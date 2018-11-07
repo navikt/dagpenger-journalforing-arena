@@ -8,12 +8,15 @@ import no.nav.dagpenger.events.avro.JournalpostType.GJENOPPTAK
 import no.nav.dagpenger.events.avro.JournalpostType.MANUELL
 import no.nav.dagpenger.events.avro.JournalpostType.NY
 import no.nav.dagpenger.events.avro.JournalpostType.UKJENT
+import no.nav.dagpenger.streams.KafkaCredential
 import no.nav.dagpenger.streams.Service
 import no.nav.dagpenger.streams.Topics.INNGÅENDE_JOURNALPOST
 import no.nav.dagpenger.streams.consumeTopic
+import no.nav.dagpenger.streams.streamConfig
 import no.nav.dagpenger.streams.toTopic
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
+import java.util.Properties
 
 private val LOGGER = KotlinLogging.logger {}
 
@@ -48,6 +51,14 @@ class JournalføringArena(val env: Environment) : Service() {
         return KafkaStreams(builder.build(), this.getConfig())
     }
 
+    override fun getConfig(): Properties {
+        return streamConfig(
+            appId = SERVICE_APP_ID,
+            bootStapServerUrl = env.bootstrapServersUrl,
+            credential = KafkaCredential(env.username, env.password)
+        )
+    }
+
     private fun filterJournalpostTypes(journalpostType: JournalpostType): Boolean {
         return when (journalpostType) {
             NY, GJENOPPTAK, ETTERSENDING -> true
@@ -60,7 +71,10 @@ class JournalføringArena(val env: Environment) : Service() {
 
         val sakId = when (journalpost.getJournalpostType()) {
             NY -> createSak(journalpost.getBehandleneEnhet(), journalpost.getSøker().getIdentifikator())
-            ETTERSENDING, GJENOPPTAK -> findSakAndCreateOppgave(journalpost.getBehandleneEnhet(), journalpost.getSøker().getIdentifikator())
+            ETTERSENDING, GJENOPPTAK -> findSakAndCreateOppgave(
+                journalpost.getBehandleneEnhet(),
+                journalpost.getSøker().getIdentifikator()
+            )
             else -> throw UnexpectedJournaltypeException("Unexpected journalposttype ${journalpost.getJournalpostType()}")
         }
 
