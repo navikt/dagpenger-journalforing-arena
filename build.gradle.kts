@@ -1,6 +1,6 @@
 plugins {
     id("application")
-   kotlin("jvm") version "1.2.70"
+    kotlin("jvm") version "1.2.70"
     id("com.diffplug.gradle.spotless") version "3.13.0"
     id("com.palantir.docker") version "0.20.1"
     id("com.palantir.git-version") version "0.11.0"
@@ -21,9 +21,10 @@ apply {
 
 repositories {
     maven("https://repo.adeo.no/repository/maven-central")
-    maven("http://packages.confluent.io/maven/")
+    maven("http://packages.confluent.io/maven")
     maven("https://dl.bintray.com/kotlin/ktor")
     maven("https://dl.bintray.com/kotlin/kotlinx")
+    maven("https://dl.bintray.com/kittinunf/maven")
 }
 
 val gitVersion: groovy.lang.Closure<Any> by extra
@@ -36,11 +37,13 @@ application {
 }
 
 docker {
-    name = "navikt/${application.applicationName}"
-    buildArgs(mapOf(
-        "APP_NAME" to application.applicationName,
-        "DIST_TAR" to "${application.applicationName}-${project.version}"
-    ))
+    name = "repo.adeo.no:5443/${application.applicationName}"
+    buildArgs(
+        mapOf(
+            "APP_NAME" to application.applicationName,
+            "DIST_TAR" to "${application.applicationName}-${project.version}"
+        )
+    )
     files(tasks.findByName("distTar")?.outputs)
     pull(true)
     tags(project.version.toString())
@@ -54,8 +57,8 @@ val prometheusVersion = "0.5.0"
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("no.nav.dagpenger:streams:0.0.1")
-    implementation("no.nav.dagpenger:events:0.0.1")
+    implementation("no.nav.dagpenger:streams:0.1.10-SNAPSHOT")
+    implementation("no.nav.dagpenger:events:0.1.6-SNAPSHOT")
 
     implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion")
 
