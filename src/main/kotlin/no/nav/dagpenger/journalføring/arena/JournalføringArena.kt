@@ -17,14 +17,14 @@ import org.apache.kafka.streams.StreamsBuilder
 
 private val LOGGER = KotlinLogging.logger {}
 
-class JournalføringArena() : Service() {
+class JournalføringArena(val env: Environment) : Service() {
     override val SERVICE_APP_ID = "journalføring-arena"
-    override val HTTP_PORT: Int = 8080
 
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
-            val service = JournalføringArena()
+            val env = Environment()
+            val service = JournalføringArena(env)
             service.start()
         }
     }
