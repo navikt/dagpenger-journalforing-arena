@@ -2,6 +2,12 @@ package no.nav.dagpenger.journalføring.arena
 
 import mu.KotlinLogging
 import no.nav.dagpenger.events.avro.Behov
+import no.nav.dagpenger.events.avro.JournalpostType
+import no.nav.dagpenger.events.avro.JournalpostType.ETTERSENDING
+import no.nav.dagpenger.events.avro.JournalpostType.GJENOPPTAK
+import no.nav.dagpenger.events.avro.JournalpostType.MANUELL
+import no.nav.dagpenger.events.avro.JournalpostType.NY
+import no.nav.dagpenger.events.avro.JournalpostType.UKJENT
 import no.nav.dagpenger.streams.Service
 import no.nav.dagpenger.streams.Topics.INNGÅENDE_JOURNALPOST
 import no.nav.dagpenger.streams.consumeTopic
@@ -30,19 +36,45 @@ class JournalføringArena() : Service() {
         val inngåendeJournalposter = builder.consumeTopic(INNGÅENDE_JOURNALPOST)
 
         inngåendeJournalposter
-                .peek { key, value -> LOGGER.info("Processing ${value.javaClass} with key $key") }
-                .filter { _, behov -> behov.getJournalpost().getJournalpostType() != null }
-                .filter { _, behov -> behov.getJournalpost().getBehandleneEnhet() != null }
-                .filter { _, behov -> behov.getJournalpost().getFagsakId() == null }
-                .mapValues(this::addFagsakId)
-                .peek { key, value -> LOGGER.info("Producing ${value.javaClass} with key $key") }
-                .toTopic(INNGÅENDE_JOURNALPOST)
+            .peek { key, value -> LOGGER.info("Processing ${value.javaClass} with key $key") }
+            .filter { _, behov -> behov.getJournalpost().getBehandleneEnhet() != null }
+            .filter { _, behov -> behov.getJournalpost().getFagsakId() == null }
+            .filter { _, behov -> behov.getJournalpost().getJournalpostType() != null }
+            .filter { _, behov -> filterJournalpostTypes(behov.getJournalpost().getJournalpostType()) }
+            .mapValues(this::addFagsakId)
+            .peek { key, value -> LOGGER.info("Producing ${value.javaClass} with key $key") }
+            .toTopic(INNGÅENDE_JOURNALPOST)
 
         return KafkaStreams(builder.build(), this.getConfig())
     }
 
+    private fun filterJournalpostTypes(journalpostType: JournalpostType): Boolean {
+        return when (journalpostType) {
+            NY, GJENOPPTAK, ETTERSENDING -> true
+            UKJENT, MANUELL -> false
+        }
+    }
+
     private fun addFagsakId(behov: Behov): Behov {
         val journalpost = behov.getJournalpost()
+
+        val sakId = when (journalpost.getJournalpostType()) {
+            NY -> createSak(journalpost.getBehandleneEnhet(), journalpost.getSøker().getIdentifikator())
+            ETTERSENDING, GJENOPPTAK -> findSakAndCreateOppgave(journalpost.getBehandleneEnhet(), journalpost.getSøker().getIdentifikator())
+            else -> throw UnexpectedJournaltypeException("Unexpected journalposttype ${journalpost.getJournalpostType()}")
+        }
+
+        journalpost.setFagsakId(sakId)
         return behov
     }
+
+    private fun createSak(behandlendeEnhet: String, fødselsnummer: String): String {
+        return ""
+    }
+
+    private fun findSakAndCreateOppgave(behandlendeEnhet: String, fødselsnummer: String): String {
+        return ""
+    }
 }
+
+class UnexpectedJournaltypeException(override val message: String) : RuntimeException(message)
