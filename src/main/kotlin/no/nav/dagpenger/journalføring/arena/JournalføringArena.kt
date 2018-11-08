@@ -70,16 +70,31 @@ class JournalføringArena(val env: Environment, val oppslagHttpClient: OppslagHt
     private fun addFagsakId(behov: Behov): Behov {
         val journalpost = behov.getJournalpost()
 
-        val sakId = when (journalpost.getJournalpostType()) {
-            NY -> createNewSak(journalpost.getBehandleneEnhet(), journalpost.getSøker().getIdentifikator())
-            ETTERSENDING, GJENOPPTAK -> findSakAndCreateOppgave(
-                journalpost.getBehandleneEnhet(),
-                journalpost.getSøker().getIdentifikator()
+        try {
+            val sakId = when (journalpost.getJournalpostType()) {
+                NY -> createNewSak(journalpost.getBehandleneEnhet(), journalpost.getSøker().getIdentifikator())
+                ETTERSENDING, GJENOPPTAK -> findSakAndCreateOppgave(
+                    journalpost.getBehandleneEnhet(),
+                    journalpost.getSøker().getIdentifikator()
+                )
+                else -> throw UnexpectedJournaltypeException("Unexpected journalposttype ${journalpost.getJournalpostType()}")
+            }
+
+            journalpost.setFagsakId(sakId)
+        } catch (oppslagException: OppslagException) {
+            LOGGER.error(
+                "Error communicating to dagpenger-oppslag, setting JournalpostType to MANUELL",
+                oppslagException
             )
-            else -> throw UnexpectedJournaltypeException("Unexpected journalposttype ${journalpost.getJournalpostType()}")
+            journalpost.setJournalpostType(MANUELL)
+        } catch (unexpectedJournaltypeException: UnexpectedJournaltypeException) {
+            LOGGER.error(
+                "Unexpected JournalpostType, setting JournalpostType to MANUELL",
+                unexpectedJournaltypeException
+            )
+            journalpost.setJournalpostType(MANUELL)
         }
 
-        journalpost.setFagsakId(sakId)
         return behov
     }
 

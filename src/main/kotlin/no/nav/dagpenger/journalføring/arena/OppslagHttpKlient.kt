@@ -93,4 +93,4 @@ data class FindArenaSakResponse(
 )
 
 class OppslagException(val statusCode: Int, override val message: String, override val cause: Throwable) :
-    RuntimeException(message, cause)
+    RuntimeException("$statusCode: $message", cause)
