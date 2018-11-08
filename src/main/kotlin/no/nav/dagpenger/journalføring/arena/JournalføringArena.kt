@@ -20,14 +20,15 @@ import java.util.Properties
 
 private val LOGGER = KotlinLogging.logger {}
 
-class JournalføringArena(val env: Environment) : Service() {
+class JournalføringArena(val env: Environment, val oppslagHttpClient: OppslagHttpClient) : Service() {
     override val SERVICE_APP_ID = "journalføring-arena"
 
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
             val env = Environment()
-            val service = JournalføringArena(env)
+            val oppslagHttpClient = OppslagHttpClient(env.dagpengerOppslagUrl)
+            val service = JournalføringArena(env, oppslagHttpClient)
             service.start()
         }
     }
@@ -70,7 +71,7 @@ class JournalføringArena(val env: Environment) : Service() {
         val journalpost = behov.getJournalpost()
 
         val sakId = when (journalpost.getJournalpostType()) {
-            NY -> createSak(journalpost.getBehandleneEnhet(), journalpost.getSøker().getIdentifikator())
+            NY -> createNewSak(journalpost.getBehandleneEnhet(), journalpost.getSøker().getIdentifikator())
             ETTERSENDING, GJENOPPTAK -> findSakAndCreateOppgave(
                 journalpost.getBehandleneEnhet(),
                 journalpost.getSøker().getIdentifikator()
@@ -82,12 +83,16 @@ class JournalføringArena(val env: Environment) : Service() {
         return behov
     }
 
-    private fun createSak(behandlendeEnhet: String, fødselsnummer: String): String {
-        return ""
+    private fun createNewSak(behandlendeEnhet: String, fødselsnummer: String): String {
+        return oppslagHttpClient.createSak(behandlendeEnhet, fødselsnummer)
     }
 
     private fun findSakAndCreateOppgave(behandlendeEnhet: String, fødselsnummer: String): String {
-        return ""
+        val sakId = oppslagHttpClient.findSak(fødselsnummer)
+
+        oppslagHttpClient.createOppgave(behandlendeEnhet, fødselsnummer, sakId)
+
+        return sakId
     }
 }
 
