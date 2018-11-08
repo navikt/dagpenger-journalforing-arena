@@ -54,6 +54,7 @@ val kafkaVersion = "2.0.0"
 val confluentVersion = "4.1.2"
 val ktorVersion = "0.9.5"
 val prometheusVersion = "0.5.0"
+val fuelVersion = "1.15.0"
 
 dependencies {
     implementation(kotlin("stdlib"))
@@ -62,6 +63,8 @@ dependencies {
 
     implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion")
 
+    implementation("com.github.kittinunf.fuel:fuel:$fuelVersion")
+    implementation("com.github.kittinunf.fuel:fuel-gson:$fuelVersion")
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
 
