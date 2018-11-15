@@ -4,8 +4,6 @@ plugins {
     id("com.diffplug.gradle.spotless") version "3.13.0"
     id("com.palantir.docker") version "0.20.1"
     id("com.palantir.git-version") version "0.11.0"
-    id("com.adarshr.test-logger") version "1.5.0"
-    id("java-library")
 }
 
 buildscript {
@@ -16,15 +14,16 @@ buildscript {
 
 apply {
     plugin("com.diffplug.gradle.spotless")
-    plugin("com.adarshr.test-logger")
 }
 
 repositories {
     maven("https://repo.adeo.no/repository/maven-central")
-    maven("http://packages.confluent.io/maven")
+    maven("http://packages.confluent.io/maven/")
     maven("https://dl.bintray.com/kotlin/ktor")
     maven("https://dl.bintray.com/kotlin/kotlinx")
     maven("https://dl.bintray.com/kittinunf/maven")
+    maven("https://repo.adeo.no/repository/maven-snapshots/")
+    maven("https://repo.adeo.no/repository/maven-releases/")
 }
 
 val gitVersion: groovy.lang.Closure<Any> by extra
@@ -32,7 +31,7 @@ version = gitVersion()
 group = "no.nav.dagpenger"
 
 application {
-    applicationName = "dagpenger-journalføring-arena"
+    applicationName = "dagpenger-journalforing-arena"
     mainClassName = "no.nav.dagpenger.journalføring.arena.JournalføringArena"
 }
 
