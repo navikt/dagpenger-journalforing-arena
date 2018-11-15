@@ -1,5 +1,5 @@
-name: dagpenger-journalføring-arena
-image: repo.adeo.no:5443/dagpenger-journalføring-arena
+name: dagpenger-journalforing-arena
+image: repo.adeo.no:5443/dagpenger-journalforing-arena
 team: dagpenger
 replicas:
   min: 2
