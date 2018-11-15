@@ -1,1 +1,1 @@
-rootProject.name = "dagpenger-journalføring-arena"
+rootProject.name = "dagpenger-journalforing-arena"
