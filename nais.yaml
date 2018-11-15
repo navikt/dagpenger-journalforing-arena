@@ -13,12 +13,13 @@ resources:
     memory: 256Mi
 prometheus:
   enabled: true
-  #fasitResources:
-  #  used:
-  #    - alias: dagpenger-joark-mottak-properties
-  #      resourceType: applicationproperties
-  #    - alias: srvdagpenger
-  #      resourceType: credential
-  #      propertyMap:
-  #        username: KAFKA_USERNAME
-  #        password: KAFKA_PASSWORD
+fasitResources:
+  used:
+  - alias: dagpenger-journalforing-arena-properties
+    resourceType: applicationproperties
+  - alias: srvdagpenger-journalforing-arena
+    resourceType: credential
+  - alias:  kafka-schema-registry
+    resourceType: baseUrl
+  - alias: dagpenger-oppslag-api
+    resourceType: restservice
