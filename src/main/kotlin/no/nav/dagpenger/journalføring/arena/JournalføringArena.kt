@@ -85,13 +85,19 @@ class JournalføringArena(val env: Environment, val oppslagHttpClient: OppslagHt
     }
 
     private fun createNewSak(behandlendeEnhet: String, fødselsnummer: String): String {
-        return oppslagHttpClient.createSak(behandlendeEnhet, fødselsnummer)
+        val createNewOppgaveAndSak =
+            CreateArenaOppgaveRequest(behandlendeEnhet, fødselsnummer, null, "STARTVEDTAK", true)
+
+        return oppslagHttpClient.createOppgave(createNewOppgaveAndSak)
     }
 
     private fun findSakAndCreateOppgave(behandlendeEnhet: String, fødselsnummer: String): String {
         val sakId = oppslagHttpClient.findSak(fødselsnummer)
 
-        oppslagHttpClient.createOppgave(behandlendeEnhet, fødselsnummer, sakId)
+        val createNewOppgaveOnExistingSak =
+            CreateArenaOppgaveRequest(behandlendeEnhet, fødselsnummer, sakId, "BEHENVPERSON", false)
+
+        oppslagHttpClient.createOppgave(createNewOppgaveOnExistingSak)
 
         return sakId
     }
