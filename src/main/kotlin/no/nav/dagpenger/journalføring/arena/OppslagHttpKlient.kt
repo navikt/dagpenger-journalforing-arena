@@ -7,28 +7,9 @@ import com.google.gson.Gson
 
 class OppslagHttpClient(private val oppslagUrl: String) {
 
-    fun createSak(behandlendeEnhetId: String, fødselsnummer: String): String {
+    fun createOppgave(createOppgaveRequest: CreateArenaOppgaveRequest): String {
 
-        val requestJson = Gson().toJson(CreateArenaSakRequest(behandlendeEnhetId, fødselsnummer)).toString()
-
-        val (_, response, result) = with(
-            "${oppslagUrl}arena/createsak".httpPost()
-                .header(mapOf("Content-Type" to "application/json"))
-                .body(requestJson)
-        ) {
-            responseObject<CreateArenaSakResponse>()
-        }
-        return when (result) {
-            is Result.Failure -> throw OppslagException(
-                response.statusCode, response.responseMessage, result.getException()
-            )
-            is Result.Success -> result.get().sakId
-        }
-    }
-
-    fun createOppgave(behandlendeEnhetId: String, fødselsnummer: String, sakId: String): String {
-
-        val requestJson = Gson().toJson(CreateArenaOppgaveRequest(behandlendeEnhetId, fødselsnummer, sakId)).toString()
+        val requestJson = Gson().toJson(createOppgaveRequest).toString()
 
         val (_, response, result) = with(
             "${oppslagUrl}arena/createoppgave".httpPost()
@@ -41,13 +22,13 @@ class OppslagHttpClient(private val oppslagUrl: String) {
             is Result.Failure -> throw OppslagException(
                 response.statusCode, response.responseMessage, result.getException()
             )
-            is Result.Success -> result.get().oppgaveId
+            is Result.Success -> result.get().sakId
         }
     }
 
     fun findSak(fødselsnummer: String): String {
 
-        val requestJson = Gson().toJson(FindArenaSakRequest(fødselsnummer)).toString()
+        val requestJson = Gson().toJson(FindArenaSakRequest(fødselsnummer, "PERSON", "DAG")).toString()
 
         val (_, response, result) = with(
             "${oppslagUrl}arena/findsak".httpPost()
@@ -65,27 +46,24 @@ class OppslagHttpClient(private val oppslagUrl: String) {
     }
 }
 
-data class CreateArenaSakRequest(
-    val behandlendeEnhetId: String,
-    val fødselsnummer: String
-)
-
-data class CreateArenaSakResponse(
-    val sakId: String
-)
-
 data class CreateArenaOppgaveRequest(
     val behandlendeEnhetId: String,
     val fødselsnummer: String,
-    val sakId: String
+    val sakId: String?,
+    val oppgaveType: String,
+    val tvingNySak: Boolean,
+    val tema: String = "DAG",
+    val prioritet: String = "HOY"
 )
 
 data class CreateArenaOppgaveResponse(
-    val oppgaveId: String
+    val sakId: String
 )
 
 data class FindArenaSakRequest(
-    val fødselsnummer: String
+    val fødselsnummer: String,
+    val brukerType: String,
+    val tema: String = "DAG"
 )
 
 data class FindArenaSakResponse(
