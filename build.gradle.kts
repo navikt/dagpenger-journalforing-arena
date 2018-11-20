@@ -76,6 +76,7 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
     testImplementation("junit:junit:4.12")
+    testImplementation("com.github.tomakehurst:wiremock:2.19.0")
     testImplementation("au.com.dius:pact-jvm-consumer-java8_2.12:3.6.0-rc.0")
 }
 
