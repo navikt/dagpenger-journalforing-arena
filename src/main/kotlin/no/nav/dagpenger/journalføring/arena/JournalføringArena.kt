@@ -2,6 +2,7 @@ package no.nav.dagpenger.journalføring.arena
 
 import mu.KotlinLogging
 import no.nav.dagpenger.events.avro.Behov
+import no.nav.dagpenger.events.avro.Journalpost
 import no.nav.dagpenger.events.avro.JournalpostType
 import no.nav.dagpenger.events.avro.JournalpostType.ETTERSENDING
 import no.nav.dagpenger.events.avro.JournalpostType.GJENOPPTAK
@@ -70,36 +71,47 @@ class JournalføringArena(val env: Environment, val oppslagHttpClient: OppslagHt
     private fun addFagsakId(behov: Behov): Behov {
         val journalpost = behov.getJournalpost()
 
-        val sakId = when (journalpost.getJournalpostType()) {
-            NY -> createNewSak(journalpost.getBehandleneEnhet(), journalpost.getSøker().getIdentifikator())
-            ETTERSENDING, GJENOPPTAK -> findSakAndCreateOppgave(
-                journalpost.getBehandleneEnhet(),
-                journalpost.getSøker().getIdentifikator()
-            )
+        when (journalpost.getJournalpostType()) {
+            NY -> createNewSak(journalpost)
+            ETTERSENDING, GJENOPPTAK -> findSakAndCreateOppgave(journalpost)
             else -> throw UnexpectedJournaltypeException("Unexpected journalposttype ${journalpost.getJournalpostType()}")
         }
-
-        journalpost.setFagsakId(sakId)
 
         return behov
     }
 
-    private fun createNewSak(behandlendeEnhet: String, fødselsnummer: String): String {
+    private fun createNewSak(journalPost: Journalpost) {
         val createNewOppgaveAndSak =
-            CreateArenaOppgaveRequest(behandlendeEnhet, fødselsnummer, null, "STARTVEDTAK", true)
+            CreateArenaOppgaveRequest(journalPost.getBehandleneEnhet(), journalPost.getSøker().getIdentifikator(), null, "STARTVEDTAK", true)
 
-        return oppslagHttpClient.createOppgave(createNewOppgaveAndSak)
+        val sakId = oppslagHttpClient.createOppgave(createNewOppgaveAndSak)
+
+        journalPost.setFagsakId(sakId)
     }
 
-    private fun findSakAndCreateOppgave(behandlendeEnhet: String, fødselsnummer: String): String {
-        val sakId = oppslagHttpClient.findSak(fødselsnummer)
+    private fun findSakAndCreateOppgave(journalPost: Journalpost) {
 
-        val createNewOppgaveOnExistingSak =
-            CreateArenaOppgaveRequest(behandlendeEnhet, fødselsnummer, sakId, "BEHENVPERSON", false)
+        val sakId = findNewestActiveDagpengerSak(journalPost.getSøker().getIdentifikator())
 
-        oppslagHttpClient.createOppgave(createNewOppgaveOnExistingSak)
+        if (sakId == null) {
+            LOGGER.info { "Could not find any existing arena-sak, setting journalpostType to MANUELL" }
+            journalPost.setJournalpostType(MANUELL)
+        } else {
+            val createNewOppgaveOnExistingSak =
+                CreateArenaOppgaveRequest(journalPost.getBehandleneEnhet(), journalPost.getSøker().getIdentifikator(), sakId, "BEHENVPERSON", false)
 
-        return sakId
+            oppslagHttpClient.createOppgave(createNewOppgaveOnExistingSak)
+
+            journalPost.setFagsakId(sakId)
+        }
+    }
+
+    private fun findNewestActiveDagpengerSak(fødselsnummer: String): String? {
+        val getActiveDagpengerSaker = GetArenaSakerRequest(fødselsnummer, "PERSON","DAG", false)
+
+        val saker: List<ArenaSak> = oppslagHttpClient.getSaker(getActiveDagpengerSaker)
+
+        return saker.filter { it.sakstatus == "AKTIV" }.maxBy { it.sakOpprettet }?.sakId
     }
 }
 
