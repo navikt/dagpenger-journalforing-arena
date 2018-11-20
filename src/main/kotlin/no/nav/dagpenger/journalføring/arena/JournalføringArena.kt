@@ -82,7 +82,13 @@ class JournalføringArena(val env: Environment, val oppslagHttpClient: OppslagHt
 
     private fun createNewSak(journalPost: Journalpost) {
         val createNewOppgaveAndSak =
-            CreateArenaOppgaveRequest(journalPost.getBehandleneEnhet(), journalPost.getSøker().getIdentifikator(), null, "STARTVEDTAK", true)
+            CreateArenaOppgaveRequest(
+                journalPost.getBehandleneEnhet(),
+                journalPost.getSøker().getIdentifikator(),
+                null,
+                "STARTVEDTAK",
+                true
+            )
 
         val sakId = oppslagHttpClient.createOppgave(createNewOppgaveAndSak)
 
@@ -98,7 +104,13 @@ class JournalføringArena(val env: Environment, val oppslagHttpClient: OppslagHt
             journalPost.setJournalpostType(MANUELL)
         } else {
             val createNewOppgaveOnExistingSak =
-                CreateArenaOppgaveRequest(journalPost.getBehandleneEnhet(), journalPost.getSøker().getIdentifikator(), sakId, "BEHENVPERSON", false)
+                CreateArenaOppgaveRequest(
+                    journalPost.getBehandleneEnhet(),
+                    journalPost.getSøker().getIdentifikator(),
+                    sakId,
+                    "BEHENVPERSON",
+                    false
+                )
 
             oppslagHttpClient.createOppgave(createNewOppgaveOnExistingSak)
 
@@ -107,7 +119,7 @@ class JournalføringArena(val env: Environment, val oppslagHttpClient: OppslagHt
     }
 
     private fun findNewestActiveDagpengerSak(fødselsnummer: String): String? {
-        val getActiveDagpengerSaker = GetArenaSakerRequest(fødselsnummer, "PERSON","DAG", false)
+        val getActiveDagpengerSaker = GetArenaSakerRequest(fødselsnummer, "PERSON", "DAG", false)
 
         val saker: List<ArenaSak> = oppslagHttpClient.getSaker(getActiveDagpengerSaker)
 
