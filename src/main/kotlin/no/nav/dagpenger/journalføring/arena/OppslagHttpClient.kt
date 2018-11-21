@@ -5,11 +5,10 @@ import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import java.util.Date
-import javax.xml.datatype.XMLGregorianCalendar
 
-class OppslagHttpClient(private val oppslagUrl: String) {
+class OppslagHttpClient(private val oppslagUrl: String) : OppslagClient {
 
-    fun createOppgave(request: CreateArenaOppgaveRequest): String {
+    override fun createOppgave(request: CreateArenaOppgaveRequest): String {
 
         val requestJson = Gson().toJson(request).toString()
 
@@ -28,7 +27,7 @@ class OppslagHttpClient(private val oppslagUrl: String) {
         }
     }
 
-    fun getSaker(request: GetArenaSakerRequest): List<ArenaSak> {
+    override fun getSaker(request: GetArenaSakerRequest): List<ArenaSak> {
 
         val requestJson = Gson().toJson(request).toString()
 
