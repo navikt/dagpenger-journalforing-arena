@@ -108,8 +108,8 @@ class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient
         val sakId = findNewestActiveDagpengerSak(journalPost.getSøker().getIdentifikator())
 
         if (sakId == null) {
-            LOGGER.info { "Could not find any existing arena-sak, setting journalpostType to MANUELL" }
-            journalPost.setJournalpostType(MANUELL)
+            // TODO: find out how to send behov to be manually processed
+            throw RuntimeException("Could not find any existing arena-sak")
         } else {
             val createNewOppgaveOnExistingSak =
                 CreateArenaOppgaveRequest(
