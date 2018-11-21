@@ -114,7 +114,6 @@ class OppslagHttpClientTest {
         assertEquals(2, saker.size)
     }
 
-
     @Test(expected = OppslagException::class)
     fun `get saker feiler`() {
 

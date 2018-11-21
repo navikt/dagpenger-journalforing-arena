@@ -21,7 +21,7 @@ import java.util.Properties
 
 private val LOGGER = KotlinLogging.logger {}
 
-class JournalføringArena(val env: Environment, val oppslagHttpClient: OppslagHttpClient) : Service() {
+class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient) : Service() {
     override val SERVICE_APP_ID = "journalføring-arena"
 
     companion object {
@@ -90,7 +90,7 @@ class JournalføringArena(val env: Environment, val oppslagHttpClient: OppslagHt
                 true
             )
 
-        val sakId = oppslagHttpClient.createOppgave(createNewOppgaveAndSak)
+        val sakId = oppslagClient.createOppgave(createNewOppgaveAndSak)
 
         journalPost.setFagsakId(sakId)
     }
@@ -112,7 +112,7 @@ class JournalføringArena(val env: Environment, val oppslagHttpClient: OppslagHt
                     false
                 )
 
-            oppslagHttpClient.createOppgave(createNewOppgaveOnExistingSak)
+            oppslagClient.createOppgave(createNewOppgaveOnExistingSak)
 
             journalPost.setFagsakId(sakId)
         }
@@ -121,7 +121,7 @@ class JournalføringArena(val env: Environment, val oppslagHttpClient: OppslagHt
     private fun findNewestActiveDagpengerSak(fødselsnummer: String): String? {
         val getActiveDagpengerSaker = GetArenaSakerRequest(fødselsnummer, "PERSON", "DAG", false)
 
-        val saker: List<ArenaSak> = oppslagHttpClient.getSaker(getActiveDagpengerSaker)
+        val saker: List<ArenaSak> = oppslagClient.getSaker(getActiveDagpengerSaker)
 
         return saker.filter { it.sakstatus == "AKTIV" }.maxBy { it.sakOpprettet }?.sakId
     }
