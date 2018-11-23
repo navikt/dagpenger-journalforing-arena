@@ -7,7 +7,11 @@ import no.nav.dagpenger.events.avro.HenvendelsesType
 import no.nav.dagpenger.events.avro.Søknad
 import org.junit.Before
 import org.junit.Test
+import org.mockito.Mockito
+import java.util.Date
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class JournalforingArenaTest {
@@ -48,6 +52,7 @@ class JournalforingArenaTest {
 
     @Before
     fun setUp() {
+
         val env = Environment("", "", "")
         journalføringArena = JournalføringArena(env, DummyOppslagClient())
     }
@@ -107,6 +112,37 @@ class JournalforingArenaTest {
             assertFalse { journalføringArena.shouldBeProcessed(createBehov(it, false, true, true)) }
             assertFalse { journalføringArena.shouldBeProcessed(createBehov(it, false, false, true)) }
         }
+    }
+
+    /**
+     * Returns Mockito.any() as nullable type to avoid java.lang.IllegalStateException when
+     * null is returned.
+     */
+    fun <T> any(): T = Mockito.any<T>()
+
+    @Test
+    fun `findNewestActiveDagpengerSak should return most recent sak`() {
+        val saker = listOf(
+            ArenaSak("first", "AKTIV", Date(2018, 10, 10)),
+            ArenaSak("last", "AKTIV", Date(2018, 11, 10)),
+            ArenaSak("middle", "AKTIV", Date(2018, 10, 20)),
+            ArenaSak("newestButInactive", "INAKTIV", Date(2018, 11, 20))
+        )
+
+        val oppslagMock = Mockito.mock(OppslagClient::class.java)
+        Mockito.`when`(oppslagMock.getSaker(any())).thenReturn(saker)
+        val journalføringArena = JournalføringArena(Environment("", "", ""), oppslagMock)
+
+        assertEquals("last", journalføringArena.findNewestActiveDagpengerSak("123123"))
+    }
+
+    @Test
+    fun `findNewestActiveDagpengerSak should return null if no saker found`() {
+        val oppslagMock = Mockito.mock(OppslagClient::class.java)
+        Mockito.`when`(oppslagMock.getSaker(any())).thenReturn(listOf())
+        val journalføringArena = JournalføringArena(Environment("", "", ""), oppslagMock)
+
+        assertNull(journalføringArena.findNewestActiveDagpengerSak("123123"))
     }
 
     class DummyOppslagClient : OppslagClient {
