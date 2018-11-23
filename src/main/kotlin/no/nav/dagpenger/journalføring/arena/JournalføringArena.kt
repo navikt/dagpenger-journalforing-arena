@@ -3,6 +3,8 @@ package no.nav.dagpenger.journalføring.arena
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig
 import mu.KotlinLogging
 import no.nav.dagpenger.events.avro.Behov
+import no.nav.dagpenger.events.hasBehandlendeEnhet
+import no.nav.dagpenger.events.hasFagsakId
 import no.nav.dagpenger.events.isEttersending
 import no.nav.dagpenger.events.isGjenopptakSoknad
 import no.nav.dagpenger.events.isNySoknad
@@ -47,10 +49,7 @@ class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient
 
         inngåendeJournalposter
             .peek { key, value -> LOGGER.info("Processing ${value.javaClass} with key $key") }
-            .filter { _, behov -> behov.getTrengerManuellBehandling() }
-            .filter { _, behov -> behov.getBehandleneEnhet() != null }
-            .filter { _, behov -> behov.getFagsakId() == null }
-            .filter { _, behov -> behov.isSoknad() || behov.isEttersending() }
+            .filter { _, behov -> shouldBeProcessed(behov) }
             .mapValues(this::addFagsakId)
             .peek { key, value -> LOGGER.info("Producing ${value.javaClass} with key $key") }
             .toTopic(innkommendeJournalpost)
@@ -64,6 +63,13 @@ class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient
             bootStapServerUrl = env.bootstrapServersUrl,
             credential = KafkaCredential(env.username, env.password)
         )
+    }
+
+    private fun shouldBeProcessed(behov: Behov): Boolean {
+        return !behov.getTrengerManuellBehandling()
+            && behov.hasBehandlendeEnhet()
+            && !behov.hasFagsakId()
+            && (behov.isSoknad() || behov.isEttersending())
     }
 
     private fun addFagsakId(behov: Behov): Behov {
