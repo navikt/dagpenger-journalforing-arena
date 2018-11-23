@@ -65,14 +65,14 @@ class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient
         )
     }
 
-    private fun shouldBeProcessed(behov: Behov): Boolean {
+    fun shouldBeProcessed(behov: Behov): Boolean {
         return !behov.getTrengerManuellBehandling()
             && behov.hasBehandlendeEnhet()
             && !behov.hasFagsakId()
             && (behov.isSoknad() || behov.isEttersending())
     }
 
-    private fun addFagsakId(behov: Behov): Behov {
+    fun addFagsakId(behov: Behov): Behov {
 
         if (behov.isNySoknad()) {
             createNewSak(behov)
@@ -82,7 +82,7 @@ class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient
         return behov
     }
 
-    private fun createNewSak(behov: Behov) {
+    fun createNewSak(behov: Behov) {
         val createNewOppgaveAndSak =
             CreateArenaOppgaveRequest(
                 behov.getBehandleneEnhet(),
@@ -97,7 +97,7 @@ class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient
         behov.setFagsakId(sakId)
     }
 
-    private fun findSakAndCreateOppgave(behov: Behov) {
+    fun findSakAndCreateOppgave(behov: Behov) {
 
         val sakId = findNewestActiveDagpengerSak(behov.getMottaker().getIdentifikator())
 
@@ -120,7 +120,7 @@ class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient
         }
     }
 
-    private fun findNewestActiveDagpengerSak(fødselsnummer: String): String? {
+    fun findNewestActiveDagpengerSak(fødselsnummer: String): String? {
         val getActiveDagpengerSaker = GetArenaSakerRequest(fødselsnummer, "PERSON", "DAG", false)
 
         val saker: List<ArenaSak> = oppslagClient.getSaker(getActiveDagpengerSaker)
