@@ -6,9 +6,11 @@ import no.nav.common.JAASCredential
 import no.nav.common.KafkaEnvironment
 import no.nav.common.embeddedutils.getAvailablePort
 import no.nav.dagpenger.events.avro.Behov
+import no.nav.dagpenger.events.avro.HenvendelsesType
 import no.nav.dagpenger.events.avro.Journalpost
-import no.nav.dagpenger.events.avro.JournalpostType
-import no.nav.dagpenger.events.avro.Søker
+import no.nav.dagpenger.events.avro.Mottaker
+import no.nav.dagpenger.events.avro.Søknad
+import no.nav.dagpenger.events.hasFagsakId
 import no.nav.dagpenger.streams.Topics
 import no.nav.dagpenger.streams.Topics.INNGÅENDE_JOURNALPOST
 import org.apache.kafka.clients.CommonClientConfigs
@@ -63,25 +65,27 @@ class JournalforingArenaComponentTest {
     @Test
     fun ` Component test of JournalføringArena`() {
 
-        //Test data: [hasBehandlendeEnhet, hasFagsakId]
+        //Test data: [hasBehandlendeEnhet, hasFagsakId, trengerManuellBehandling]
         val innkommendeBehov = listOf(
-            listOf(true, true),
-            listOf(true, false),
-            listOf(true, true),
-            listOf(true, true),
-            listOf(true, false),
-            listOf(true, true),
-            listOf(true, false),
-            listOf(true, true),
-            listOf(false, false),
-            listOf(true, true)
+            listOf(false, false, false),
+            listOf(false, false, false),
+            listOf(false, true, false),
+            listOf(true, false, false),
+            listOf(true, false, false),
+            listOf(true, false, true),
+            listOf(true, true, false),
+            listOf(true, true, false),
+            listOf(true, true, false),
+            listOf(true, true, false),
+            listOf(true, true, false),
+            listOf(true, true, false),
+            listOf(true, true, true)
         )
 
-        // JournalforingArena should process behovs with behandlendeEnhet and without fagsakId
-        val behovsToProcess = innkommendeBehov.filter { it[0] && !it[1] }.size
+        // JournalforingArena should process behovs with behandlendeEnhet, without fagsakId and without trengerManuellBehandling
+        val behovsToProcess = innkommendeBehov.filter { it[0] && !it[1] && !it[2] }
 
-        // JournalforingArena should not process behovs missing behandlendeEnhet
-        val behovsMissingData = innkommendeBehov.filter { !it[0] && !it[1] }.size
+        val innkommendeBehovWithFagsakId = innkommendeBehov.filter { it[1] }
 
         // given an environment
         val env = Environment(
@@ -105,14 +109,25 @@ class JournalforingArenaComponentTest {
             val behov: Behov = Behov
                 .newBuilder()
                 .setBehovId("123")
+                .setHenvendelsesType(
+                    HenvendelsesType
+                        .newBuilder()
+                        .setSøknad(
+                            Søknad
+                                .newBuilder()
+                                .setVedtakstype("NY")
+                                .build()
+                        )
+                        .build()
+                )
+                .setBehandleneEnhet(if (testdata[0]) "behandlendeEnhet" else null)
+                .setFagsakId(if (testdata[1]) "fagsak" else null)
+                .setTrengerManuellBehandling(testdata[2])
+                .setMottaker(Mottaker("12345678912"))
                 .setJournalpost(
                     Journalpost
                         .newBuilder()
                         .setJournalpostId("12345")
-                        .setSøker(Søker("12345678912"))
-                        .setJournalpostType(JournalpostType.NY)
-                        .setBehandleneEnhet(if (testdata[0]) "behandlendeEnhet" else null)
-                        .setFagsakId(if (testdata[1]) "fagsak" else null)
                         .build()
                 )
                 .build()
@@ -121,18 +136,16 @@ class JournalforingArenaComponentTest {
         }
 
         val behovConsumer: KafkaConsumer<String, Behov> = behovConsumer(env)
-        val behovsListe = behovConsumer.poll(Duration.ofSeconds(5)).toList()
+        val utgåendeBehov = behovConsumer.poll(Duration.ofSeconds(5)).toList()
 
         ruting.stop()
 
         //Verify the number of produced messages
-        assertEquals(innkommendeBehov.size + behovsToProcess, behovsListe.size)
+        assertEquals(innkommendeBehov.size + behovsToProcess.size, utgåendeBehov.size)
 
-        //Check if JournalføringArena sets fagsakId, by verifing the number of behovs without fagsakId
-        val withoutFagsakId = behovsListe.filter { kanskjeBehandletBehov ->
-            kanskjeBehandletBehov.value().getJournalpost().getFagsakId() == null
-        }.size
-        assertEquals(behovsToProcess + behovsMissingData, withoutFagsakId)
+        //Check if JournalføringArena sets fagsakId, by verifing the number of behovs with fagsakId
+        val utgåendeBehovWithFagsakId = utgåendeBehov.filter { it.value().hasFagsakId() }
+        assertEquals(behovsToProcess.size + innkommendeBehovWithFagsakId.size, utgåendeBehovWithFagsakId.size)
     }
 
     class DummyOppslagClient : OppslagClient {

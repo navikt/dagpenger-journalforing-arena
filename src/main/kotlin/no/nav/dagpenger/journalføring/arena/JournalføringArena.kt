@@ -3,13 +3,10 @@ package no.nav.dagpenger.journalføring.arena
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig
 import mu.KotlinLogging
 import no.nav.dagpenger.events.avro.Behov
-import no.nav.dagpenger.events.avro.Journalpost
-import no.nav.dagpenger.events.avro.JournalpostType
-import no.nav.dagpenger.events.avro.JournalpostType.ETTERSENDING
-import no.nav.dagpenger.events.avro.JournalpostType.GJENOPPTAK
-import no.nav.dagpenger.events.avro.JournalpostType.MANUELL
-import no.nav.dagpenger.events.avro.JournalpostType.NY
-import no.nav.dagpenger.events.avro.JournalpostType.UKJENT
+import no.nav.dagpenger.events.isEttersending
+import no.nav.dagpenger.events.isGjenopptakSoknad
+import no.nav.dagpenger.events.isNySoknad
+import no.nav.dagpenger.events.isSoknad
 import no.nav.dagpenger.streams.KafkaCredential
 import no.nav.dagpenger.streams.Service
 import no.nav.dagpenger.streams.Topics.INNGÅENDE_JOURNALPOST
@@ -50,10 +47,10 @@ class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient
 
         inngåendeJournalposter
             .peek { key, value -> LOGGER.info("Processing ${value.javaClass} with key $key") }
-            .filter { _, behov -> behov.getJournalpost().getBehandleneEnhet() != null }
-            .filter { _, behov -> behov.getJournalpost().getFagsakId() == null }
-            .filter { _, behov -> behov.getJournalpost().getJournalpostType() != null }
-            .filter { _, behov -> filterJournalpostTypes(behov.getJournalpost().getJournalpostType()) }
+            .filter { _, behov -> behov.getTrengerManuellBehandling() }
+            .filter { _, behov -> behov.getBehandleneEnhet() != null }
+            .filter { _, behov -> behov.getFagsakId() == null }
+            .filter { _, behov -> behov.isSoknad() || behov.isEttersending() }
             .mapValues(this::addFagsakId)
             .peek { key, value -> LOGGER.info("Producing ${value.javaClass} with key $key") }
             .toTopic(innkommendeJournalpost)
@@ -69,30 +66,21 @@ class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient
         )
     }
 
-    private fun filterJournalpostTypes(journalpostType: JournalpostType): Boolean {
-        return when (journalpostType) {
-            NY, GJENOPPTAK, ETTERSENDING -> true
-            UKJENT, MANUELL -> false
-        }
-    }
-
     private fun addFagsakId(behov: Behov): Behov {
-        val journalpost = behov.getJournalpost()
 
-        when (journalpost.getJournalpostType()) {
-            NY -> createNewSak(journalpost)
-            ETTERSENDING, GJENOPPTAK -> findSakAndCreateOppgave(journalpost)
-            else -> throw UnexpectedJournaltypeException("Unexpected journalposttype ${journalpost.getJournalpostType()}")
+        if (behov.isNySoknad()) {
+            createNewSak(behov)
+        } else if (behov.isGjenopptakSoknad() || behov.isEttersending()) {
+            findSakAndCreateOppgave(behov)
         }
-
         return behov
     }
 
-    private fun createNewSak(journalPost: Journalpost) {
+    private fun createNewSak(behov: Behov) {
         val createNewOppgaveAndSak =
             CreateArenaOppgaveRequest(
-                journalPost.getBehandleneEnhet(),
-                journalPost.getSøker().getIdentifikator(),
+                behov.getBehandleneEnhet(),
+                behov.getMottaker().getIdentifikator(),
                 null,
                 "STARTVEDTAK",
                 true
@@ -100,12 +88,12 @@ class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient
 
         val sakId = oppslagClient.createOppgave(createNewOppgaveAndSak)
 
-        journalPost.setFagsakId(sakId)
+        behov.setFagsakId(sakId)
     }
 
-    private fun findSakAndCreateOppgave(journalPost: Journalpost) {
+    private fun findSakAndCreateOppgave(behov: Behov) {
 
-        val sakId = findNewestActiveDagpengerSak(journalPost.getSøker().getIdentifikator())
+        val sakId = findNewestActiveDagpengerSak(behov.getMottaker().getIdentifikator())
 
         if (sakId == null) {
             // TODO: find out how to send behov to be manually processed
@@ -113,8 +101,8 @@ class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient
         } else {
             val createNewOppgaveOnExistingSak =
                 CreateArenaOppgaveRequest(
-                    journalPost.getBehandleneEnhet(),
-                    journalPost.getSøker().getIdentifikator(),
+                    behov.getBehandleneEnhet(),
+                    behov.getMottaker().getIdentifikator(),
                     sakId,
                     "BEHENVPERSON",
                     false
@@ -122,7 +110,7 @@ class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient
 
             oppslagClient.createOppgave(createNewOppgaveOnExistingSak)
 
-            journalPost.setFagsakId(sakId)
+            behov.setFagsakId(sakId)
         }
     }
 
@@ -135,4 +123,3 @@ class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient
     }
 }
 
-class UnexpectedJournaltypeException(override val message: String) : RuntimeException(message)
