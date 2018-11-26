@@ -1,6 +1,5 @@
 package no.nav.dagpenger.journalføring.arena
 
-import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig
 import mu.KotlinLogging
 import no.nav.dagpenger.events.avro.Behov
 import no.nav.dagpenger.events.hasBehandlendeEnhet
@@ -12,7 +11,6 @@ import no.nav.dagpenger.events.isSoknad
 import no.nav.dagpenger.streams.KafkaCredential
 import no.nav.dagpenger.streams.Service
 import no.nav.dagpenger.streams.Topics.INNGÅENDE_JOURNALPOST
-import no.nav.dagpenger.streams.configureAvroSerde
 import no.nav.dagpenger.streams.consumeTopic
 import no.nav.dagpenger.streams.streamConfig
 import no.nav.dagpenger.streams.toTopic
@@ -40,14 +38,8 @@ class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient
     override fun setupStreams(): KafkaStreams {
         println(SERVICE_APP_ID)
 
-        val innkommendeJournalpost = INNGÅENDE_JOURNALPOST.copy(
-            valueSerde = configureAvroSerde<Behov>(
-                mapOf(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG to env.schemaRegistryUrl)
-            )
-        )
-
         val builder = StreamsBuilder()
-        val inngåendeJournalposter = builder.consumeTopic(innkommendeJournalpost)
+        val inngåendeJournalposter = builder.consumeTopic(INNGÅENDE_JOURNALPOST, env.schemaRegistryUrl)
 
         val (needsNewArenaSak, hasExistingArenaSak) = inngåendeJournalposter
             .peek { key, value -> LOGGER.info("Processing ${value.javaClass} with key $key") }
@@ -62,7 +54,7 @@ class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient
 
         needsNewArenaSak.merge(hasExistingArenaSak)
             .peek { key, value -> LOGGER.info("Producing ${value.javaClass} with key $key") }
-            .toTopic(innkommendeJournalpost)
+            .toTopic(INNGÅENDE_JOURNALPOST, env.schemaRegistryUrl)
 
         return KafkaStreams(builder.build(), this.getConfig())
     }
