@@ -6,12 +6,6 @@ plugins {
     id("com.palantir.git-version") version "0.11.0"
 }
 
-buildscript {
-    repositories {
-        maven("https://repo.adeo.no/repository/maven-central")
-    }
-}
-
 apply {
     plugin("com.diffplug.gradle.spotless")
 }
