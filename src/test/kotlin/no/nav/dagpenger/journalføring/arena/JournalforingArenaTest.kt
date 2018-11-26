@@ -6,6 +6,7 @@ import no.nav.dagpenger.events.avro.Ettersending
 import no.nav.dagpenger.events.avro.HenvendelsesType
 import no.nav.dagpenger.events.avro.Mottaker
 import no.nav.dagpenger.events.avro.Søknad
+import no.nav.dagpenger.events.avro.Vedtakstype
 import org.junit.Test
 import org.mockito.Mockito
 import java.util.Date
@@ -22,7 +23,7 @@ class JournalforingArenaTest {
             .setSøknad(
                 Søknad
                     .newBuilder()
-                    .setVedtakstype("NY")
+                    .setVedtakstype(Vedtakstype.NY_RETTIGHET)
                     .build()
             )
             .build()
@@ -33,7 +34,7 @@ class JournalforingArenaTest {
             .setSøknad(
                 Søknad
                     .newBuilder()
-                    .setVedtakstype("GJENOPPTAK")
+                    .setVedtakstype(Vedtakstype.GJENOPPTAK)
                     .build()
             )
             .build()
