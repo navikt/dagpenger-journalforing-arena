@@ -4,12 +4,7 @@ plugins {
     id("com.diffplug.gradle.spotless") version "3.13.0"
     id("com.palantir.docker") version "0.20.1"
     id("com.palantir.git-version") version "0.11.0"
-}
-
-buildscript {
-    repositories {
-        maven("https://repo.adeo.no/repository/maven-central")
-    }
+    id("info.solidsoft.pitest") version "1.3.0"
 }
 
 apply {
@@ -57,7 +52,7 @@ val fuelVersion = "1.15.0"
 dependencies {
     implementation(kotlin("stdlib"))
     implementation("no.nav.dagpenger:streams:0.2.2-SNAPSHOT")
-    implementation("no.nav.dagpenger:events:0.1.6-SNAPSHOT")
+    implementation("no.nav.dagpenger:events:0.1.9-SNAPSHOT")
 
     implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion")
 
@@ -75,7 +70,9 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
     testImplementation("junit:junit:4.12")
-    testImplementation("au.com.dius:pact-jvm-consumer-java8_2.12:3.6.0-rc.0")
+    testImplementation("org.mockito:mockito-all:2.+")
+    testImplementation("com.github.tomakehurst:wiremock:2.19.0")
+    testImplementation("no.nav:kafka-embedded-env:2.0.1")
 }
 
 spotless {
@@ -87,3 +84,12 @@ spotless {
         ktlint()
     }
 }
+
+pitest {
+    threads = 4
+    pitestVersion = "1.4.3"
+    coverageThreshold = 80
+    avoidCallsTo = setOf("kotlin.jvm.internal")
+}
+
+tasks.getByName("check").dependsOn("pitest")
