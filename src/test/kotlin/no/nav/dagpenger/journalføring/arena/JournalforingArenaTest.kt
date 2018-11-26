@@ -4,6 +4,7 @@ import no.nav.dagpenger.events.avro.Annet
 import no.nav.dagpenger.events.avro.Behov
 import no.nav.dagpenger.events.avro.Ettersending
 import no.nav.dagpenger.events.avro.HenvendelsesType
+import no.nav.dagpenger.events.avro.Mottaker
 import no.nav.dagpenger.events.avro.Søknad
 import org.junit.Test
 import org.mockito.Mockito
@@ -14,8 +15,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class JournalforingArenaTest {
-
-    lateinit var journalføringArena: JournalføringArena
 
     val nySøknad: HenvendelsesType =
         HenvendelsesType
@@ -59,6 +58,7 @@ class JournalforingArenaTest {
             .setBehovId("10")
             .setHenvendelsesType(henvendelsesType)
             .setTrengerManuellBehandling(trengerManuellBehandling)
+            .setMottaker(Mottaker("id"))
 
         if (hasBehandlendeEnhet) behov.behandleneEnhet = "0000"
         if (hasFagsakId) behov.fagsakId = "1215"
@@ -135,5 +135,18 @@ class JournalforingArenaTest {
         val journalføringArena = JournalføringArena(Environment("", "", ""), oppslagMock)
 
         assertNull(journalføringArena.findNewestActiveDagpengerSak("123123"))
+    }
+
+    @Test
+    fun `findSakAndCreateOppgave sets manuellBhenalding flag if no saker are found`() {
+        val oppslagMock = Mockito.mock(OppslagClient::class.java)
+        Mockito.`when`(oppslagMock.getSaker(any())).thenReturn(listOf())
+        val journalføringArena = JournalføringArena(Environment("", "", ""), oppslagMock)
+
+        val behov = createBehov(gjenopptakSøknad, trengerManuellBehandling = false)
+
+        journalføringArena.findSakAndCreateOppgave(behov)
+
+        assertEquals(behov.getTrengerManuellBehandling(), true)
     }
 }
