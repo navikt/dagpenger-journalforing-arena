@@ -10,6 +10,7 @@ import no.nav.dagpenger.events.avro.HenvendelsesType
 import no.nav.dagpenger.events.avro.Journalpost
 import no.nav.dagpenger.events.avro.Mottaker
 import no.nav.dagpenger.events.avro.Søknad
+import no.nav.dagpenger.events.avro.Vedtakstype
 import no.nav.dagpenger.events.hasFagsakId
 import no.nav.dagpenger.streams.Topics
 import no.nav.dagpenger.streams.Topics.INNGÅENDE_JOURNALPOST
@@ -115,7 +116,7 @@ class JournalforingArenaComponentTest {
                         .setSøknad(
                             Søknad
                                 .newBuilder()
-                                .setVedtakstype("NY")
+                                .setVedtakstype(Vedtakstype.NY_RETTIGHET)
                                 .build()
                         )
                         .build()
