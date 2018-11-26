@@ -2,12 +2,6 @@ package no.nav.dagpenger.journalføring.arena
 
 import mu.KotlinLogging
 import no.nav.dagpenger.events.avro.Behov
-import no.nav.dagpenger.events.avro.JournalpostType
-import no.nav.dagpenger.events.avro.JournalpostType.ETTERSENDING
-import no.nav.dagpenger.events.avro.JournalpostType.GJENOPPTAK
-import no.nav.dagpenger.events.avro.JournalpostType.MANUELL
-import no.nav.dagpenger.events.avro.JournalpostType.NY
-import no.nav.dagpenger.events.avro.JournalpostType.UKJENT
 import no.nav.dagpenger.streams.KafkaCredential
 import no.nav.dagpenger.streams.Service
 import no.nav.dagpenger.streams.Topics.INNGÅENDE_JOURNALPOST
@@ -37,7 +31,7 @@ class JournalføringArena(val env: Environment, val oppslagHttpClient: OppslagHt
         println(SERVICE_APP_ID)
         val builder = StreamsBuilder()
 
-        val inngåendeJournalposter = builder.consumeTopic(INNGÅENDE_JOURNALPOST)
+        val inngåendeJournalposter = builder.consumeTopic(INNGÅENDE_JOURNALPOST, env.schemaRegistryUrl)
 
         inngåendeJournalposter
             .peek { key, value -> LOGGER.info("Processing ${value.javaClass} with key $key") }
@@ -47,7 +41,7 @@ class JournalføringArena(val env: Environment, val oppslagHttpClient: OppslagHt
             .filter { _, behov -> filterJournalpostTypes(behov.getJournalpost().getJournalpostType()) }
             .mapValues(this::addFagsakId)
             .peek { key, value -> LOGGER.info("Producing ${value.javaClass} with key $key") }
-            .toTopic(INNGÅENDE_JOURNALPOST)
+            .toTopic(INNGÅENDE_JOURNALPOST, env.schemaRegistryUrl)
 
         return KafkaStreams(builder.build(), this.getConfig())
     }
