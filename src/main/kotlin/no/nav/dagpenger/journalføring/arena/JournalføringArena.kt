@@ -67,13 +67,6 @@ class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient
         )
     }
 
-    fun shouldBeProcessed(behov: Behov): Boolean {
-        return !behov.getTrengerManuellBehandling()
-            && behov.hasBehandlendeEnhet()
-            && !behov.hasFagsakId()
-            && (behov.isSoknad() || behov.isEttersending())
-    }
-
     fun createNewSak(behov: Behov) {
         val createNewOppgaveAndSak =
             CreateArenaOppgaveRequest(
@@ -126,4 +119,10 @@ class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient
     }
 }
 
+fun shouldBeProcessed(behov: Behov): Boolean {
+    return !behov.getTrengerManuellBehandling()
+        && behov.hasBehandlendeEnhet()
+        && !behov.hasFagsakId()
+        && (behov.isSoknad() || behov.isEttersending())
+}
 

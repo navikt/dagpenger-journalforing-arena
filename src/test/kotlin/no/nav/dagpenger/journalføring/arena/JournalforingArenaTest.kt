@@ -50,13 +50,6 @@ class JournalforingArenaTest {
         .setAnnet(Annet())
         .build()
 
-    @Before
-    fun setUp() {
-
-        val env = Environment("", "", "")
-        journalføringArena = JournalføringArena(env, DummyOppslagClient())
-    }
-
     fun createBehov(
         henvendelsesType: HenvendelsesType,
         hasBehandlendeEnhet: Boolean = false,
@@ -76,41 +69,41 @@ class JournalforingArenaTest {
 
     @Test
     fun `should process ny søknad with behandlende enhet`() {
-        assertTrue { journalføringArena.shouldBeProcessed(createBehov(nySøknad, true)) }
+        assertTrue { shouldBeProcessed(createBehov(nySøknad, true)) }
     }
 
     @Test
     fun `should process gjenopptak søknad with behandlendeenhet`() {
-        assertTrue { journalføringArena.shouldBeProcessed(createBehov(gjenopptakSøknad, true)) }
+        assertTrue { shouldBeProcessed(createBehov(gjenopptakSøknad, true)) }
     }
 
     @Test
     fun `should process ettersending with behandlende enhet`() {
-        assertTrue { journalføringArena.shouldBeProcessed(createBehov(ettersending, true)) }
+        assertTrue { shouldBeProcessed(createBehov(ettersending, true)) }
     }
 
     @Test
     fun `should not process annet with behandlende enhet`() {
-        assertFalse { journalføringArena.shouldBeProcessed(createBehov(annet, true)) }
+        assertFalse { shouldBeProcessed(createBehov(annet, true)) }
     }
 
     @Test
     fun `should not process behovs with fagsakId`() {
         listOf(nySøknad, gjenopptakSøknad, ettersending, annet).forEach {
-            assertFalse { journalføringArena.shouldBeProcessed(createBehov(it, true, true, true)) }
-            assertFalse { journalføringArena.shouldBeProcessed(createBehov(it, true, true, false)) }
-            assertFalse { journalføringArena.shouldBeProcessed(createBehov(it, false, true, true)) }
-            assertFalse { journalføringArena.shouldBeProcessed(createBehov(it, false, true, false)) }
+            assertFalse { shouldBeProcessed(createBehov(it, true, true, true)) }
+            assertFalse { shouldBeProcessed(createBehov(it, true, true, false)) }
+            assertFalse { shouldBeProcessed(createBehov(it, false, true, true)) }
+            assertFalse { shouldBeProcessed(createBehov(it, false, true, false)) }
         }
     }
 
     @Test
     fun `should not process behovs with trengerManuellBehandling`() {
         listOf(nySøknad, gjenopptakSøknad, ettersending, annet).forEach {
-            assertFalse { journalføringArena.shouldBeProcessed(createBehov(it, true, true, true)) }
-            assertFalse { journalføringArena.shouldBeProcessed(createBehov(it, true, false, true)) }
-            assertFalse { journalføringArena.shouldBeProcessed(createBehov(it, false, true, true)) }
-            assertFalse { journalføringArena.shouldBeProcessed(createBehov(it, false, false, true)) }
+            assertFalse { shouldBeProcessed(createBehov(it, true, true, true)) }
+            assertFalse { shouldBeProcessed(createBehov(it, true, false, true)) }
+            assertFalse { shouldBeProcessed(createBehov(it, false, true, true)) }
+            assertFalse { shouldBeProcessed(createBehov(it, false, false, true)) }
         }
     }
 
@@ -143,15 +136,5 @@ class JournalforingArenaTest {
         val journalføringArena = JournalføringArena(Environment("", "", ""), oppslagMock)
 
         assertNull(journalføringArena.findNewestActiveDagpengerSak("123123"))
-    }
-
-    class DummyOppslagClient : OppslagClient {
-        override fun createOppgave(request: CreateArenaOppgaveRequest): String {
-            return "ArenaSakId"
-        }
-
-        override fun getSaker(request: GetArenaSakerRequest): List<ArenaSak> {
-            return listOf()
-        }
     }
 }
