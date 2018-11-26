@@ -5,7 +5,6 @@ import no.nav.dagpenger.events.avro.Behov
 import no.nav.dagpenger.events.avro.Ettersending
 import no.nav.dagpenger.events.avro.HenvendelsesType
 import no.nav.dagpenger.events.avro.Søknad
-import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
 import java.util.Date
