@@ -98,12 +98,11 @@ class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient
     }
 
     fun findSakAndCreateOppgave(behov: Behov) {
-
         val sakId = findNewestActiveDagpengerSak(behov.getMottaker().getIdentifikator())
 
         if (sakId == null) {
-            // TODO: find out how to send behov to be manually processed
-            throw RuntimeException("Could not find any existing arena-sak")
+            LOGGER.error { "Could not find sak in Arena for JournalpostId=${behov.getJournalpost().getJournalpostId()}, setting trengerManuellBehandling = true." }
+            behov.setTrengerManuellBehandling(true)
         } else {
             val createNewOppgaveOnExistingSak =
                 CreateArenaOppgaveRequest(
