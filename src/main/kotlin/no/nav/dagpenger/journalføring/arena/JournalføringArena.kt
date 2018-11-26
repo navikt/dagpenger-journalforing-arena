@@ -18,6 +18,8 @@ import no.nav.dagpenger.streams.streamConfig
 import no.nav.dagpenger.streams.toTopic
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
+import org.apache.kafka.streams.kstream.KStream
+import org.apache.kafka.streams.kstream.Predicate
 import java.util.Properties
 
 private val LOGGER = KotlinLogging.logger {}
@@ -47,10 +49,18 @@ class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient
         val builder = StreamsBuilder()
         val inngåendeJournalposter = builder.consumeTopic(innkommendeJournalpost)
 
-        inngåendeJournalposter
+        val (needsNewArenaSak, hasExistingArenaSak) = inngåendeJournalposter
             .peek { key, value -> LOGGER.info("Processing ${value.javaClass} with key $key") }
             .filter { _, behov -> shouldBeProcessed(behov) }
-            .mapValues(this::addFagsakId)
+            .kbranch(
+                { _, behov -> behov.isNySoknad() },
+                { _, behov -> behov.isGjenopptakSoknad() || behov.isEttersending() })
+
+        needsNewArenaSak.mapValues(this::createNewSak)
+
+        hasExistingArenaSak.mapValues(this::findSakAndCreateOppgave)
+
+        needsNewArenaSak.merge(hasExistingArenaSak)
             .peek { key, value -> LOGGER.info("Producing ${value.javaClass} with key $key") }
             .toTopic(innkommendeJournalpost)
 
@@ -70,16 +80,6 @@ class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient
             && behov.hasBehandlendeEnhet()
             && !behov.hasFagsakId()
             && (behov.isSoknad() || behov.isEttersending())
-    }
-
-    fun addFagsakId(behov: Behov): Behov {
-
-        if (behov.isNySoknad()) {
-            createNewSak(behov)
-        } else if (behov.isGjenopptakSoknad() || behov.isEttersending()) {
-            findSakAndCreateOppgave(behov)
-        }
-        return behov
     }
 
     fun createNewSak(behov: Behov) {
@@ -127,5 +127,12 @@ class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient
 
         return saker.filter { it.sakstatus == "AKTIV" }.maxBy { it.sakOpprettet }?.sakId
     }
+
+    // https://stackoverflow.com/a/48048516/10075690
+    fun <K, V> KStream<K, V>.kbranch(vararg predicates: (K, V) -> Boolean): Array<KStream<K, V>> {
+        val arguments = predicates.map { Predicate { key: K, value: V -> it(key, value) } }
+        return this.branch(*arguments.toTypedArray())
+    }
 }
+
 
