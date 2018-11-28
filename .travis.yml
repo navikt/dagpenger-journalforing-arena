@@ -3,11 +3,17 @@ jdk:
   - openjdk11
 script:
   - "./gradlew build"
-
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
 cache:
   directories:
-    - $HOME/.gradle/caches/
-    - $HOME/.gradle/wrapper/
+    - "$HOME/.gradle/caches/"
+    - "$HOME/.gradle/wrapper/"
+notifications:
+  slack:
+    rooms:
+      secure: CiZk3sjGbsqm2UHlN448jhbXSvBBJU+QPGwGiXlqoJmyZmVYOxMdfDYlhAQ65TSlIiPHrP3B6Q3VjjDwdlKGSSvgP2de+xGHhmQDnCAzT23fPD8lQ9pBQZawhd84ioX/3T/8Jzy9EJfBzbAqA9iAH9UEfbVHb8DQkN0OFwaCFBh2DWyafEgGOoaoK4rxNMirI0D7i+afwK2DNwLW3O9Os19kU1ajVri52k1pe2HxSKb39XF8ADBPUOD8h0889Dw/ShnNJRvjZrWusWNX00JnT1Un9dsT21/gZdEpC52szExvV/SSvch0g3BU8XTWBJXMUl92sLwptSyElm6WAgAy/OQX19OH7OxId4QCG0oLnSrTMmhaC7VqN/f0VAd7gjw9xAiCJdpazcXuDV0ZSdDOieH4S1OCH3gpBbJ9aRo6Prsk0/PjQi9pNvyv7tNRua8JDAR9H+wSy5kPgtMIUTZWD56kvrUV+k2vws7U1N0vWadUHlRiGEy+yj1O2klFnTvWrmF9IG3DUiaqloZq91D4oCUkMjfu1J2c5w0gN9WTH6/L3rnL273BWmRHzLB+WR8Uo0tyAx0Rf22L1aBij6t6MAL08YvH0h0maNTprM5VJPUpIH1L/zCrasZgrX1byJMJB7ptE0uDKfdi/LpXP1pnOxObdty7Rngbj7sU/dZAypI=
+  on_success: change
+  on_failure: always
+  on_pull_requests: false
