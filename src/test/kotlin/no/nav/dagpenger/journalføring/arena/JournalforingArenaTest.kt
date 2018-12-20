@@ -3,7 +3,6 @@ package no.nav.dagpenger.journalføring.arena
 import no.nav.dagpenger.events.avro.Annet
 import no.nav.dagpenger.events.avro.Behov
 import no.nav.dagpenger.events.avro.Ettersending
-import no.nav.dagpenger.events.avro.HenvendelsesType
 import no.nav.dagpenger.events.avro.Mottaker
 import no.nav.dagpenger.events.avro.Søknad
 import no.nav.dagpenger.events.avro.Vedtakstype
@@ -17,40 +16,24 @@ import kotlin.test.assertTrue
 
 class JournalforingArenaTest {
 
-    val nySøknad: HenvendelsesType =
-        HenvendelsesType
+    private val nySøknad: Søknad =
+        Søknad
             .newBuilder()
-            .setSøknad(
-                Søknad
-                    .newBuilder()
-                    .setVedtakstype(Vedtakstype.NY_RETTIGHET)
-                    .build()
-            )
+            .setVedtakstype(Vedtakstype.NY_RETTIGHET)
             .build()
 
-    val gjenopptakSøknad: HenvendelsesType =
-        HenvendelsesType
+    private val gjenopptakSøknad: Søknad =
+        Søknad
             .newBuilder()
-            .setSøknad(
-                Søknad
-                    .newBuilder()
-                    .setVedtakstype(Vedtakstype.GJENOPPTAK)
-                    .build()
-            )
+            .setVedtakstype(Vedtakstype.GJENOPPTAK)
             .build()
 
-    val ettersending: HenvendelsesType = HenvendelsesType
-        .newBuilder()
-        .setEttersending(Ettersending())
-        .build()
+    private val ettersending: Ettersending = Ettersending()
 
-    val annet: HenvendelsesType = HenvendelsesType
-        .newBuilder()
-        .setAnnet(Annet())
-        .build()
+    private val annet: Annet = Annet()
 
     fun createBehov(
-        henvendelsesType: HenvendelsesType,
+        henvendelsesType: Any,
         hasBehandlendeEnhet: Boolean = false,
         hasFagsakId: Boolean = false,
         trengerManuellBehandling: Boolean = false

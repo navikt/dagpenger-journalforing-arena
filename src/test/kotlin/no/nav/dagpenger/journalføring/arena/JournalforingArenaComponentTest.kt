@@ -6,7 +6,6 @@ import no.nav.common.JAASCredential
 import no.nav.common.KafkaEnvironment
 import no.nav.common.embeddedutils.getAvailablePort
 import no.nav.dagpenger.events.avro.Behov
-import no.nav.dagpenger.events.avro.HenvendelsesType
 import no.nav.dagpenger.events.avro.Journalpost
 import no.nav.dagpenger.events.avro.Mottaker
 import no.nav.dagpenger.events.avro.Søknad
@@ -111,14 +110,9 @@ class JournalforingArenaComponentTest {
                 .newBuilder()
                 .setBehovId("123")
                 .setHenvendelsesType(
-                    HenvendelsesType
+                    Søknad
                         .newBuilder()
-                        .setSøknad(
-                            Søknad
-                                .newBuilder()
-                                .setVedtakstype(Vedtakstype.NY_RETTIGHET)
-                                .build()
-                        )
+                        .setVedtakstype(Vedtakstype.NY_RETTIGHET)
                         .build()
                 )
                 .setBehandleneEnhet(if (testdata[0]) "behandlendeEnhet" else null)
