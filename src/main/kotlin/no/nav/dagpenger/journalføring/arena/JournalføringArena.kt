@@ -24,6 +24,7 @@ private val LOGGER = KotlinLogging.logger {}
 
 class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient) : Service() {
     override val SERVICE_APP_ID = "journalføring-arena"
+    override val HTTP_PORT: Int = env.httpPort ?: super.HTTP_PORT
 
     companion object {
         @JvmStatic
