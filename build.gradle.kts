@@ -67,7 +67,7 @@ dependencies {
     testImplementation("junit:junit:4.12")
     testImplementation("org.mockito:mockito-all:2.+")
     testImplementation("com.github.tomakehurst:wiremock:2.19.0")
-    testImplementation("no.nav:kafka-embedded-env:2.0.1")
+    testImplementation("no.nav:kafka-embedded-env:2.0.2")
 }
 
 spotless {
