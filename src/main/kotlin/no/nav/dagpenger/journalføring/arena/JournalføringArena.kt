@@ -14,8 +14,8 @@ import no.nav.dagpenger.streams.Topics.INNGÅENDE_JOURNALPOST
 import no.nav.dagpenger.streams.consumeTopic
 import no.nav.dagpenger.streams.streamConfig
 import no.nav.dagpenger.streams.toTopic
-import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
+import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.kstream.KStream
 import org.apache.kafka.streams.kstream.Predicate
 import java.util.Properties
@@ -36,8 +36,7 @@ class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient
         }
     }
 
-    override fun setupStreams(): KafkaStreams {
-        println(SERVICE_APP_ID)
+    override fun buildTopology(): Topology {
 
         val builder = StreamsBuilder()
         val inngåendeJournalposter = builder.consumeTopic(INNGÅENDE_JOURNALPOST, env.schemaRegistryUrl)
@@ -57,7 +56,7 @@ class JournalføringArena(val env: Environment, val oppslagClient: OppslagClient
             .peek { key, value -> LOGGER.info("Producing ${value.javaClass} with key $key") }
             .toTopic(INNGÅENDE_JOURNALPOST, env.schemaRegistryUrl)
 
-        return KafkaStreams(builder.build(), this.getConfig())
+        return builder.build()
     }
 
     override fun getConfig(): Properties {
