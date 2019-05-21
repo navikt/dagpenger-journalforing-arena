@@ -65,7 +65,7 @@ class JournalforingArenaComponentTest {
     @Test
     fun ` Component test of JournalføringArena`() {
 
-        //Test data: [hasBehandlendeEnhet, hasFagsakId, trengerManuellBehandling]
+        // Test data: [hasBehandlendeEnhet, hasFagsakId, trengerManuellBehandling]
         val innkommendeBehov = listOf(
             listOf(false, false, false),
             listOf(false, false, false),
@@ -99,7 +99,7 @@ class JournalforingArenaComponentTest {
 
         val ruting = JournalføringArena(env, DummyOppslagClient())
 
-        //produce behov...
+        // produce behov...
 
         val behovProducer = behovProducer(env)
 
@@ -135,10 +135,10 @@ class JournalforingArenaComponentTest {
 
         ruting.stop()
 
-        //Verify the number of produced messages
+        // Verify the number of produced messages
         assertEquals(innkommendeBehov.size + behovsToProcess.size, utgåendeBehov.size)
 
-        //Check if JournalføringArena sets fagsakId, by verifing the number of behovs with fagsakId
+        // Check if JournalføringArena sets fagsakId, by verifing the number of behovs with fagsakId
         val utgåendeBehovWithFagsakId = utgåendeBehov.filter { it.value().hasFagsakId() }
         assertEquals(behovsToProcess.size + innkommendeBehovWithFagsakId.size, utgåendeBehovWithFagsakId.size)
     }
