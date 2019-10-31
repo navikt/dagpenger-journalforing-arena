@@ -5,7 +5,7 @@ metadata:
 spec:
   vault:
     paths:
-      - kvPath: "serviceuser/data/prod/srvdp-jrnf-arena"
-        mountPath: "/secrets/serviceuser/srvdp-jrnf-arena"
+      - kvPath: "serviceuser/data/prod/srvdagpenger-journ"
+        mountPath: "/secrets/serviceuser/srvdagpenger-journ"
 
 
