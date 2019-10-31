@@ -9,6 +9,7 @@ import com.natpryce.konfig.intType
 import com.natpryce.konfig.overriding
 import com.natpryce.konfig.stringType
 import no.nav.dagpenger.events.Packet
+import no.nav.dagpenger.streams.KafkaCredential
 import no.nav.dagpenger.streams.PacketDeserializer
 import no.nav.dagpenger.streams.PacketSerializer
 import no.nav.dagpenger.streams.Topic
@@ -18,10 +19,8 @@ import java.io.File
 private val localProperties = ConfigurationMap(
     mapOf(
         "kafka.bootstrap.servers" to "localhost:9092",
-        "oidc.sts.issuerurl" to "localhost:8082",
         "application.profile" to Profile.LOCAL.toString(),
         "application.httpPort" to "8080",
-        "oppslag.url" to "http://localhost:8081",
         "srvdagpenger.journalforing.arena.username" to "user",
         "srvdagpenger.journalforing.arena.password" to "password"
     )
@@ -64,8 +63,14 @@ data class Configuration(
             keySerde = Serdes.String(),
             valueSerde = Serdes.serdeFrom(PacketSerializer(), PacketDeserializer())
         ),
+        val user: String = config()[Key("srvdagpenger.journalforing.arena.username", stringType)],
+        val password: String = config()[Key("srvdagpenger.journalforing.arena.password", stringType)],
         val brokers: String = config()[Key("kafka.bootstrap.servers", stringType)]
-    )
+    ) {
+        fun credential(): KafkaCredential? {
+            return KafkaCredential(user, password)
+        }
+    }
 
     data class Application(
         val profile: Profile = config()[Key("application.profile", stringType)].let { Profile.valueOf(it) },

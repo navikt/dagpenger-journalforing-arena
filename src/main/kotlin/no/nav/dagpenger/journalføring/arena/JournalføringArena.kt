@@ -3,7 +3,9 @@ package no.nav.dagpenger.journalføring.arena
 import mu.KotlinLogging
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.streams.River
+import no.nav.dagpenger.streams.streamConfig
 import org.apache.kafka.streams.kstream.Predicate
+import java.util.Properties
 
 private val logger = KotlinLogging.logger {}
 
@@ -24,6 +26,13 @@ class JournalføringArena(val configuration: Configuration) : River(configuratio
 
         packet.putValue("arena-journalføring", "yes")
         return packet
+    }
+    override fun getConfig(): Properties {
+        return streamConfig(
+            appId = SERVICE_APP_ID,
+            bootStapServerUrl = configuration.kafka.brokers,
+            credential = configuration.kafka.credential()
+        )
     }
 }
 
