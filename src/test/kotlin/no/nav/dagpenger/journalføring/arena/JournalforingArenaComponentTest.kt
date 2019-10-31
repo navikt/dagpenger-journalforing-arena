@@ -1,6 +1,5 @@
 package no.nav.dagpenger.journalføring.arena
 
-import io.kotlintest.matchers.numerics.shouldBeGreaterThan
 import io.kotlintest.shouldBe
 import mu.KotlinLogging
 import no.nav.common.JAASCredential
@@ -19,7 +18,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.util.Properties
-import java.util.concurrent.TimeUnit
 
 class JournalforingArenaComponentTest {
 
@@ -79,9 +77,8 @@ class JournalforingArenaComponentTest {
 
         val behovConsumer: KafkaConsumer<String, Packet> = behovConsumer(configuration)
 
-        TimeUnit.SECONDS.sleep(20)
         val journalføringer = behovConsumer.poll(Duration.ofSeconds(5)).toList()
-        journalføringer.size shouldBeGreaterThan 2
+        journalføringer.size shouldBe 1
     }
 
     private fun behovProducer(configuration: Configuration): KafkaProducer<String, Packet> {
