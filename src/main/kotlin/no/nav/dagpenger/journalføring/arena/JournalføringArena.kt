@@ -9,7 +9,7 @@ private val logger = KotlinLogging.logger {}
 
 class JournalføringArena(val configuration: Configuration) : River(configuration.kafka.dagpengerJournalpostTopic) {
 
-    override val SERVICE_APP_ID = "journalføring-arena"
+    override val SERVICE_APP_ID = "dp-journalforing-arena"
     override val HTTP_PORT: Int = configuration.application.httpPort
 
     override fun filterPredicates(): List<Predicate<String, Packet>> {
