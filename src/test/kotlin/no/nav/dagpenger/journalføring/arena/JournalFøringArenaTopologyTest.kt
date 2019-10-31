@@ -1,6 +1,5 @@
 package no.nav.dagpenger.journalføring.arena
 
-import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.streams.PacketDeserializer
