@@ -19,6 +19,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.util.Properties
+import java.util.concurrent.TimeUnit
 
 class JournalforingArenaComponentTest {
 
@@ -57,8 +58,8 @@ class JournalforingArenaComponentTest {
         @AfterAll
         @JvmStatic
         fun teardown() {
-            embeddedEnvironment.tearDown()
             arena.stop()
+            embeddedEnvironment.tearDown()
         }
     }
 
@@ -77,8 +78,10 @@ class JournalforingArenaComponentTest {
         LOGGER.info { "Produced -> ${record.topic()}  to offset ${record.offset()}" }
 
         val behovConsumer: KafkaConsumer<String, Packet> = behovConsumer(configuration)
+
+        TimeUnit.SECONDS.sleep(20)
         val journalføringer = behovConsumer.poll(Duration.ofSeconds(5)).toList()
-        journalføringer.size shouldBeGreaterThan 0
+        journalføringer.size shouldBeGreaterThan 2
     }
 
     private fun behovProducer(configuration: Configuration): KafkaProducer<String, Packet> {
