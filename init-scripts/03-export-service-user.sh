@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-if test -f /secrets/serviceuser/srvdp-jrnf-arena/username;
+if test -f /secrets/serviceuser/srvdagpenger-journ/username;
 then
-    export  SRVDAGPENGER_JOURNALFORING_ARENA_USERNAME=$(cat /secrets/serviceuser/srvdp-jrnf-arena/username)
+    export  SRVDAGPENGER_JOURNALFORING_ARENA_USERNAME=$(cat /secrets/serviceuser/srvdagpenger-journ/username)
 fi
-if test -f /secrets/serviceuser/srvdp-jrnf-arena/password;
+if test -f /secrets/serviceuser/srvdagpenger-journ/password;
 then
-    export  SRVDAGPENGER_JOURNALFORING_ARENA_PASSWORD=$(cat /secrets/serviceuser/srvdp-jrnf-arena/password)
+    export  SRVDAGPENGER_JOURNALFORING_ARENA_PASSWORD=$(cat /secrets/serviceuser/srvdagpenger-journ/password)
 fi
 
 
