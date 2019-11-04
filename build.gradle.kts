@@ -36,6 +36,10 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
 }
 
+val tjenestespesifikasjonerVersion = "1.2019.09.25-00.21-49b69f0625e0"
+
+fun tjenestespesifikasjon(name: String) = "no.nav.tjenestespesifikasjoner:$name:$tjenestespesifikasjonerVersion"
+
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation("com.github.navikt:dagpenger-streams:2019.10.18-12.06.fbbb66cd150b")
@@ -63,6 +67,8 @@ dependencies {
     implementation(Kafka.clients)
     implementation(Kafka.streams)
     implementation(Kafka.Confluent.avroStreamSerdes)
+
+    implementation(tjenestespesifikasjon("behandleArbeidOgAktivitetOppgave-v1-tjenestespesifikasjon"))
 
     implementation(Ktor.serverNetty)
 

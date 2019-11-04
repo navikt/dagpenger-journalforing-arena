@@ -32,7 +32,9 @@ class JournalforingArenaComponentTest {
             autoStart = false,
             withSchemaRegistry = true,
             withSecurity = true,
-            topics = listOf("privat-dagpenger-journalpost-mottatt-v1")
+            topicInfos = listOf(
+                KafkaEnvironment.TopicInfo("privat-dagpenger-journalpost-mottatt-v1")
+            )
         )
 
         // given config
