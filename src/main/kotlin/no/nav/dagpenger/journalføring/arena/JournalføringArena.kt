@@ -61,20 +61,19 @@ class JournalføringArena(private val configuration: Configuration, val arenaOpp
 fun main(args: Array<String>) {
     val configuration = Configuration()
 
-    val behandleArbeidsytelseSak =
-        SoapPort.BehandleArbeidOgAktivitetOppgaveV1(configuration.behandleArbeidsytelseSak.endpoint)
-
-    val arenaOppgaveClient: ArenaOppgaveClient =
-        SoapArenaOppgaveClient(behandleArbeidsytelseSak)
-
-    val soapStsClient = stsClient(
-        stsUrl = configuration.soapSTSClient.endpoint,
-        credentials = configuration.soapSTSClient.username to configuration.soapSTSClient.password
-    ).also {
-        it.configureFor(behandleArbeidsytelseSak)
-    }
-
     val service = if (configuration.application.profile != Profile.PROD) {
+        val behandleArbeidsytelseSak =
+            SoapPort.BehandleArbeidOgAktivitetOppgaveV1(configuration.behandleArbeidsytelseSak.endpoint)
+
+        val arenaOppgaveClient: ArenaOppgaveClient =
+            SoapArenaOppgaveClient(behandleArbeidsytelseSak)
+
+        val soapStsClient = stsClient(
+            stsUrl = configuration.soapSTSClient.endpoint,
+            credentials = configuration.soapSTSClient.username to configuration.soapSTSClient.password
+        ).also {
+            it.configureFor(behandleArbeidsytelseSak)
+        }
         JournalføringArena(configuration, arenaOppgaveClient)
     } else {
         JournalføringArena(configuration, DummyArenaOppgaveClient())
