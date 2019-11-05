@@ -3,10 +3,6 @@ package no.nav.dagpenger.journalføring.arena
 import mu.KotlinLogging
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaOppgaveClient
-import no.nav.dagpenger.journalføring.arena.adapter.soap.SoapArenaOppgaveClient
-import no.nav.dagpenger.journalføring.arena.adapter.soap.SoapPort
-import no.nav.dagpenger.journalføring.arena.adapter.soap.configureFor
-import no.nav.dagpenger.journalføring.arena.adapter.soap.stsClient
 import no.nav.dagpenger.streams.River
 import no.nav.dagpenger.streams.streamConfig
 import org.apache.kafka.streams.kstream.Predicate
@@ -62,19 +58,19 @@ fun main(args: Array<String>) {
     val configuration = Configuration()
 
     val service = if (configuration.application.profile != Profile.PROD) {
-        val behandleArbeidsytelseSak =
-            SoapPort.BehandleArbeidOgAktivitetOppgaveV1(configuration.behandleArbeidsytelseSak.endpoint)
-
-        val arenaOppgaveClient: ArenaOppgaveClient =
-            SoapArenaOppgaveClient(behandleArbeidsytelseSak)
-
-        val soapStsClient = stsClient(
-            stsUrl = configuration.soapSTSClient.endpoint,
-            credentials = configuration.soapSTSClient.username to configuration.soapSTSClient.password
-        ).also {
-            it.configureFor(behandleArbeidsytelseSak)
-        }
-        JournalføringArena(configuration, arenaOppgaveClient)
+        // val behandleArbeidsytelseSak =
+        //     SoapPort.BehandleArbeidOgAktivitetOppgaveV1(configuration.behandleArbeidsytelseSak.endpoint)
+        //
+        // val arenaOppgaveClient: ArenaOppgaveClient =
+        //     SoapArenaOppgaveClient(behandleArbeidsytelseSak)
+        //
+        // val soapStsClient = stsClient(
+        //     stsUrl = configuration.soapSTSClient.endpoint,
+        //     credentials = configuration.soapSTSClient.username to configuration.soapSTSClient.password
+        // ).also {
+        //     it.configureFor(behandleArbeidsytelseSak)
+        // }
+        JournalføringArena(configuration, DummyArenaOppgaveClient())
     } else {
         JournalføringArena(configuration, DummyArenaOppgaveClient())
     }
