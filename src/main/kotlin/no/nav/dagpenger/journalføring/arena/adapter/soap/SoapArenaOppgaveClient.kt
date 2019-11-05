@@ -1,6 +1,7 @@
 package no.nav.dagpenger.journalføring.arena.adapter.soap
 
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaOppgaveClient
+import no.nav.dagpenger.journalføring.arena.adapter.ArenaOppgaveClientException
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BehandleArbeidOgAktivitetOppgaveV1
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.informasjon.WSOppgave
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.informasjon.WSOppgavetype
@@ -34,7 +35,11 @@ class SoapArenaOppgaveClient(val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1) 
             frist = DatatypeFactory.newInstance().newXMLGregorianCalendar(GregorianCalendar.from(dateTime))
         }
 
-        val response: WSBestillOppgaveResponse = oppgaveV1.bestillOppgave(soapRequest)
+        val response: WSBestillOppgaveResponse = try {
+            oppgaveV1.bestillOppgave(soapRequest)
+        } catch (e: Exception) {
+            throw ArenaOppgaveClientException(e)
+        }
 
         return response.arenaSakId
     }
