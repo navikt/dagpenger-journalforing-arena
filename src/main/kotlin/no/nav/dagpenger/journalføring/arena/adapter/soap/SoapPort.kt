@@ -1,6 +1,7 @@
-package no.nav.dagpenger.journalføring.arena
+package no.nav.dagpenger.journalføring.arena.adapter.soap
 
 import no.nav.cxf.metrics.MetricFeature
+import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BehandleArbeidOgAktivitetOppgaveV1
 /*import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3*/
 import org.apache.cxf.ext.logging.LoggingFeature
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean
@@ -9,17 +10,17 @@ import javax.xml.namespace.QName
 
 object SoapPort {
 
-    /*fun PersonV3(serviceUrl: String): PersonV3 {
+    fun BehandleArbeidOgAktivitetOppgaveV1(serviceUrl: String): BehandleArbeidOgAktivitetOppgaveV1 {
 
         return createServicePort(
             serviceUrl,
-            serviceClazz = PersonV3::class.java,
-            wsdl = "wsdl/no/nav/tjeneste/virksomhet/person/v3/Binding.wsdl",
-            namespace = "http://nav.no/tjeneste/virksomhet/person/v3/Binding",
-            svcName = "Person_v3",
-            portName = "Person_v3Port"
+            serviceClazz = BehandleArbeidOgAktivitetOppgaveV1::class.java,
+            wsdl = "wsdl/no/nav/tjeneste/virksomhet/behandleArbeidOgAktivitetOppgave/v1/Binding.wsdl",
+            namespace = "http://nav.no/tjeneste/virksomhet/behandleArbeidOgAktivitetOppgave/v1/Binding",
+            svcName = "BehandleArbeidOgAktivitetOppgave_v1",
+            portName = "BehandleArbeidOgAktivitetOppgave_v1Port"
         )
-    }*/
+    }
 
     private fun <PORT_TYPE> createServicePort(
         serviceUrl: String,

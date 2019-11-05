@@ -1,6 +1,7 @@
 package no.nav.dagpenger.journalføring.arena
 
 import io.kotlintest.shouldBe
+import io.mockk.mockk
 import mu.KotlinLogging
 import no.nav.common.JAASCredential
 import no.nav.common.KafkaEnvironment
@@ -47,7 +48,7 @@ class JournalforingArenaComponentTest {
             )
         )
 
-        val arena = JournalføringArena(configuration)
+        val arena = JournalføringArena(configuration, mockk())
         @BeforeAll
         @JvmStatic
         fun setup() {

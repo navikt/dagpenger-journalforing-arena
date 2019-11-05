@@ -1,4 +1,4 @@
-package no.nav.dagpenger.journalføring.arena
+package no.nav.dagpenger.journalføring.arena.adapter.soap
 
 import io.kotlintest.shouldBe
 import io.mockk.every
@@ -7,23 +7,17 @@ import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BehandleAr
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.meldinger.WSBestillOppgaveResponse
 import org.junit.jupiter.api.Test
 
-class ArenaOppgaveClientTest {
-
+class SoapArenaOppgaveClientTest {
 
     @Test
     fun `suksessfull bestillOppgave gir arenaSakId `() {
         val stubbedClient = mockk<BehandleArbeidOgAktivitetOppgaveV1>()
         every { stubbedClient.bestillOppgave(any()) } returns WSBestillOppgaveResponse().withArenaSakId("123")
 
-        val client = ArenaOppgaveClient(stubbedClient)
+        val client = SoapArenaOppgaveClient(stubbedClient)
 
         val actual = client.bestillOppgave("123456789", "abcbscb")
 
         actual shouldBe "123"
     }
-
-    @Test
-    fun ``
-
-
 }
