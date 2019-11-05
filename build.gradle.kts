@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.github.jengelman.gradle.plugins.shadow.transformers.ServiceFileTransformer
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
@@ -107,6 +109,16 @@ spotless {
     }
 }
 
+tasks.withType<ShadowJar> {
+    mergeServiceFiles()
+
+    // Make sure the cxf service files are handled correctly so that the SOAP services work.
+    // Ref https://stackoverflow.com/questions/45005287/serviceconstructionexception-when-creating-a-cxf-web-service-client-scalajava
+    transform(ServiceFileTransformer::class.java) {
+        setPath("META-INF/cxf")
+        include("bus-extensions.txt")
+    }
+}
 tasks.named("compileKotlin") {
     dependsOn("spotlessCheck")
 }
