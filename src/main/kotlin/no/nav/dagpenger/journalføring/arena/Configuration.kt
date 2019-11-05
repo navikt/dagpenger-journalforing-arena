@@ -17,7 +17,6 @@ import no.nav.dagpenger.streams.Topic
 import org.apache.kafka.common.serialization.Serdes
 import java.io.File
 
-
 private val defaultProperties = ConfigurationMap(
     mapOf(
         "application.httpPort" to 8080.toString(),
