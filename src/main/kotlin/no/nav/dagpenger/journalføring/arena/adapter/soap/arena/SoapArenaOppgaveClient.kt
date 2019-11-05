@@ -1,4 +1,4 @@
-package no.nav.dagpenger.journalføring.arena.adapter.soap
+package no.nav.dagpenger.journalføring.arena.adapter.soap.arena
 
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaOppgaveClient
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaOppgaveClientException
