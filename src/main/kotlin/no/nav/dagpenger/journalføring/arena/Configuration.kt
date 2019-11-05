@@ -31,7 +31,7 @@ private val localProperties = ConfigurationMap(
         "srvdagpenger.journalforing.arena.username" to "user",
         "srvdagpenger.journalforing.arena.password" to "password",
         "securitytokenservice.url" to "https://localhost/SecurityTokenServiceProvider/",
-        "behandlearbeidsytelsesak.v1.url" to "http://localhost/ail_ws/BehandleArbeidsytelseSak_v1"
+        "behandlearbeidsytelsesak.v1.url" to "https://localhost/ail_ws/BehandleArbeidOgAktivitetOppgave_v1"
     )
 )
 private val devProperties = ConfigurationMap(
@@ -39,7 +39,7 @@ private val devProperties = ConfigurationMap(
         "kafka.bootstrap.servers" to "b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443",
         "application.profile" to Profile.DEV.toString(),
         "securitytokenservice.url" to "https://sts-q2.test.local/SecurityTokenServiceProvider/",
-        "behandlearbeidsytelsesak.v1.url" to "https://arena-q2.adeo.no/ail_ws/BehandleArbeidsytelseSak_v1"
+        "behandlearbeidsytelsesak.v1.url" to "https://arena-q1.adeo.no/ail_ws/BehandleArbeidOgAktivitetOppgave_v1"
     )
 )
 private val prodProperties = ConfigurationMap(
@@ -47,7 +47,7 @@ private val prodProperties = ConfigurationMap(
         "kafka.bootstrap.servers" to "a01apvl00145.adeo.no:8443,a01apvl00146.adeo.no:8443,a01apvl00147.adeo.no:8443,a01apvl00148.adeo.no:8443,a01apvl00149.adeo.no:8443,a01apvl00150.adeo.no:8443",
         "application.profile" to Profile.PROD.toString(),
         "securitytokenservice.url" to "https://sts.adeo.no/SecurityTokenServiceProvider//",
-        "behandlearbeidsytelsesak.v1.url" to "https://arena.adeo.no/ail_ws/BehandleArbeidsytelseSak_v1"
+        "behandlearbeidsytelsesak.v1.url" to "https://arena.adeo.no/ail_ws/BehandleArbeidOgAktivitetOppgave_v1"
     )
 )
 
