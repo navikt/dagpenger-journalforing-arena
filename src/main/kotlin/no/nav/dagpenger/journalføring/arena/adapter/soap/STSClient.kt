@@ -1,4 +1,4 @@
-package no.nav.dagpenger.journalføring.arena.sts
+package no.nav.dagpenger.journalføring.arena.adapter.soap
 
 import org.apache.cxf.Bus
 import org.apache.cxf.BusFactory

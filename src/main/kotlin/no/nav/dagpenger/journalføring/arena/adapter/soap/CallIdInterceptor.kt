@@ -1,4 +1,4 @@
-package no.nav.dagpenger.journalføring.arena
+package no.nav.dagpenger.journalføring.arena.adapter.soap
 
 import org.apache.cxf.binding.soap.SoapHeader
 import org.apache.cxf.binding.soap.SoapMessage
