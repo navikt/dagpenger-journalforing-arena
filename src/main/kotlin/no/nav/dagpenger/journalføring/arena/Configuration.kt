@@ -5,6 +5,7 @@ import com.natpryce.konfig.ConfigurationMap
 import com.natpryce.konfig.ConfigurationProperties
 import com.natpryce.konfig.EnvironmentVariables
 import com.natpryce.konfig.Key
+import com.natpryce.konfig.booleanType
 import com.natpryce.konfig.intType
 import com.natpryce.konfig.overriding
 import com.natpryce.konfig.stringType
@@ -16,11 +17,18 @@ import no.nav.dagpenger.streams.Topic
 import org.apache.kafka.common.serialization.Serdes
 import java.io.File
 
+
+private val defaultProperties = ConfigurationMap(
+    mapOf(
+        "application.httpPort" to 8080.toString(),
+        "allow.insecure.soap.requests" to false.toString()
+    )
+)
+
 private val localProperties = ConfigurationMap(
     mapOf(
         "kafka.bootstrap.servers" to "localhost:9092",
         "application.profile" to Profile.LOCAL.toString(),
-        "application.httpPort" to "8080",
         "srvdagpenger.journalforing.arena.username" to "user",
         "srvdagpenger.journalforing.arena.password" to "password",
         "securitytokenservice.url" to "https://localhost/SecurityTokenServiceProvider/",
@@ -31,7 +39,6 @@ private val devProperties = ConfigurationMap(
     mapOf(
         "kafka.bootstrap.servers" to "b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443",
         "application.profile" to Profile.DEV.toString(),
-        "application.httpPort" to "8080",
         "securitytokenservice.url" to "https://sts-q2.test.local/SecurityTokenServiceProvider/",
         "behandlearbeidsytelsesak.v1.url" to "https://arena-q2.adeo.no/ail_ws/BehandleArbeidsytelseSak_v1"
     )
@@ -40,7 +47,6 @@ private val prodProperties = ConfigurationMap(
     mapOf(
         "kafka.bootstrap.servers" to "a01apvl00145.adeo.no:8443,a01apvl00146.adeo.no:8443,a01apvl00147.adeo.no:8443,a01apvl00148.adeo.no:8443,a01apvl00149.adeo.no:8443,a01apvl00150.adeo.no:8443",
         "application.profile" to Profile.PROD.toString(),
-        "application.httpPort" to "8080",
         "securitytokenservice.url" to "https://sts.adeo.no/SecurityTokenServiceProvider//",
         "behandlearbeidsytelsesak.v1.url" to "https://arena.adeo.no/ail_ws/BehandleArbeidsytelseSak_v1"
     )
@@ -51,10 +57,10 @@ private val defaultConfiguration =
 
 fun config(): Configuration {
     return when (System.getenv("NAIS_CLUSTER_NAME") ?: System.getProperty("NAIS_CLUSTER_NAME")) {
-        "dev-fss" -> defaultConfiguration overriding devProperties
-        "prod-fss" -> defaultConfiguration overriding prodProperties
+        "dev-fss" -> defaultConfiguration overriding devProperties overriding defaultProperties
+        "prod-fss" -> defaultConfiguration overriding prodProperties overriding defaultProperties
         else -> {
-            defaultConfiguration overriding localProperties
+            defaultConfiguration overriding localProperties overriding defaultProperties
         }
     }
 }
@@ -83,7 +89,8 @@ data class Configuration(
     data class SoapSTSClient(
         val endpoint: String = config()[Key("securitytokenservice.url", stringType)],
         val username: String = config()[Key("srvdagpenger.journalforing.arena.username", stringType)],
-        val password: String = config()[Key("srvdagpenger.journalforing.arena.username", stringType)]
+        val password: String = config()[Key("srvdagpenger.journalforing.arena.username", stringType)],
+        val allowInsecureSoapRequests: Boolean = config()[Key("allow.insecure.soap.requests", booleanType)]
     )
 
     data class BehandleArbeidsytelseSak(
