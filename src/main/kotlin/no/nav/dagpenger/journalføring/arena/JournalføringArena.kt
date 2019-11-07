@@ -21,7 +21,7 @@ internal object PacketKeys {
     const val AKTØR_ID: String = "aktørId"
     const val BEHANDLENDE_ENHETER: String = "behandlendeEnheter"
     const val NATURLIG_IDENT: String = "naturligIdent"
-    const val ARENA_SAK_RESULTAT: String = "arenaSakResultat"
+    const val ARENA_SAK_RESULTAT: String = "arenaSakId"
 }
 
 class JournalføringArena(private val configuration: Configuration, val arenaOppgaveClient: ArenaOppgaveClient) :
@@ -78,7 +78,7 @@ fun main(args: Array<String>) {
         } else {
             soapStsClient.configureFor(behandleArbeidsytelseSak)
         }
-        JournalføringArena(configuration, DummyArenaOppgaveClient())
+        JournalføringArena(configuration, arenaOppgaveClient)
     } else {
         JournalføringArena(configuration, DummyArenaOppgaveClient())
     }

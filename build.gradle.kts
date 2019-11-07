@@ -67,6 +67,8 @@ dependencies {
     implementation(Log4j2.Logstash.logstashLayout)
     implementation(Kotlin.Logging.kotlinLogging)
 
+    implementation(Ulid.ulid)
+
     implementation(Kafka.clients)
     implementation(Kafka.streams)
     implementation(Kafka.Confluent.avroStreamSerdes)
