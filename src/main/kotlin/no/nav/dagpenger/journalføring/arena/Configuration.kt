@@ -93,7 +93,7 @@ data class Configuration(
     data class SoapSTSClient(
         val endpoint: String = config()[Key("securitytokenservice.url", stringType)],
         val username: String = config()[Key("srvdagpenger.journalforing.arena.username", stringType)],
-        val password: String = config()[Key("srvdagpenger.journalforing.arena.username", stringType)],
+        val password: String = config()[Key("srvdagpenger.journalforing.arena.password", stringType)],
         val allowInsecureSoapRequests: Boolean = config()[Key("allow.insecure.soap.requests", booleanType)]
     )
 
