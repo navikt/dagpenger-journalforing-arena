@@ -21,6 +21,7 @@ apply {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
     jcenter()
     maven("http://packages.confluent.io/maven/")
@@ -89,6 +90,7 @@ dependencies {
     implementation("com.sun.xml.ws:jaxws-tools:2.3.0.2")
 
     implementation(tjenestespesifikasjon("behandleArbeidOgAktivitetOppgave-v1-tjenestespesifikasjon"))
+    implementation("no.nav.tjenestespesifikasjoner:arenaSakVedtakService:0-SNAPSHOT")
 
     implementation("org.apache.cxf:cxf-rt-features-logging:$cxfVersion")
     implementation("org.apache.cxf:cxf-rt-frontend-jaxws:$cxfVersion")

@@ -3,7 +3,6 @@ package no.nav.dagpenger.journalføring.arena.adapter.soap.arena
 import io.kotlintest.shouldBe
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.dagpenger.journalføring.arena.adapter.soap.arena.SoapArenaOppgaveClient
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BehandleArbeidOgAktivitetOppgaveV1
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.meldinger.WSBestillOppgaveResponse
 import org.junit.jupiter.api.Test

@@ -1,5 +1,6 @@
 package no.nav.dagpenger.journalføring.arena.adapter.soap
 
+import no.nav.arena.services.sakvedtakservice.SakVedtakPortType
 import no.nav.cxf.metrics.MetricFeature
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BehandleArbeidOgAktivitetOppgaveV1
 import org.apache.cxf.ext.logging.LoggingFeature
@@ -8,6 +9,19 @@ import org.apache.cxf.ws.addressing.WSAddressingFeature
 import javax.xml.namespace.QName
 
 object SoapPort {
+
+
+    fun ArenaSakVedtakService(serviceUrl: String): SakVedtakPortType {
+        return createServicePort(
+            serviceUrl = serviceUrl,
+            serviceClazz = SakVedtakPortType::class.java,
+            wsdl = "wsdl/arenaSakVedtakService.wsdl",
+            namespace = "http://arena.nav.no/services/sakvedtakservice",
+            svcName = "ArenaSakVedtakService",
+            portName = "ArenaSakVedtakServicePort"
+        )
+
+    }
 
     fun BehandleArbeidOgAktivitetOppgaveV1(serviceUrl: String): BehandleArbeidOgAktivitetOppgaveV1 {
 
