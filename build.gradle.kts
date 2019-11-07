@@ -90,7 +90,6 @@ dependencies {
     implementation("com.sun.xml.ws:jaxws-tools:2.3.0.2")
 
     implementation(tjenestespesifikasjon("behandleArbeidOgAktivitetOppgave-v1-tjenestespesifikasjon"))
-    implementation("no.nav.tjenestespesifikasjoner:arenaSakVedtakService:0-SNAPSHOT")
 
     implementation("org.apache.cxf:cxf-rt-features-logging:$cxfVersion")
     implementation("org.apache.cxf:cxf-rt-frontend-jaxws:$cxfVersion")
@@ -113,6 +112,35 @@ spotless {
     }
 }
 
+java {
+    val mainJavaSourceSet: SourceDirectorySet = sourceSets.getByName("main").java
+    mainJavaSourceSet.srcDir("$projectDir/build/generated-sources")
+}
+
+val wsdlDir = "$projectDir/src/main/resources/wsdl"
+val wsdlsToGenerate = listOf(
+    "$wsdlDir/hentsak/arenaSakVedtakService.wsdl")
+
+val generatedDir = "$projectDir/build/generated-sources"
+
+tasks {
+    register("wsimport") {
+        inputs.files(wsdlsToGenerate)
+        outputs.dir(generatedDir)
+
+        group = "other"
+        doLast {
+            mkdir(generatedDir)
+            wsdlsToGenerate.forEach {
+                ant.withGroovyBuilder {
+                    "taskdef"("name" to "wsimport", "classname" to "com.sun.tools.ws.ant.WsImport", "classpath" to sourceSets.getAt("main").runtimeClasspath.asPath)
+                    "wsimport"("wsdl" to it, "sourcedestdir" to generatedDir, "xnocompile" to true) {}
+                }
+            }
+        }
+    }
+}
+
 tasks.withType<ShadowJar> {
     mergeServiceFiles()
 
@@ -123,8 +151,10 @@ tasks.withType<ShadowJar> {
         include("bus-extensions.txt")
     }
 }
+
 tasks.named("compileKotlin") {
     dependsOn("spotlessCheck")
+    dependsOn("wsimport")
 }
 
 tasks.withType<Test> {
