@@ -39,7 +39,6 @@ class SoapArenaOppgaveClient(val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1) 
         } catch (e: Exception) {
             throw ArenaOppgaveClientException(e)
             // BestillOppgaveSikkerhetsbegrensning, BestillOppgaveOrganisasjonIkkeFunnet, BestillOppgavePersonErInaktiv, BestillOppgaveSakIkkeOpprettet, BestillOppgavePersonIkkeFunnet, BestillOppgaveUgyldigInput;
-
         }
 
         return response.arenaSakId
