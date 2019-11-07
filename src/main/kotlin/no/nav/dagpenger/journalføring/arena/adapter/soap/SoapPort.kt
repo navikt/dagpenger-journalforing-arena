@@ -14,7 +14,7 @@ object SoapPort {
         return createServicePort(
             serviceUrl = serviceUrl,
             serviceClazz = SakVedtakService::class.java,
-            wsdl = "wsdl/arenaSakVedtakService.wsdl",
+            wsdl = "wsdl/hentsak/arenaSakVedtakService.wsdl",
             namespace = "http://arena.nav.no/services/sakvedtakservice",
             svcName = "ArenaSakVedtakService",
             portName = "ArenaSakVedtakServicePort"
