@@ -31,7 +31,8 @@ private val localProperties = ConfigurationMap(
         "srvdagpenger.journalforing.arena.username" to "user",
         "srvdagpenger.journalforing.arena.password" to "password",
         "securitytokenservice.url" to "https://localhost/SecurityTokenServiceProvider/",
-        "behandlearbeidsytelsesak.v1.url" to "https://localhost/ail_ws/BehandleArbeidOgAktivitetOppgave_v1"
+        "behandlearbeidsytelsesak.v1.url" to "https://localhost/ail_ws/BehandleArbeidOgAktivitetOppgave_v1",
+        "arenasakvedtakservice.url" to "https://localhost/arenasakvedtakservice"
     )
 )
 private val devProperties = ConfigurationMap(
@@ -39,7 +40,8 @@ private val devProperties = ConfigurationMap(
         "kafka.bootstrap.servers" to "b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443",
         "application.profile" to Profile.DEV.toString(),
         "securitytokenservice.url" to "https://sts-q2.test.local/SecurityTokenServiceProvider/",
-        "behandlearbeidsytelsesak.v1.url" to "https://arena-q1.adeo.no/ail_ws/BehandleArbeidOgAktivitetOppgave_v1"
+        "behandlearbeidsytelsesak.v1.url" to "https://arena-q1.adeo.no/ail_ws/BehandleArbeidOgAktivitetOppgave_v1",
+        "arenasakvedtakservice.url" to "https://arena-q1.adeo.no/arena_ws/services/ArenaSakVedtakService"
     )
 )
 private val prodProperties = ConfigurationMap(
@@ -47,7 +49,8 @@ private val prodProperties = ConfigurationMap(
         "kafka.bootstrap.servers" to "a01apvl00145.adeo.no:8443,a01apvl00146.adeo.no:8443,a01apvl00147.adeo.no:8443,a01apvl00148.adeo.no:8443,a01apvl00149.adeo.no:8443,a01apvl00150.adeo.no:8443",
         "application.profile" to Profile.PROD.toString(),
         "securitytokenservice.url" to "https://sts.adeo.no/SecurityTokenServiceProvider//",
-        "behandlearbeidsytelsesak.v1.url" to "https://arena.adeo.no/ail_ws/BehandleArbeidOgAktivitetOppgave_v1"
+        "behandlearbeidsytelsesak.v1.url" to "https://arena.adeo.no/ail_ws/BehandleArbeidOgAktivitetOppgave_v1",
+        "arenasakvedtakservice.url" to "https://arena.adeo.no/arena_ws/services/ArenaSakVedtakService"
     )
 )
 
@@ -68,8 +71,10 @@ data class Configuration(
     val kafka: Kafka = Kafka(),
     val application: Application = Application(),
     val soapSTSClient: SoapSTSClient = SoapSTSClient(),
-    val behandleArbeidsytelseSak: BehandleArbeidsytelseSak = BehandleArbeidsytelseSak()
+    val behandleArbeidsytelseSak: BehandleArbeidsytelseSakConfig = BehandleArbeidsytelseSakConfig(),
+    val arenaSakVedtakService: ArenaSakVedtakServiceConfig = ArenaSakVedtakServiceConfig()
 ) {
+
     data class Kafka(
         val dagpengerJournalpostTopic: Topic<String, Packet> = Topic(
             "privat-dagpenger-journalpost-mottatt-v1",
@@ -92,8 +97,12 @@ data class Configuration(
         val allowInsecureSoapRequests: Boolean = config()[Key("allow.insecure.soap.requests", booleanType)]
     )
 
-    data class BehandleArbeidsytelseSak(
+    data class BehandleArbeidsytelseSakConfig(
         val endpoint: String = config()[Key("behandlearbeidsytelsesak.v1.url", stringType)]
+    )
+
+    data class ArenaSakVedtakServiceConfig(
+        val endpoint: String = config()[Key("arenasakvedtakservice.url", stringType)]
     )
 
     data class Application(

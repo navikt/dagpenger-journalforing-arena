@@ -21,6 +21,7 @@ apply {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
     jcenter()
     maven("http://packages.confluent.io/maven/")
@@ -111,6 +112,35 @@ spotless {
     }
 }
 
+java {
+    val mainJavaSourceSet: SourceDirectorySet = sourceSets.getByName("main").java
+    mainJavaSourceSet.srcDir("$projectDir/build/generated-sources")
+}
+
+val wsdlDir = "$projectDir/src/main/resources/wsdl"
+val wsdlsToGenerate = listOf(
+    "$wsdlDir/hentsak/arenaSakVedtakService.wsdl")
+
+val generatedDir = "$projectDir/build/generated-sources"
+
+tasks {
+    register("wsimport") {
+        inputs.files(wsdlsToGenerate)
+        outputs.dir(generatedDir)
+
+        group = "other"
+        doLast {
+            mkdir(generatedDir)
+            wsdlsToGenerate.forEach {
+                ant.withGroovyBuilder {
+                    "taskdef"("name" to "wsimport", "classname" to "com.sun.tools.ws.ant.WsImport", "classpath" to sourceSets.getAt("main").runtimeClasspath.asPath)
+                    "wsimport"("wsdl" to it, "sourcedestdir" to generatedDir, "xnocompile" to true) {}
+                }
+            }
+        }
+    }
+}
+
 tasks.withType<ShadowJar> {
     mergeServiceFiles()
 
@@ -121,8 +151,10 @@ tasks.withType<ShadowJar> {
         include("bus-extensions.txt")
     }
 }
+
 tasks.named("compileKotlin") {
     dependsOn("spotlessCheck")
+    dependsOn("wsimport")
 }
 
 tasks.withType<Test> {
