@@ -2,10 +2,10 @@ package no.nav.dagpenger.journalføring.arena
 
 import mu.KotlinLogging
 import no.nav.dagpenger.events.Packet
-import no.nav.dagpenger.journalføring.arena.adapter.ArenaOppgaveClient
+import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
 import no.nav.dagpenger.journalføring.arena.adapter.soap.STS_SAML_POLICY_NO_TRANSPORT_BINDING
-import no.nav.dagpenger.journalføring.arena.adapter.soap.arena.SoapArenaOppgaveClient
 import no.nav.dagpenger.journalføring.arena.adapter.soap.SoapPort
+import no.nav.dagpenger.journalføring.arena.adapter.soap.arena.SoapArenaClient
 import no.nav.dagpenger.journalføring.arena.adapter.soap.configureFor
 import no.nav.dagpenger.journalføring.arena.adapter.soap.stsClient
 import no.nav.dagpenger.streams.River
@@ -24,7 +24,7 @@ internal object PacketKeys {
     const val ARENA_SAK_RESULTAT: String = "arenaSakId"
 }
 
-class JournalføringArena(private val configuration: Configuration, val arenaOppgaveClient: ArenaOppgaveClient) :
+class JournalføringArena(private val configuration: Configuration, val arenaClient: ArenaClient) :
     River(configuration.kafka.dagpengerJournalpostTopic) {
 
     override val SERVICE_APP_ID = "dp-journalforing-arena"
@@ -45,8 +45,20 @@ class JournalføringArena(private val configuration: Configuration, val arenaOpp
 
         packet.putValue(
             PacketKeys.ARENA_SAK_RESULTAT,
-            arenaOppgaveClient.bestillOppgave(naturligIdent = naturligIdent, behandlendeEnhetId = enhetId)
+            "1234"
         )
+        try {
+            val saker = arenaClient.hentArenaSaker(naturligIdent)
+            saker.forEach {
+                logger.info { "Tilhører sak: ${it.saksId}" }
+            }
+
+            if (saker.isEmpty()) {
+                logger.info { "Har ingen saker" }
+            }
+        } catch (exception: Exception) {
+            logger.error(exception) { "Failed to get arena-saker" }
+        }
         return packet
     }
 
@@ -62,32 +74,28 @@ class JournalføringArena(private val configuration: Configuration, val arenaOpp
 fun main(args: Array<String>) {
     val configuration = Configuration()
 
-    val service = if (configuration.application.profile != Profile.PROD) {
-        val behandleArbeidsytelseSak =
-            SoapPort.BehandleArbeidOgAktivitetOppgaveV1(configuration.behandleArbeidsytelseSak.endpoint)
+    val behandleArbeidsytelseSak =
+        SoapPort.BehandleArbeidOgAktivitetOppgaveV1(configuration.behandleArbeidsytelseSak.endpoint)
 
-        val arenaOppgaveClient: ArenaOppgaveClient =
-            SoapArenaOppgaveClient(behandleArbeidsytelseSak)
+    val arenaSakVedtakService: SakVedtakService =
+        SoapPort.ArenaSakVedtakService(configuration.arenaSakVedtakService.endpoint)
 
-        val soapStsClient = stsClient(
-            stsUrl = configuration.soapSTSClient.endpoint,
-            credentials = configuration.soapSTSClient.username to configuration.soapSTSClient.password
-        )
-        if (configuration.soapSTSClient.allowInsecureSoapRequests) {
-            soapStsClient.configureFor(behandleArbeidsytelseSak, STS_SAML_POLICY_NO_TRANSPORT_BINDING)
-        } else {
-            soapStsClient.configureFor(behandleArbeidsytelseSak)
-        }
-        JournalføringArena(configuration, arenaOppgaveClient)
+    val arenaOppgaveClient: ArenaClient =
+        SoapArenaClient(behandleArbeidsytelseSak, arenaSakVedtakService)
+
+    val soapStsClient = stsClient(
+        stsUrl = configuration.soapSTSClient.endpoint,
+        credentials = configuration.soapSTSClient.username to configuration.soapSTSClient.password
+    )
+    if (configuration.soapSTSClient.allowInsecureSoapRequests) {
+        soapStsClient.configureFor(behandleArbeidsytelseSak, STS_SAML_POLICY_NO_TRANSPORT_BINDING)
+        soapStsClient.configureFor(arenaSakVedtakService, STS_SAML_POLICY_NO_TRANSPORT_BINDING)
     } else {
-        JournalføringArena(configuration, DummyArenaOppgaveClient())
+        soapStsClient.configureFor(behandleArbeidsytelseSak)
+        soapStsClient.configureFor(arenaSakVedtakService)
     }
+
+    val service = JournalføringArena(configuration, arenaOppgaveClient)
 
     service.start()
-}
-
-class DummyArenaOppgaveClient : ArenaOppgaveClient {
-    override fun bestillOppgave(naturligIdent: String, behandlendeEnhetId: String): String {
-        return "DUMMY_SAK!"
-    }
 }
