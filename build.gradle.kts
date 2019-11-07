@@ -34,11 +34,6 @@ application {
     mainClassName = "no.nav.dagpenger.journalføring.arena.JournalføringArenaKt"
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-}
-
 val cxfVersion = "3.3.1"
 val tjenestespesifikasjonerVersion = "1.2019.09.25-00.21-49b69f0625e0"
 
