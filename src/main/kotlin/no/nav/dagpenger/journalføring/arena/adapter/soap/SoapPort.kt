@@ -3,7 +3,6 @@ package no.nav.dagpenger.journalføring.arena.adapter.soap
 import no.nav.cxf.metrics.MetricFeature
 import no.nav.dagpenger.journalføring.arena.SakVedtakService
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BehandleArbeidOgAktivitetOppgaveV1
-import org.apache.cxf.ext.logging.LoggingFeature
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean
 import org.apache.cxf.ws.addressing.WSAddressingFeature
 import javax.xml.namespace.QName
@@ -47,7 +46,7 @@ object SoapPort {
             serviceName = QName(namespace, svcName)
             endpointName = QName(namespace, portName)
             serviceClass = serviceClazz
-            features = listOf(WSAddressingFeature(), LoggingFeature(), MetricFeature())
+            features = listOf(WSAddressingFeature(), MetricFeature())
             outInterceptors.add(CallIdInterceptor())
         }
 
