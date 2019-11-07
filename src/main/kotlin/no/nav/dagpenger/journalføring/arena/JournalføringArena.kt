@@ -47,18 +47,18 @@ class JournalføringArena(private val configuration: Configuration, val arenaCli
             PacketKeys.ARENA_SAK_RESULTAT,
             "1234"
         )
-        try {
-            val saker = arenaClient.hentArenaSaker(naturligIdent)
-            saker.forEach {
-                logger.info { "Tilhører sak: ${it.saksId}" }
-            }
-
-            if (saker.isEmpty()) {
-                logger.info { "Har ingen saker" }
-            }
-        } catch (exception: Exception) {
-            logger.error(exception) { "Failed to get arena-saker" }
-        }
+        // try {
+        //     val saker = arenaClient.hentArenaSaker(naturligIdent)
+        //     saker.forEach {
+        //         logger.info { "Tilhører sak: ${it.saksId}" }
+        //     }
+        //
+        //     if (saker.isEmpty()) {
+        //         logger.info { "Har ingen saker" }
+        //     }
+        // } catch (exception: Exception) {
+        //     logger.error(exception) { "Failed to get arena-saker" }
+        // }
         return packet
     }
 
@@ -80,7 +80,7 @@ fun main(args: Array<String>) {
     val arenaSakVedtakService: SakVedtakService =
         SoapPort.ArenaSakVedtakService(configuration.arenaSakVedtakService.endpoint)
 
-    val arenaOppgaveClient: ArenaClient =
+    val arenaClient: ArenaClient =
         SoapArenaClient(behandleArbeidsytelseSak, arenaSakVedtakService)
 
     val soapStsClient = stsClient(
@@ -95,7 +95,7 @@ fun main(args: Array<String>) {
         soapStsClient.configureFor(arenaSakVedtakService)
     }
 
-    val service = JournalføringArena(configuration, arenaOppgaveClient)
+    val service = JournalføringArena(configuration, arenaClient)
 
     service.start()
 }
