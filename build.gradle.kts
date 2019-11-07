@@ -21,7 +21,7 @@ apply {
 }
 
 repositories {
-    mavenCentral    ()
+    mavenCentral()
     jcenter()
     maven("http://packages.confluent.io/maven/")
     maven("https://jitpack.io")
