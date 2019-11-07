@@ -15,15 +15,14 @@ import java.time.ZonedDateTime
 import java.util.GregorianCalendar
 import javax.xml.datatype.DatatypeFactory
 
-class SoapArenaOppgaveClient(val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1) :
-    ArenaOppgaveClient {
+class SoapArenaOppgaveClient(val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1) : ArenaOppgaveClient {
     override fun bestillOppgave(naturligIdent: String, behandlendeEnhetId: String): String {
 
         val soapRequest = WSBestillOppgaveRequest()
 
         soapRequest.oppgavetype = WSOppgavetype().apply { value = "STARTVEDTAK" }
 
-        val dateTime = ZonedDateTime.now().toInstant().atZone(ZoneId.of("Europe/Oslo"))
+        val today = ZonedDateTime.now().toInstant().atZone(ZoneId.of("Europe/Oslo"))
 
         soapRequest.oppgave = WSOppgave().apply {
             tema = WSTema().apply { value = "DAG" }
@@ -32,13 +31,15 @@ class SoapArenaOppgaveClient(val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1) 
             prioritet = WSPrioritet().apply {
                 this.kodeRef = "HOY"
             }
-            frist = DatatypeFactory.newInstance().newXMLGregorianCalendar(GregorianCalendar.from(dateTime))
+            frist = DatatypeFactory.newInstance().newXMLGregorianCalendar(GregorianCalendar.from(today))
         }
 
         val response: WSBestillOppgaveResponse = try {
             oppgaveV1.bestillOppgave(soapRequest)
         } catch (e: Exception) {
             throw ArenaOppgaveClientException(e)
+            // BestillOppgaveSikkerhetsbegrensning, BestillOppgaveOrganisasjonIkkeFunnet, BestillOppgavePersonErInaktiv, BestillOppgaveSakIkkeOpprettet, BestillOppgavePersonIkkeFunnet, BestillOppgaveUgyldigInput;
+
         }
 
         return response.arenaSakId
