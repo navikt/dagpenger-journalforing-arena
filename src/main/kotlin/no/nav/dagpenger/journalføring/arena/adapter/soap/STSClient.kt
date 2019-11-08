@@ -25,7 +25,7 @@ fun stsClient(stsUrl: String, credentials: Pair<String, String>): STSClient {
         isAllowRenewing = false
 
         location = stsUrl
-        features = listOf(LoggingFeature())
+        outInterceptors = listOf(CallIdInterceptor())
 
         properties = mapOf(
             SecurityConstants.USERNAME to credentials.first,
