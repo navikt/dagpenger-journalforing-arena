@@ -5,7 +5,6 @@ import no.finn.unleash.DefaultUnleash
 import no.finn.unleash.Unleash
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
-import no.nav.dagpenger.journalføring.arena.adapter.soap.STS_CLIENT_AUTHENTICATION_POLICY
 import no.nav.dagpenger.journalføring.arena.adapter.soap.STS_SAML_POLICY_NO_TRANSPORT_BINDING
 import no.nav.dagpenger.journalføring.arena.adapter.soap.SoapPort
 import no.nav.dagpenger.journalføring.arena.adapter.soap.arena.SoapArenaClient
@@ -87,8 +86,8 @@ fun main(args: Array<String>) {
     val behandleArbeidsytelseSak =
         SoapPort.behandleArbeidOgAktivitetOppgaveV1(configuration.behandleArbeidsytelseSak.endpoint)
 
-    val arenaSakVedtakService: SakVedtakService =
-        SoapPort.sakVedtakService(configuration.arenaSakVedtakService.endpoint)
+    // val arenaSakVedtakService: SakVedtakService =
+    //     SoapPort.sakVedtakService(configuration.arenaSakVedtakService.endpoint)
 
     val arenaClient: ArenaClient =
         SoapArenaClient(behandleArbeidsytelseSak, arbeidOgAktivitet)
@@ -100,11 +99,11 @@ fun main(args: Array<String>) {
     if (configuration.soapSTSClient.allowInsecureSoapRequests) {
         soapStsClient.configureFor(behandleArbeidsytelseSak, STS_SAML_POLICY_NO_TRANSPORT_BINDING)
         // soapStsClient.configureFor(arenaSakVedtakService, STS_SAML_POLICY_NO_TRANSPORT_BINDING)
-        // soapStsClient.configureFor(arbeidOgAktivitet, STS_SAML_POLICY_NO_TRANSPORT_BINDING)
+        soapStsClient.configureFor(arbeidOgAktivitet, STS_SAML_POLICY_NO_TRANSPORT_BINDING)
     } else {
         soapStsClient.configureFor(behandleArbeidsytelseSak)
-        soapStsClient.configureFor(arenaSakVedtakService, STS_CLIENT_AUTHENTICATION_POLICY)
-        // soapStsClient.configureFor(arbeidOgAktivitet)
+        // soapStsClient.configureFor(arenaSakVedtakService)
+        soapStsClient.configureFor(arbeidOgAktivitet)
     }
 
     val service = JournalføringArena(configuration, arenaClient)
