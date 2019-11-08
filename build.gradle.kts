@@ -43,6 +43,8 @@ dependencies {
     implementation("com.github.navikt:dagpenger-streams:2019.10.18-12.06.fbbb66cd150b")
     implementation(Dagpenger.Events)
 
+    implementation("no.finn.unleash:unleash-client-java:3.2.9")
+
     implementation(Dagpenger.Biblioteker.stsKlient)
 
     implementation(Prometheus.common)

@@ -9,7 +9,7 @@ import javax.xml.namespace.QName
 
 object SoapPort {
 
-    fun ArenaSakVedtakService(serviceUrl: String): SakVedtakService {
+    fun sakVedtakService(serviceUrl: String): SakVedtakService {
         return createServicePort(
             serviceUrl = serviceUrl,
             serviceClazz = SakVedtakService::class.java,
@@ -20,7 +20,7 @@ object SoapPort {
         )
     }
 
-    fun BehandleArbeidOgAktivitetOppgaveV1(serviceUrl: String): BehandleArbeidOgAktivitetOppgaveV1 {
+    fun behandleArbeidOgAktivitetOppgaveV1(serviceUrl: String): BehandleArbeidOgAktivitetOppgaveV1 {
 
         return createServicePort(
             serviceUrl,
