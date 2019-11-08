@@ -3,6 +3,7 @@ package no.nav.dagpenger.journalføring.arena.adapter.soap
 import no.nav.cxf.metrics.MetricFeature
 import no.nav.dagpenger.journalføring.arena.SakVedtakService
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BehandleArbeidOgAktivitetOppgaveV1
+import no.nav.virksomhet.tjenester.sak.arbeidogaktivitet.v1.ArbeidOgAktivitet
 import org.apache.cxf.ext.logging.LoggingFeature
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean
 import org.apache.cxf.ws.addressing.WSAddressingFeature
@@ -30,6 +31,17 @@ object SoapPort {
             namespace = "http://nav.no/tjeneste/virksomhet/behandleArbeidOgAktivitetOppgave/v1/Binding",
             svcName = "BehandleArbeidOgAktivitetOppgave_v1",
             portName = "BehandleArbeidOgAktivitetOppgave_v1Port"
+        )
+    }
+
+    fun arenaArbeidOgAktivitet(serviceUrl: String): ArbeidOgAktivitet {
+        return createServicePort(
+            serviceUrl,
+            serviceClazz = ArbeidOgAktivitet::class.java,
+            wsdl = "wsdl/nav-tjeneste-arbeidOgAktivitet_ArbeidOgAktivitetWSEXP.wsdl",
+            namespace = "http://nav.no/virksomhet/tjenester/sak/arbeidogaktivitet/v1",
+            svcName = "ArbeidOgAktivitetWSEXP_ArbeidOgAktivitetHttpService",
+            portName = "ArbeidOgAktivitetWSEXP_ArbeidOgAktivitetHttpPort"
         )
     }
 

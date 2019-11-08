@@ -81,14 +81,16 @@ class JournalføringArena(private val configuration: Configuration, val arenaCli
 fun main(args: Array<String>) {
     val configuration = Configuration()
 
+    val arbeidOgAktivitet = SoapPort.arenaArbeidOgAktivitet(configuration.arenaArbeidOgAktivitet.endpoint)
+
     val behandleArbeidsytelseSak =
         SoapPort.behandleArbeidOgAktivitetOppgaveV1(configuration.behandleArbeidsytelseSak.endpoint)
 
-    val arenaSakVedtakService: SakVedtakService =
-        SoapPort.sakVedtakService(configuration.arenaSakVedtakService.endpoint)
+    // val arenaSakVedtakService: SakVedtakService =
+    //     SoapPort.sakVedtakService(configuration.arenaSakVedtakService.endpoint)
 
     val arenaClient: ArenaClient =
-        SoapArenaClient(behandleArbeidsytelseSak, arenaSakVedtakService)
+        SoapArenaClient(behandleArbeidsytelseSak, arbeidOgAktivitet)
 
     val soapStsClient = stsClient(
         stsUrl = configuration.soapSTSClient.endpoint,
@@ -96,10 +98,12 @@ fun main(args: Array<String>) {
     )
     if (configuration.soapSTSClient.allowInsecureSoapRequests) {
         soapStsClient.configureFor(behandleArbeidsytelseSak, STS_SAML_POLICY_NO_TRANSPORT_BINDING)
-        soapStsClient.configureFor(arenaSakVedtakService, STS_SAML_POLICY_NO_TRANSPORT_BINDING)
+        // soapStsClient.configureFor(arenaSakVedtakService, STS_SAML_POLICY_NO_TRANSPORT_BINDING)
+        soapStsClient.configureFor(arbeidOgAktivitet, STS_SAML_POLICY_NO_TRANSPORT_BINDING)
     } else {
         soapStsClient.configureFor(behandleArbeidsytelseSak)
         // soapStsClient.configureFor(arenaSakVedtakService)
+        soapStsClient.configureFor(arbeidOgAktivitet)
     }
 
     val service = JournalføringArena(configuration, arenaClient)
