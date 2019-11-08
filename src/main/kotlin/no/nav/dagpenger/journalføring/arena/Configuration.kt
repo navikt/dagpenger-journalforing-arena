@@ -52,7 +52,7 @@ private val prodProperties = ConfigurationMap(
     mapOf(
         "kafka.bootstrap.servers" to "a01apvl00145.adeo.no:8443,a01apvl00146.adeo.no:8443,a01apvl00147.adeo.no:8443,a01apvl00148.adeo.no:8443,a01apvl00149.adeo.no:8443,a01apvl00150.adeo.no:8443",
         "application.profile" to Profile.PROD.toString(),
-        "securitytokenservice.url" to "https://sts.adeo.no/SecurityTokenServiceProvider//",
+        "securitytokenservice.url" to "https://sts.adeo.no/SecurityTokenServiceProvider/",
         "behandlearbeidsytelsesak.v1.url" to "https://arena.adeo.no/ail_ws/BehandleArbeidOgAktivitetOppgave_v1",
         "arenasakvedtakservice.url" to "https://arena.adeo.no/arena_ws/services/ArenaSakVedtakService"
     )
