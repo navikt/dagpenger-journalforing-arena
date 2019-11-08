@@ -39,7 +39,7 @@ object SoapPort {
             serviceUrl,
             serviceClazz = ArbeidOgAktivitet::class.java,
             wsdl = "wsdl/nav-tjeneste-arbeidOgAktivitet_ArbeidOgAktivitetWSEXP.wsdl",
-            namespace = "http://nav.no/virksomhet/tjenester/sak/arbeidogaktivitet/v1",
+            namespace = "http://nav.no/virksomhet/tjenester/sak/arbeidogaktivitet/v1/Binding",
             svcName = "ArbeidOgAktivitetWSEXP_ArbeidOgAktivitetHttpService",
             portName = "ArbeidOgAktivitetWSEXP_ArbeidOgAktivitetHttpPort"
         )
