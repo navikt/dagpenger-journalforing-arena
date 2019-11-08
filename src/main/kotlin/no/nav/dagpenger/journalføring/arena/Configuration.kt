@@ -9,6 +9,7 @@ import com.natpryce.konfig.booleanType
 import com.natpryce.konfig.intType
 import com.natpryce.konfig.overriding
 import com.natpryce.konfig.stringType
+import no.finn.unleash.util.UnleashConfig
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.streams.KafkaCredential
 import no.nav.dagpenger.streams.PacketDeserializer
@@ -16,11 +17,14 @@ import no.nav.dagpenger.streams.PacketSerializer
 import no.nav.dagpenger.streams.Topic
 import org.apache.kafka.common.serialization.Serdes
 import java.io.File
+import java.net.InetAddress
+import java.net.UnknownHostException
 
 private val defaultProperties = ConfigurationMap(
     mapOf(
         "application.httpPort" to 8080.toString(),
-        "allow.insecure.soap.requests" to false.toString()
+        "allow.insecure.soap.requests" to false.toString(),
+        "unleash.url" to "http://unleash.default.svc.nais.local/api/"
     )
 )
 
@@ -72,7 +76,12 @@ data class Configuration(
     val application: Application = Application(),
     val soapSTSClient: SoapSTSClient = SoapSTSClient(),
     val behandleArbeidsytelseSak: BehandleArbeidsytelseSakConfig = BehandleArbeidsytelseSakConfig(),
-    val arenaSakVedtakService: ArenaSakVedtakServiceConfig = ArenaSakVedtakServiceConfig()
+    val arenaSakVedtakService: ArenaSakVedtakServiceConfig = ArenaSakVedtakServiceConfig(),
+    val unleashConfig: UnleashConfig = UnleashConfig.builder()
+        .appName(config().getOrElse(Key("app.name", stringType), "dagpenger-journalforing-arena"))
+        .instanceId(getHostname())
+        .unleashAPI(config()[Key("unleash.url", stringType)])
+        .build()
 ) {
 
     data class Kafka(
@@ -111,6 +120,15 @@ data class Configuration(
         val password: String = config()[Key("srvdagpenger.journalforing.arena.password", stringType)],
         val httpPort: Int = config()[Key("application.httpPort", intType)]
     )
+}
+
+fun getHostname(): String {
+    return try {
+        val addr: InetAddress = InetAddress.getLocalHost()
+        addr.hostName
+    } catch (e: UnknownHostException) {
+        "unknown"
+    }
 }
 
 enum class Profile {
