@@ -23,7 +23,7 @@ internal object PacketKeys {
     const val AKTØR_ID: String = "aktørId"
     const val BEHANDLENDE_ENHETER: String = "behandlendeEnheter"
     const val NATURLIG_IDENT: String = "naturligIdent"
-    const val ARENA_SAK_RESULTAT: String = "arenaSakId"
+    const val ARENA_SAK_ID: String = "arenaSakId"
 }
 
 class JournalføringArena(private val configuration: Configuration, val arenaClient: ArenaClient) :
@@ -36,7 +36,7 @@ class JournalføringArena(private val configuration: Configuration, val arenaCli
 
     override fun filterPredicates(): List<Predicate<String, Packet>> {
         return listOf(
-            Predicate { _, packet -> !packet.hasField(PacketKeys.ARENA_SAK_RESULTAT) }
+            Predicate { _, packet -> !packet.hasField(PacketKeys.ARENA_SAK_ID) }
         )
     }
 
@@ -48,7 +48,7 @@ class JournalføringArena(private val configuration: Configuration, val arenaCli
                 .first().enhetId
 
         packet.putValue(
-            PacketKeys.ARENA_SAK_RESULTAT,
+            PacketKeys.ARENA_SAK_ID,
             "1234"
         )
         try {
@@ -99,7 +99,7 @@ fun main(args: Array<String>) {
         soapStsClient.configureFor(arenaSakVedtakService, STS_SAML_POLICY_NO_TRANSPORT_BINDING)
     } else {
         soapStsClient.configureFor(behandleArbeidsytelseSak)
-        soapStsClient.configureFor(arenaSakVedtakService)
+        // soapStsClient.configureFor(arenaSakVedtakService)
     }
 
     val service = JournalføringArena(configuration, arenaClient)
