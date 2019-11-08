@@ -1,6 +1,8 @@
 package no.nav.dagpenger.journalføring.arena
 
 import mu.KotlinLogging
+import no.finn.unleash.DefaultUnleash
+import no.finn.unleash.Unleash
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
 import no.nav.dagpenger.journalføring.arena.adapter.soap.STS_SAML_POLICY_NO_TRANSPORT_BINDING
@@ -30,6 +32,8 @@ class JournalføringArena(private val configuration: Configuration, val arenaCli
     override val SERVICE_APP_ID = "dp-journalforing-arena"
     override val HTTP_PORT: Int = configuration.application.httpPort
 
+    private val unleash: Unleash = DefaultUnleash(configuration.unleashConfig)
+
     override fun filterPredicates(): List<Predicate<String, Packet>> {
         return listOf(
             Predicate { _, packet -> !packet.hasField(PacketKeys.ARENA_SAK_RESULTAT) }
@@ -47,18 +51,21 @@ class JournalføringArena(private val configuration: Configuration, val arenaCli
             PacketKeys.ARENA_SAK_RESULTAT,
             "1234"
         )
-        // try {
-        //     val saker = arenaClient.hentArenaSaker(naturligIdent)
-        //     saker.forEach {
-        //         logger.info { "Tilhører sak: ${it.saksId}" }
-        //     }
-        //
-        //     if (saker.isEmpty()) {
-        //         logger.info { "Har ingen saker" }
-        //     }
-        // } catch (exception: Exception) {
-        //     logger.error(exception) { "Failed to get arena-saker" }
-        // }
+        try {
+            if (unleash.isEnabled("dp-arena.HentSaker${configuration.application.profile.name}")) {
+                val saker = arenaClient.hentArenaSaker(naturligIdent)
+                saker.forEach {
+                    logger.info { "Tilhører sak: ${it.saksId}" }
+                }
+
+                if (saker.isEmpty()) {
+                    logger.info { "Har ingen saker" }
+                }
+            }
+        } catch (exception: Exception) {
+            logger.error(exception) { "Failed to get arena-saker" }
+        }
+
         return packet
     }
 
@@ -75,10 +82,10 @@ fun main(args: Array<String>) {
     val configuration = Configuration()
 
     val behandleArbeidsytelseSak =
-        SoapPort.BehandleArbeidOgAktivitetOppgaveV1(configuration.behandleArbeidsytelseSak.endpoint)
+        SoapPort.behandleArbeidOgAktivitetOppgaveV1(configuration.behandleArbeidsytelseSak.endpoint)
 
     val arenaSakVedtakService: SakVedtakService =
-        SoapPort.ArenaSakVedtakService(configuration.arenaSakVedtakService.endpoint)
+        SoapPort.sakVedtakService(configuration.arenaSakVedtakService.endpoint)
 
     val arenaClient: ArenaClient =
         SoapArenaClient(behandleArbeidsytelseSak, arenaSakVedtakService)
