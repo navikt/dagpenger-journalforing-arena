@@ -50,7 +50,7 @@ class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1,
 
     override fun hentArenaSaker(naturligIdent: String): List<SaksInfo> {
 
-        val resultat = Holder<SaksInfoListe>()
+        val resultat = Holder<SaksInfoListe>(SaksInfoListe())
         val bruker = Bruker().apply {
             this.brukerId = naturligIdent
             this.brukertypeKode = "PERSON"
