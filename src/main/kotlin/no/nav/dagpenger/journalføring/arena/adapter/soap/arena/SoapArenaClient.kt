@@ -54,7 +54,7 @@ class SoapArenaClient(
 
         // val resultat = Holder<SaksInfoListe>()
         val bruker = WSBruker().withBruker(naturligIdent).withBrukertypeKode("PERSON")
-        val request = WSHentSakListeRequest().withBruker(bruker)
+        val request = WSHentSakListeRequest().withBruker(bruker).withFagomradeKode("DAG")
 
         val resultat = arbeidOgAktivitet.hentSakListe(request)
         // arenaSakVedtakService.hentSaksInfoListeV2(

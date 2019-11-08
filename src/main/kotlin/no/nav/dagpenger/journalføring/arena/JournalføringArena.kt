@@ -55,7 +55,7 @@ class JournalføringArena(private val configuration: Configuration, val arenaCli
             if (unleash.isEnabled("dp-arena.HentSaker${configuration.application.profile.name}")) {
                 val saker = arenaClient.hentArenaSaker(naturligIdent)
                 saker.forEach {
-                    logger.info { "Tilhører sak: ${it.saksId}" }
+                    logger.info { "Tilhører sak: id: ${it.saksId}, tema: ${it.fagomradeKode}" }
                 }
 
                 if (saker.isEmpty()) {
