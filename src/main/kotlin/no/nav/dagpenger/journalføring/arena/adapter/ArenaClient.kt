@@ -1,8 +1,8 @@
 package no.nav.dagpenger.journalføring.arena.adapter
 
-import no.nav.virksomhet.gjennomforing.sak.arbeidogaktivitet.v1.Sak
+import no.nav.arena.services.lib.sakvedtak.SaksInfo
 
 interface ArenaClient {
     fun bestillOppgave(naturligIdent: String, behandlendeEnhetId: String): String
-    fun hentArenaSaker(naturligIdent: String): List<Sak>
+    fun hentArenaSaker(naturligIdent: String): List<SaksInfo>
 }

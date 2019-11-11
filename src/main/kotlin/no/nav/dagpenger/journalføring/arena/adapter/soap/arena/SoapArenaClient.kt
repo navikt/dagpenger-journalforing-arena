@@ -1,7 +1,11 @@
 package no.nav.dagpenger.journalføring.arena.adapter.soap.arena
 
+import no.nav.arena.services.lib.sakvedtak.SaksInfo
+import no.nav.arena.services.lib.sakvedtak.SaksInfoListe
+import no.nav.arena.services.sakvedtakservice.Bruker
+import no.nav.dagpenger.journalføring.arena.SakVedtakService
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
-import no.nav.dagpenger.journalføring.arena.adapter.ArenaOppgaveClientException
+import no.nav.dagpenger.journalføring.arena.adapter.ArenaClientException
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BehandleArbeidOgAktivitetOppgaveV1
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.informasjon.WSOppgave
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.informasjon.WSOppgavetype
@@ -10,19 +14,13 @@ import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.informasjo
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.informasjon.WSTema
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.meldinger.WSBestillOppgaveRequest
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.meldinger.WSBestillOppgaveResponse
-import no.nav.virksomhet.gjennomforing.sak.arbeidogaktivitet.v1.Sak
-import no.nav.virksomhet.tjenester.sak.arbeidogaktivitet.v1.ArbeidOgAktivitet
-import no.nav.virksomhet.tjenester.sak.meldinger.v1.WSBruker
-import no.nav.virksomhet.tjenester.sak.meldinger.v1.WSHentSakListeRequest
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.GregorianCalendar
 import javax.xml.datatype.DatatypeFactory
+import javax.xml.ws.Holder
 
-class SoapArenaClient(
-    private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1,
-    private val arbeidOgAktivitet: ArbeidOgAktivitet
-) : ArenaClient {
+class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1, private val arenaSakVedtakService: SakVedtakService) : ArenaClient {
     override fun bestillOppgave(naturligIdent: String, behandlendeEnhetId: String): String {
         val soapRequest = WSBestillOppgaveRequest()
 
@@ -43,30 +41,30 @@ class SoapArenaClient(
         val response: WSBestillOppgaveResponse = try {
             oppgaveV1.bestillOppgave(soapRequest)
         } catch (e: Exception) {
-            throw ArenaOppgaveClientException(e)
+            throw ArenaClientException(e)
             // @todo Håndtere BestillOppgaveSikkerhetsbegrensning, BestillOppgaveOrganisasjonIkkeFunnet, BestillOppgavePersonErInaktiv, BestillOppgaveSakIkkeOpprettet, BestillOppgavePersonIkkeFunnet, BestillOppgaveUgyldigInput;
         }
 
         return response.arenaSakId
     }
 
-    override fun hentArenaSaker(naturligIdent: String): List<Sak> {
+    override fun hentArenaSaker(naturligIdent: String): List<SaksInfo> {
 
-        // val resultat = Holder<SaksInfoListe>()
-        val bruker = WSBruker().withBruker(naturligIdent).withBrukertypeKode("PERSON")
-        val request = WSHentSakListeRequest().withBruker(bruker).withFagomradeKode("DAG")
+        val resultat = Holder<SaksInfoListe>()
+        val bruker = Bruker().apply {
+            this.brukerId = naturligIdent
+            this.brukertypeKode = "PERSON"
+        }
+        arenaSakVedtakService.hentSaksInfoListeV2(
+            Holder(bruker),
+            null,
+            null,
+            null,
+            "DAG",
+            null,
+            resultat
+        )
 
-        val resultat = arbeidOgAktivitet.hentSakListe(request)
-        // arenaSakVedtakService.hentSaksInfoListeV2(
-        //     Holder(bruker),
-        //     null,
-        //     null,
-        //     null,
-        //     "DAG",
-        //     null,
-        //     resultat
-        // )
-
-        return resultat.sakListe
+        return resultat.value.saksInfo
     }
 }
