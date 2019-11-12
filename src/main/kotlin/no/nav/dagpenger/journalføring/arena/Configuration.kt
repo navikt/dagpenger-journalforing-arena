@@ -36,8 +36,7 @@ private val localProperties = ConfigurationMap(
         "srvdagpenger.journalforing.arena.password" to "password",
         "securitytokenservice.url" to "https://localhost/SecurityTokenServiceProvider/",
         "behandlearbeidsytelsesak.v1.url" to "https://localhost/ail_ws/BehandleArbeidOgAktivitetOppgave_v1",
-        "arenasakvedtakservice.url" to "https://localhost/arenasakvedtakservice",
-        "arenarbeidogAktivitet.url" to "https://localhost/arenarbeidogAktivitet"
+        "ytelseskontrakt.v3.url" to "https://localhost/ail_ws/Ytelseskontrakt_v3"
     )
 )
 private val devProperties = ConfigurationMap(
@@ -46,8 +45,7 @@ private val devProperties = ConfigurationMap(
         "application.profile" to Profile.DEV.toString(),
         "securitytokenservice.url" to "https://sts-q2.test.local/SecurityTokenServiceProvider/",
         "behandlearbeidsytelsesak.v1.url" to "https://arena-q1.adeo.no/ail_ws/BehandleArbeidOgAktivitetOppgave_v1",
-        "arenasakvedtakservice.url" to "https://arena-q1.adeo.no/arena_ws/services/ArenaSakVedtakService",
-        "arenarbeidogAktivitet.url" to "https://tjenestebuss-q1.adeo.no:443/nav-tjeneste-arbeidOgAktivitet_v1Web/sca/ArbeidOgAktivitetWSEXP"
+        "ytelseskontrakt.v3.url" to "https://arena-q1.adeo.no/ail_ws/Ytelseskontrakt_v3"
     )
 )
 private val prodProperties = ConfigurationMap(
@@ -56,8 +54,7 @@ private val prodProperties = ConfigurationMap(
         "application.profile" to Profile.PROD.toString(),
         "securitytokenservice.url" to "https://sts.adeo.no/SecurityTokenServiceProvider/",
         "behandlearbeidsytelsesak.v1.url" to "https://arena.adeo.no/ail_ws/BehandleArbeidOgAktivitetOppgave_v1",
-        "arenasakvedtakservice.url" to "https://arena.adeo.no/arena_ws/services/ArenaSakVedtakService",
-        "arenarbeidogAktivitet.url" to "https://tjenestebuss.adeo.no/nav-tjeneste-arbeidOgAktivitet_v1Web/sca/ArbeidOgAktivitetWSEXP"
+        "ytelseskontrakt.v3.url" to "https:///arena.adeo.no/ail_ws/Ytelseskontrakt_v3"
     )
 )
 
@@ -78,9 +75,8 @@ data class Configuration(
     val kafka: Kafka = Kafka(),
     val application: Application = Application(),
     val soapSTSClient: SoapSTSClient = SoapSTSClient(),
-    val behandleArbeidsytelseSak: BehandleArbeidsytelseSakConfig = BehandleArbeidsytelseSakConfig(),
-    val arenaSakVedtakService: ArenaSakVedtakServiceConfig = ArenaSakVedtakServiceConfig(),
-    val arenaArbeidOgAktivitet: ArenaArbeidOgAktivitetConfig = ArenaArbeidOgAktivitetConfig(),
+    val behandleArbeidsytelseSakConfig: BehandleArbeidsytelseSakConfig = BehandleArbeidsytelseSakConfig(),
+    val ytelseskontraktV3Config: YtelseskontraktV3Config = YtelseskontraktV3Config(),
     val unleashConfig: UnleashConfig = UnleashConfig.builder()
         .appName(config().getOrElse(Key("app.name", stringType), "dagpenger-journalforing-arena"))
         .instanceId(getHostname())
@@ -114,8 +110,8 @@ data class Configuration(
         val endpoint: String = config()[Key("behandlearbeidsytelsesak.v1.url", stringType)]
     )
 
-    data class ArenaSakVedtakServiceConfig(
-        val endpoint: String = config()[Key("arenasakvedtakservice.url", stringType)]
+    data class YtelseskontraktV3Config(
+        val endpoint: String = config()[Key("ytelseskontrakt.v3.url", stringType)]
     )
 
     data class ArenaArbeidOgAktivitetConfig(

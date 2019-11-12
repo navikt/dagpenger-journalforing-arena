@@ -82,10 +82,10 @@ class JournalføringArena(private val configuration: Configuration, val arenaCli
 fun main(args: Array<String>) {
     val configuration = Configuration()
 
-    val ytelseskontraktV3: YtelseskontraktV3 = SoapPort.ytelseskontraktV3(configuration.arenaArbeidOgAktivitet.endpoint)
+    val ytelseskontraktV3: YtelseskontraktV3 = SoapPort.ytelseskontraktV3(configuration.ytelseskontraktV3Config.endpoint)
 
     val behandleArbeidsytelseSak =
-        SoapPort.behandleArbeidOgAktivitetOppgaveV1(configuration.behandleArbeidsytelseSak.endpoint)
+        SoapPort.behandleArbeidOgAktivitetOppgaveV1(configuration.behandleArbeidsytelseSakConfig.endpoint)
 
     val arenaClient: ArenaClient =
         SoapArenaClient(behandleArbeidsytelseSak, ytelseskontraktV3)
