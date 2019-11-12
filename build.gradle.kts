@@ -109,7 +109,6 @@ spotless {
     }
 }
 
-
 tasks.withType<ShadowJar> {
     mergeServiceFiles()
 
