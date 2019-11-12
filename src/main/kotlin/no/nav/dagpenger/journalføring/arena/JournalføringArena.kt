@@ -1,5 +1,6 @@
 package no.nav.dagpenger.journalføring.arena
 
+import io.prometheus.client.Counter
 import mu.KotlinLogging
 import no.finn.unleash.DefaultUnleash
 import no.finn.unleash.Unleash
@@ -26,6 +27,12 @@ internal object PacketKeys {
     const val NATURLIG_IDENT: String = "naturligIdent"
     const val ARENA_SAK_ID: String = "arenaSakId"
 }
+
+private val jpCounter = Counter
+    .build()
+    .name("oppgave_opprettet_arena")
+    .help("Antall oppgaver opprettet i arena")
+    .register()
 
 class JournalføringArena(private val configuration: Configuration, val arenaClient: ArenaClient) :
     River(configuration.kafka.dagpengerJournalpostTopic) {
@@ -55,6 +62,13 @@ class JournalføringArena(private val configuration: Configuration, val arenaCli
         try {
             if (unleash.isEnabled("dp-arena.HentSaker${configuration.application.profile.name}")) {
                 val saker = arenaClient.hentArenaSaker(naturligIdent)
+                val aktiveSaker = saker.filter { it.status == "AKTIV" }
+
+                if (aktiveSaker.isEmpty()) {
+                    jpCounter.inc()
+                    // val arenaSakId = arenaClient.bestillOppgave(naturligIdent, enhetId)
+                    // packet.putValue(PacketKeys.ARENA_SAK_ID, arenaSakId)
+                }
                 saker.forEach {
                     logger.info { "Tilhører sak: id: ${it.fagsystemSakId}, status: ${it.status}" }
                 }

@@ -11,6 +11,7 @@ import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.informasjo
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.meldinger.WSBestillOppgaveRequest
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.meldinger.WSBestillOppgaveResponse
 import no.nav.tjeneste.virksomhet.ytelseskontrakt.v3.YtelseskontraktV3
+import no.nav.tjeneste.virksomhet.ytelseskontrakt.v3.informasjon.ytelseskontrakt.WSPeriode
 import no.nav.tjeneste.virksomhet.ytelseskontrakt.v3.meldinger.WSHentYtelseskontraktListeRequest
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -46,7 +47,12 @@ class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1,
     }
 
     override fun hentArenaSaker(naturligIdent: String): List<ArenaSak> {
-        val request = WSHentYtelseskontraktListeRequest().withPersonidentifikator(naturligIdent)
+        val fomDato = ZonedDateTime.now().toInstant().atZone(ZoneId.of("Europe/Oslo")).minusWeeks(104)
+        val request =
+            WSHentYtelseskontraktListeRequest()
+                .withPersonidentifikator(naturligIdent)
+                .withPeriode(WSPeriode().withFom(DatatypeFactory.newInstance().newXMLGregorianCalendar(GregorianCalendar.from(fomDato))))
+
         val response = ytelseskontraktV3.hentYtelseskontraktListe(request)
         return response.ytelseskontraktListe.filter { it.ytelsestype == "DAGP" }.map { ArenaSak(it.fagsystemSakId, it.status) }
     }
