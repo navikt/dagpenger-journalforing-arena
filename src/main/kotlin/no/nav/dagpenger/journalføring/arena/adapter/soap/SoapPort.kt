@@ -15,7 +15,7 @@ object SoapPort {
             serviceUrl = serviceUrl,
             serviceClazz = YtelseskontraktV3::class.java,
             wsdl = "wsdl/tjenestespesifikasjon/no/nav/tjeneste/virksomhet/ytelseskontrakt/v3/Binding.wsdl",
-            namespace = "http://nav.no/tjeneste/virksomhet/ytelseskontrakt/v3",
+            namespace = "http://nav.no/tjeneste/virksomhet/ytelseskontrakt/v3/Binding",
             svcName = "Ytelseskontrakt_v3",
             portName = "Ytelseskontrakt_v3Port"
         )
