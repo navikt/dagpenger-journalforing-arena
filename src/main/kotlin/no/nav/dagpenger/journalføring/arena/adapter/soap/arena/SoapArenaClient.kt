@@ -46,11 +46,8 @@ class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1,
     }
 
     override fun hentArenaSaker(naturligIdent: String): List<ArenaSak> {
-
         val request = WSHentYtelseskontraktListeRequest().withPersonidentifikator(naturligIdent)
-
         val response = ytelseskontraktV3.hentYtelseskontraktListe(request)
-
         return response.ytelseskontraktListe.filter { it.ytelsestype == "DAGP" }.map { ArenaSak(it.fagsystemSakId, it.status) }
     }
 }
