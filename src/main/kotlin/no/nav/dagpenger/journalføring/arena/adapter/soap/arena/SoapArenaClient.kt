@@ -1,9 +1,5 @@
 package no.nav.dagpenger.journalføring.arena.adapter.soap.arena
 
-import no.nav.arena.services.lib.sakvedtak.SaksInfo
-import no.nav.arena.services.lib.sakvedtak.SaksInfoListe
-import no.nav.arena.services.sakvedtakservice.Bruker
-import no.nav.dagpenger.journalføring.arena.SakVedtakService
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClientException
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BehandleArbeidOgAktivitetOppgaveV1
@@ -14,13 +10,14 @@ import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.informasjo
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.informasjon.WSTema
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.meldinger.WSBestillOppgaveRequest
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.meldinger.WSBestillOppgaveResponse
+import no.nav.tjeneste.virksomhet.ytelseskontrakt.v3.YtelseskontraktV3
+import no.nav.tjeneste.virksomhet.ytelseskontrakt.v3.meldinger.WSHentYtelseskontraktListeRequest
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.GregorianCalendar
 import javax.xml.datatype.DatatypeFactory
-import javax.xml.ws.Holder
 
-class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1, private val arenaSakVedtakService: SakVedtakService) : ArenaClient {
+class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1, private val ytelseskontraktV3: YtelseskontraktV3) : ArenaClient {
     override fun bestillOppgave(naturligIdent: String, behandlendeEnhetId: String): String {
         val soapRequest = WSBestillOppgaveRequest()
 
@@ -48,23 +45,14 @@ class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1,
         return response.arenaSakId
     }
 
-    override fun hentArenaSaker(naturligIdent: String): List<SaksInfo> {
+    override fun hentArenaSaker(naturligIdent: String): List<ArenaSak> {
 
-        val resultat = Holder<SaksInfoListe>()
-        val bruker = Bruker().apply {
-            this.brukerId = naturligIdent
-            this.brukertypeKode = "PERSON"
-        }
-        arenaSakVedtakService.hentSaksInfoListeV2(
-            Holder(bruker),
-            null,
-            null,
-            null,
-            "DAG",
-            null,
-            resultat
-        )
+        val request = WSHentYtelseskontraktListeRequest().withPersonidentifikator(naturligIdent)
 
-        return resultat.value.saksInfo
+        val response = ytelseskontraktV3.hentYtelseskontraktListe(request)
+
+        return response.ytelseskontraktListe.filter { it.ytelsestype == "DAGP" }.map { ArenaSak(it.fagsystemSakId, it.status) }
     }
 }
+
+data class ArenaSak(val fagsystemSakId: Int, val status: String)

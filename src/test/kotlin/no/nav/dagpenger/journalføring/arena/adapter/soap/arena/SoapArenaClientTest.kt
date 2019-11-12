@@ -1,17 +1,14 @@
 package no.nav.dagpenger.journalføring.arena.adapter.soap.arena
 
 import io.kotlintest.shouldBe
-import io.kotlintest.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
-import no.nav.arena.services.lib.sakvedtak.SaksInfo
-import no.nav.arena.services.lib.sakvedtak.SaksInfoListe
-import no.nav.arena.services.sakvedtakservice.SakVedtakPortType
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BehandleArbeidOgAktivitetOppgaveV1
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.meldinger.WSBestillOppgaveResponse
+import no.nav.tjeneste.virksomhet.ytelseskontrakt.v3.YtelseskontraktV3
+import no.nav.tjeneste.virksomhet.ytelseskontrakt.v3.informasjon.ytelseskontrakt.WSDagpengekontrakt
+import no.nav.tjeneste.virksomhet.ytelseskontrakt.v3.meldinger.WSHentYtelseskontraktListeResponse
 import org.junit.jupiter.api.Test
-import javax.xml.ws.Holder
 
 internal class SoapArenaClientTest {
 
@@ -30,37 +27,17 @@ internal class SoapArenaClientTest {
     @Test
     fun `Skal kunne hente arena saker basert på bruker id`() {
 
-        val sakVedtakPortType: SakVedtakPortType = mockk()
-
-        val holderSlot = slot<Holder<SaksInfoListe>>()
+        val ytelseskontraktV3: YtelseskontraktV3 = mockk()
 
         every {
-            sakVedtakPortType.hentSaksInfoListeV2(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                capture(holderSlot)
-            )
-        } answers {
-            val saksInfoListeHolder = Holder<SaksInfoListe>()
-            saksInfoListeHolder.value = SaksInfoListe().apply {
-                this.saksInfo.add(SaksInfo().apply {
-                    saksId = "123"
-                })
-                holderSlot.captured = saksInfoListeHolder
-            }
+            ytelseskontraktV3.hentYtelseskontraktListe(any())
+        } returns WSHentYtelseskontraktListeResponse().withYtelseskontraktListe(listOf(WSDagpengekontrakt().withFagsystemSakId(123).withStatus("INAKT").withYtelsestype("DAGP")))
 
-            val client = SoapArenaClient(mockk(), sakVedtakPortType)
+        val client = SoapArenaClient(mockk(), ytelseskontraktV3)
+        val saker = client.hentArenaSaker("1234")
 
-            val saker = client.hentArenaSaker(
-                "1234"
-            )
-
-            saker.size shouldNotBe 0
-            saker.first().saksId shouldBe "123"
-        }
+        saker.isEmpty() shouldBe false
+        saker.first().fagsystemSakId shouldBe 123
+        saker.first().status shouldBe "INAKT"
     }
 }

@@ -86,7 +86,7 @@ dependencies {
     implementation("com.sun.xml.ws:jaxws-tools:2.3.0.2")
 
     implementation(tjenestespesifikasjon("behandleArbeidOgAktivitetOppgave-v1-tjenestespesifikasjon"))
-    implementation(tjenestespesifikasjon("arena-arbeid-og-aktivitet"))
+    implementation(tjenestespesifikasjon("ytelseskontrakt-v3-tjenestespesifikasjon"))
 
     implementation("org.apache.cxf:cxf-rt-features-logging:$cxfVersion")
     implementation("org.apache.cxf:cxf-rt-frontend-jaxws:$cxfVersion")

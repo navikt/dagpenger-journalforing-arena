@@ -12,6 +12,7 @@ import no.nav.dagpenger.journalføring.arena.adapter.soap.configureFor
 import no.nav.dagpenger.journalføring.arena.adapter.soap.stsClient
 import no.nav.dagpenger.streams.River
 import no.nav.dagpenger.streams.streamConfig
+import no.nav.tjeneste.virksomhet.ytelseskontrakt.v3.YtelseskontraktV3
 import org.apache.kafka.streams.kstream.Predicate
 import java.util.Properties
 
@@ -55,7 +56,7 @@ class JournalføringArena(private val configuration: Configuration, val arenaCli
             if (unleash.isEnabled("dp-arena.HentSaker${configuration.application.profile.name}")) {
                 val saker = arenaClient.hentArenaSaker(naturligIdent)
                 saker.forEach {
-                    logger.info { "Tilhører sak: id: ${it.saksId}, tema: ${it.tema}" }
+                    logger.info { "Tilhører sak: id: ${it.fagsystemSakId}, status: ${it.status}" }
                 }
 
                 if (saker.isEmpty()) {
@@ -81,16 +82,13 @@ class JournalføringArena(private val configuration: Configuration, val arenaCli
 fun main(args: Array<String>) {
     val configuration = Configuration()
 
-    // val arbeidOgAktivitet = SoapPort.arenaArbeidOgAktivitet(configuration.arenaArbeidOgAktivitet.endpoint)
+    val ytelseskontraktV3: YtelseskontraktV3 = SoapPort.ytelseskontraktV3(configuration.arenaArbeidOgAktivitet.endpoint)
 
     val behandleArbeidsytelseSak =
         SoapPort.behandleArbeidOgAktivitetOppgaveV1(configuration.behandleArbeidsytelseSak.endpoint)
 
-    val arenaSakVedtakService: SakVedtakService =
-        SoapPort.sakVedtakService(configuration.arenaSakVedtakService.endpoint)
-
     val arenaClient: ArenaClient =
-        SoapArenaClient(behandleArbeidsytelseSak, arenaSakVedtakService)
+        SoapArenaClient(behandleArbeidsytelseSak, ytelseskontraktV3)
 
     val soapStsClient = stsClient(
         stsUrl = configuration.soapSTSClient.endpoint,
@@ -98,8 +96,10 @@ fun main(args: Array<String>) {
     )
     if (configuration.soapSTSClient.allowInsecureSoapRequests) {
         soapStsClient.configureFor(behandleArbeidsytelseSak, STS_SAML_POLICY_NO_TRANSPORT_BINDING)
+        soapStsClient.configureFor(ytelseskontraktV3, STS_SAML_POLICY_NO_TRANSPORT_BINDING)
     } else {
         soapStsClient.configureFor(behandleArbeidsytelseSak)
+        soapStsClient.configureFor(ytelseskontraktV3)
     }
 
     val service = JournalføringArena(configuration, arenaClient)
