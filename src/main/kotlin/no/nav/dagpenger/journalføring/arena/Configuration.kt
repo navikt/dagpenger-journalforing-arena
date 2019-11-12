@@ -45,7 +45,7 @@ private val devProperties = ConfigurationMap(
         "application.profile" to Profile.DEV.toString(),
         "securitytokenservice.url" to "https://sts-q2.test.local/SecurityTokenServiceProvider/",
         "behandlearbeidsytelsesak.v1.url" to "https://arena-q1.adeo.no/ail_ws/BehandleArbeidOgAktivitetOppgave_v1",
-        "ytelseskontrakt.v3.url" to "https://arena-q1.adeo.no/ail_ws/Ytelseskontrakt_v3"
+        "ytelseskontrakt.v3.url" to "https://arena-q1.adeo.no/ail_ws/Ytelseskontrakt_v3?wsdl"
     )
 )
 private val prodProperties = ConfigurationMap(
@@ -54,7 +54,7 @@ private val prodProperties = ConfigurationMap(
         "application.profile" to Profile.PROD.toString(),
         "securitytokenservice.url" to "https://sts.adeo.no/SecurityTokenServiceProvider/",
         "behandlearbeidsytelsesak.v1.url" to "https://arena.adeo.no/ail_ws/BehandleArbeidOgAktivitetOppgave_v1",
-        "ytelseskontrakt.v3.url" to "https:///arena.adeo.no/ail_ws/Ytelseskontrakt_v3"
+        "ytelseskontrakt.v3.url" to "https:///arena.adeo.no/ail_ws/Ytelseskontrakt_v3?wsdl"
     )
 )
 
