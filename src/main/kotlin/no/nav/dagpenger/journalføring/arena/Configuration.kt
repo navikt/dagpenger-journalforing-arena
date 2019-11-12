@@ -54,7 +54,7 @@ private val prodProperties = ConfigurationMap(
         "application.profile" to Profile.PROD.toString(),
         "securitytokenservice.url" to "https://sts.adeo.no/SecurityTokenServiceProvider/",
         "behandlearbeidsytelsesak.v1.url" to "https://arena.adeo.no/ail_ws/BehandleArbeidOgAktivitetOppgave_v1",
-        "ytelseskontrakt.v3.url" to "https:///arena.adeo.no/ail_ws/Ytelseskontrakt_v3"
+        "ytelseskontrakt.v3.url" to "https://arena.adeo.no/ail_ws/Ytelseskontrakt_v3"
     )
 )
 
