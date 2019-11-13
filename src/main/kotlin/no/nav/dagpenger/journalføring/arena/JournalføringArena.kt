@@ -55,12 +55,17 @@ class JournalføringArena(private val configuration: Configuration, val arenaCli
         try {
             if (unleash.isEnabled("dp-arena.HentSaker${configuration.application.profile.name}")) {
                 val saker = arenaClient.hentArenaSaker(naturligIdent)
-                val aktiveSaker = saker.filter { it.status == "AKTIV" }
+
+                val aktiveSaker = saker.filter { it.status == "AKTIV" }.also { aktiveDagpengeSakTeller.inc(it.size.toDouble()) }
+                saker.filter { it.status == "AVSLU" }.also { avsluttetDagpengeSakTeller.inc(it.size.toDouble()) }
+                saker.filter { it.status == "INAKT" }.also { inaktivDagpengeSakTeller.inc(it.size.toDouble()) }
 
                 if (aktiveSaker.isEmpty()) {
-                    arenaOppgaveTeller.inc()
+                    automatiskJournalførtJaTeller.inc()
                     // val arenaSakId = arenaClient.bestillOppgave(naturligIdent, enhetId)
                     // packet.putValue(PacketKeys.ARENA_SAK_ID, arenaSakId)
+                } else {
+                    automatiskJournalførtNeiTeller.inc()
                 }
                 saker.forEach {
                     logger.info { "Tilhører sak: id: ${it.fagsystemSakId}, status: ${it.status}" }
