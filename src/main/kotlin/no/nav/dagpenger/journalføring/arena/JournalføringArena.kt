@@ -30,12 +30,11 @@ internal object PacketKeys {
 
 class JournalføringArena(
     private val configuration: Configuration,
-    private val arenaClient: ArenaClient,
-    private val unleash: Unleash
+    private val defaultStrategy: ArenaDefaultStrategy,
+    private val arenaClient: ArenaClient
 ) :
     River(configuration.kafka.dagpengerJournalpostTopic) {
 
-    val defaultStrategy = ArenaDefaultStrategy()
     override val SERVICE_APP_ID = "dp-journalforing-arena"
     override val HTTP_PORT: Int = configuration.application.httpPort
 
@@ -56,6 +55,13 @@ class JournalføringArena(
 
             val saker = arenaClient.hentArenaSaker(naturligIdent)
 
+            val fakta = Fakta(naturligIdent = naturligIdent, enhetId = enhetId, arenaSaker = saker)
+
+            val arenaResultat = defaultStrategy.handle(fakta)
+
+            packet.putValue(PacketKeys.ARENA_SAK_OPPRETTET, arenaResultat.opprettet)
+            arenaResultat.arenaSakId?.let { packet.putValue(PacketKeys.ARENA_SAK_ID, it) }
+
             val aktiveSaker =
                 saker.filter { it.status == "AKTIV" }.also { aktiveDagpengeSakTeller.inc(it.size.toDouble()) }
             saker.filter { it.status == "AVSLU" }.also { avsluttetDagpengeSakTeller.inc(it.size.toDouble()) }
@@ -63,14 +69,8 @@ class JournalføringArena(
 
             if (aktiveSaker.isEmpty()) {
                 automatiskJournalførtJaTeller.inc()
-                if (unleash.isEnabled("dp-arena.bestillOppgave${configuration.application.profile.name}", false)) {
-                    val arenaSakId = arenaClient.bestillOppgave(naturligIdent, enhetId)
-                    packet.putValue(PacketKeys.ARENA_SAK_ID, arenaSakId)
-                    packet.putValue(PacketKeys.ARENA_SAK_OPPRETTET, true)
-                }
             } else {
                 automatiskJournalførtNeiTeller.inc()
-                packet.putValue(PacketKeys.ARENA_SAK_OPPRETTET, false)
             }
             saker.forEach {
                 logger.info { "Tilhører sak: id: ${it.fagsystemSakId}, status: ${it.status}" }
@@ -121,7 +121,19 @@ fun main(args: Array<String>) {
 
     val unleash: Unleash = DefaultUnleash(configuration.unleashConfig)
 
-    val service = JournalføringArena(configuration, arenaClient, unleash)
+    val defaultStrategy =
+        ArenaDefaultStrategy(
+            listOf(
+                ArenaCreateOppgaveStrategy(
+                    arenaClient = arenaClient,
+                    unleash = unleash,
+                    profile = configuration.application.profile
+                ),
+                ArenaKanIkkeOppretteOppgaveStrategy()
+            )
+        )
+
+    val service = JournalføringArena(configuration, defaultStrategy, arenaClient)
 
     service.start()
 }

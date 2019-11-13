@@ -29,6 +29,5 @@ class ArenaKanIkkeOppretteOppgaveStrategyTest {
 
         val strategy = ArenaKanIkkeOppretteOppgaveStrategy()
         strategy.canHandle(fakta) shouldBe false
-
     }
 }

@@ -4,8 +4,6 @@ import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
-import no.finn.unleash.Unleash
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSak
@@ -42,20 +40,17 @@ class JournalFøringArenaTopologyTest {
     fun `Skal prosessere melding hvis arena resultat mangler `() {
 
         val arenaOppgaveClient: ArenaClient = mockk()
-        every {
-            arenaOppgaveClient.bestillOppgave("12345678", "1234")
-        } returns "1234"
 
         every {
             arenaOppgaveClient.hentArenaSaker("12345678")
         } returns emptyList<ArenaSak>()
 
-        val unleashMock: Unleash = mockk()
+        val mockedStrategy: ArenaDefaultStrategy = mockk()
         every {
-            unleashMock.isEnabled("dp-arena.bestillOppgaveLOCAL", false)
-        } returns true
+            mockedStrategy.handle(any())
+        } returns ArenaResultat("1234", true)
 
-        val testService = JournalføringArena(Configuration(), arenaOppgaveClient, unleashMock)
+        val testService = JournalføringArena(Configuration(), mockedStrategy, arenaOppgaveClient)
 
         val packet = Packet().apply {
             putValue(
@@ -97,54 +92,6 @@ class JournalFøringArenaTopologyTest {
               metric.samples[0].labelValues[0] shouldBe "true"
           }
   */
-
-        verify { arenaOppgaveClient.bestillOppgave("12345678", "1234") }
-    }
-
-    @Test
-    fun `Skal ikke legge på arenaSakId hvis bruker har aktiv sak i Arena`() {
-
-        val arenaOppgaveClient: ArenaClient = mockk()
-        every {
-            arenaOppgaveClient.hentArenaSaker("12345678")
-        } returns listOf(ArenaSak(999, "AKTIV"))
-
-        val unleashMock: Unleash = mockk()
-        every {
-            unleashMock.isEnabled("dp-arena.bestillOppgaveLOCAL", false)
-        } returns true
-
-        val testService = JournalføringArena(Configuration(), arenaOppgaveClient, unleashMock)
-
-        val packet = Packet().apply {
-            putValue(
-                "behandlendeEnheter", behandlendeenhetAdapter.toJsonValue(
-                    listOf(
-                        Behandlendeenhet(
-                            enhetId = "1234",
-                            enhetNavn = "NAV"
-                        )
-                    )
-                )!!
-            )
-            putValue("naturligIdent", "12345678")
-        }
-
-        TopologyTestDriver(testService.buildTopology(), properties).use { topologyTestDriver ->
-            val inputRecord = factory.create(packet)
-            topologyTestDriver.pipeInput(inputRecord)
-
-            val ut = topologyTestDriver.readOutput(
-                dagpengerJournalpostTopic.name,
-                dagpengerJournalpostTopic.keySerde.deserializer(),
-                dagpengerJournalpostTopic.valueSerde.deserializer()
-            )
-
-            ut shouldNotBe null
-            ut.value().hasProblem() shouldBe false
-            ut.value().hasField(PacketKeys.ARENA_SAK_ID) shouldBe false
-            ut.value().getBoolean(PacketKeys.ARENA_SAK_OPPRETTET) shouldBe false
-        }
     }
 
     @Test

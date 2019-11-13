@@ -45,4 +45,3 @@ class ArenaKanIkkeOppretteOppgaveStrategy : ArenaStrategy {
 }
 
 data class ArenaResultat(val arenaSakId: String?, val opprettet: Boolean)
-
