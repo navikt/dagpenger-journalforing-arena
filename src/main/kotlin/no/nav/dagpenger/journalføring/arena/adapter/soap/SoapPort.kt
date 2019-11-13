@@ -24,7 +24,7 @@ object SoapPort {
     fun behandleArbeidOgAktivitetOppgaveV1(serviceUrl: String): BehandleArbeidOgAktivitetOppgaveV1 {
 
         return createServicePort(
-            serviceUrl,
+            serviceUrl = serviceUrl,
             serviceClazz = BehandleArbeidOgAktivitetOppgaveV1::class.java,
             wsdl = "wsdl/no/nav/tjeneste/virksomhet/behandleArbeidOgAktivitetOppgave/v1/Binding.wsdl",
             namespace = "http://nav.no/tjeneste/virksomhet/behandleArbeidOgAktivitetOppgave/v1/Binding",

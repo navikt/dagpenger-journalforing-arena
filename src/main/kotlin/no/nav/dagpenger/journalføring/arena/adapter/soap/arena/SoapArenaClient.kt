@@ -2,6 +2,7 @@ package no.nav.dagpenger.journalføring.arena.adapter.soap.arena
 
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClientException
+import no.nav.dagpenger.journalføring.arena.adapter.ArenaSak
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BehandleArbeidOgAktivitetOppgaveV1
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.informasjon.WSOppgave
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.informasjon.WSOppgavetype
@@ -54,8 +55,11 @@ class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1,
                 .withPeriode(WSPeriode().withFom(DatatypeFactory.newInstance().newXMLGregorianCalendar(GregorianCalendar.from(fomDato))))
 
         val response = ytelseskontraktV3.hentYtelseskontraktListe(request)
-        return response.ytelseskontraktListe.filter { it.ytelsestype == "DAGP" }.map { ArenaSak(it.fagsystemSakId, it.status) }
+        return response.ytelseskontraktListe.filter { it.ytelsestype == "DAGP" }.map {
+            ArenaSak(
+                it.fagsystemSakId,
+                it.status
+            )
+        }
     }
 }
-
-data class ArenaSak(val fagsystemSakId: Int, val status: String)
