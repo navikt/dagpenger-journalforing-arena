@@ -9,6 +9,14 @@ interface ArenaStrategy {
     fun handle(fakta: Fakta): ArenaResultat
 }
 
+class ArenaNoOperationStrategy(val strategies: List<ArenaStrategy>) : ArenaStrategy {
+    override fun canHandle(fakta: Fakta) = true
+
+    override fun handle(fakta: Fakta) =
+        strategies.filter { it.canHandle(fakta) }
+            .map { it.handle(fakta) }.firstOrNull() ?: ArenaResultat(null, false)
+}
+
 class ArenaCreateOppgaveStrategy(
     private val arenaClient: ArenaClient,
     private val unleash: Unleash,
@@ -23,10 +31,18 @@ class ArenaCreateOppgaveStrategy(
     }
 
     override fun handle(fakta: Fakta): ArenaResultat {
-
         val arenaSakId = arenaClient.bestillOppgave(fakta.naturligIdent, fakta.enhetId)
         return ArenaResultat(arenaSakId, true)
     }
 }
 
+class ArenaKanIkkeOppretteOppgaveStrategy : ArenaStrategy {
+    override fun canHandle(fakta: Fakta): Boolean {
+        return fakta.arenaSaker.any { it.status == "AKTIV" }
+    }
+
+    override fun handle(fakta: Fakta) = ArenaResultat(null, false)
+}
+
 data class ArenaResultat(val arenaSakId: String?, val opprettet: Boolean)
+
