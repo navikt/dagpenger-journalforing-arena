@@ -19,6 +19,7 @@ import java.util.Properties
 private val logger = KotlinLogging.logger {}
 
 internal object PacketKeys {
+    const val ARENA_SAK_OPPRETTET: String = "arenaSakOpprettet"
     const val NY_SØKNAD: String = "nySøknad"
     const val JOURNALPOST_ID: String = "journalpostId"
     const val AKTØR_ID: String = "aktørId"
@@ -29,8 +30,8 @@ internal object PacketKeys {
 
 class JournalføringArena(
     private val configuration: Configuration,
-    private val arenaClient: ArenaClient,
-    private val unleash: Unleash
+    private val defaultStrategy: ArenaDefaultStrategy,
+    private val arenaClient: ArenaClient
 ) :
     River(configuration.kafka.dagpengerJournalpostTopic) {
 
@@ -39,7 +40,7 @@ class JournalføringArena(
 
     override fun filterPredicates(): List<Predicate<String, Packet>> {
         return listOf(
-            Predicate { _, packet -> !packet.hasField(PacketKeys.ARENA_SAK_ID) }
+            Predicate { _, packet -> !packet.hasField(PacketKeys.ARENA_SAK_OPPRETTET) }
         )
     }
 
@@ -50,13 +51,16 @@ class JournalføringArena(
             packet.getObjectValue(PacketKeys.BEHANDLENDE_ENHETER) { behandlendeenhetAdapter.fromJsonValue(it)!! }
                 .first().enhetId
 
-        packet.putValue(
-            PacketKeys.ARENA_SAK_ID,
-            "1234"
-        )
         try {
 
             val saker = arenaClient.hentArenaSaker(naturligIdent)
+
+            val fakta = Fakta(naturligIdent = naturligIdent, enhetId = enhetId, arenaSaker = saker)
+
+            val arenaResultat = defaultStrategy.handle(fakta)
+
+            packet.putValue(PacketKeys.ARENA_SAK_OPPRETTET, arenaResultat.opprettet)
+            arenaResultat.arenaSakId?.let { packet.putValue(PacketKeys.ARENA_SAK_ID, it) }
 
             val aktiveSaker =
                 saker.filter { it.status == "AKTIV" }.also { aktiveDagpengeSakTeller.inc(it.size.toDouble()) }
@@ -65,10 +69,6 @@ class JournalføringArena(
 
             if (aktiveSaker.isEmpty()) {
                 automatiskJournalførtJaTeller.inc()
-                if (unleash.isEnabled("dp-arena.bestillOppgave${configuration.application.profile.name}", false)) {
-                    val arenaSakId = arenaClient.bestillOppgave(naturligIdent, enhetId)
-                    packet.putValue(PacketKeys.ARENA_SAK_ID, arenaSakId)
-                }
             } else {
                 automatiskJournalførtNeiTeller.inc()
             }
@@ -121,7 +121,19 @@ fun main(args: Array<String>) {
 
     val unleash: Unleash = DefaultUnleash(configuration.unleashConfig)
 
-    val service = JournalføringArena(configuration, arenaClient, unleash)
+    val defaultStrategy =
+        ArenaDefaultStrategy(
+            listOf(
+                ArenaCreateOppgaveStrategy(
+                    arenaClient = arenaClient,
+                    unleash = unleash,
+                    profile = configuration.application.profile
+                ),
+                ArenaKanIkkeOppretteOppgaveStrategy()
+            )
+        )
+
+    val service = JournalføringArena(configuration, defaultStrategy, arenaClient)
 
     service.start()
 }
