@@ -9,7 +9,7 @@ interface ArenaStrategy {
     fun handle(fakta: Fakta): ArenaResultat
 }
 
-class ArenaNoOperationStrategy(val strategies: List<ArenaStrategy>) : ArenaStrategy {
+class ArenaDefaultStrategy(val strategies: List<ArenaStrategy>) : ArenaStrategy {
     override fun canHandle(fakta: Fakta) = true
 
     override fun handle(fakta: Fakta) =

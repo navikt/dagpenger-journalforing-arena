@@ -4,10 +4,10 @@ import io.kotlintest.shouldBe
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSak
 import org.junit.jupiter.api.Test
 
-internal class ArenaNoOperationStrategyTest {
+internal class ArenaDefaultStrategyTest {
     @Test
     fun `skal returnere ArenaResultat uten saksId og ikke opprette oppgave om den ikke finner passende strategi`(){
-        val arenaResultat = ArenaNoOperationStrategy(listOf()).handle(Fakta("1010101", "NAV", listOf()))
+        val arenaResultat = ArenaDefaultStrategy(listOf()).handle(Fakta("1010101", "NAV", listOf()))
         arenaResultat.arenaSakId shouldBe null
         arenaResultat.opprettet shouldBe false
     }
@@ -15,7 +15,7 @@ internal class ArenaNoOperationStrategyTest {
     @Test
     fun `skal bestille oppgave når Fakta inneholder liste uten aktiv sak`(){
 
-        val arenaResultat = ArenaNoOperationStrategy(listOf(SuksessBestillOppgaveStrategi(), ArenaKanIkkeOppretteOppgaveStrategy())).handle(
+        val arenaResultat = ArenaDefaultStrategy(listOf(SuksessBestillOppgaveStrategi(), ArenaKanIkkeOppretteOppgaveStrategy())).handle(
             Fakta("1010101", "NAV", listOf(ArenaSak(123, "INAKTIV"))))
         arenaResultat.arenaSakId shouldBe "123"
         arenaResultat.opprettet shouldBe true

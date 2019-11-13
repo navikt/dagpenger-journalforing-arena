@@ -35,6 +35,7 @@ class JournalføringArena(
 ) :
     River(configuration.kafka.dagpengerJournalpostTopic) {
 
+    val defaultStrategy = ArenaDefaultStrategy()
     override val SERVICE_APP_ID = "dp-journalforing-arena"
     override val HTTP_PORT: Int = configuration.application.httpPort
 
