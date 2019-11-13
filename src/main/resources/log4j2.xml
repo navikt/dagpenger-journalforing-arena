@@ -7,10 +7,12 @@
                             prettyPrintEnabled="false"
                             stackTraceEnabled="true"/>
         </Console>
+        <Prometheus name="metrics"/>
     </Appenders>
     <Loggers>
         <Root level="info">
             <AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="metrics"/>
         </Root>
     </Loggers>
 </Configuration>
