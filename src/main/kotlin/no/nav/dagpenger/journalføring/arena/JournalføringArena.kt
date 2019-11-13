@@ -28,7 +28,7 @@ internal object PacketKeys {
     const val ARENA_SAK_ID: String = "arenaSakId"
 }
 
-private val jpCounter = Counter
+private val arenaOppgaveTeller = Counter
     .build()
     .name("oppgave_opprettet_arena")
     .help("Antall oppgaver opprettet i arena")
@@ -65,7 +65,7 @@ class JournalføringArena(private val configuration: Configuration, val arenaCli
                 val aktiveSaker = saker.filter { it.status == "AKTIV" }
 
                 if (aktiveSaker.isEmpty()) {
-                    jpCounter.inc()
+                    arenaOppgaveTeller.inc()
                     // val arenaSakId = arenaClient.bestillOppgave(naturligIdent, enhetId)
                     // packet.putValue(PacketKeys.ARENA_SAK_ID, arenaSakId)
                 }
