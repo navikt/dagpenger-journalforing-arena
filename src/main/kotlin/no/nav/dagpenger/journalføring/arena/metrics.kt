@@ -5,7 +5,7 @@ import io.prometheus.client.Counter
 val automatiskJournalførtTeller = Counter
     .build()
     .name("automatisk_journalfort_arena")
-    .help("Antall soknader som er automatisk journalført i Arena")
+    .help("Antall søknader som er automatisk journalført i Arena")
     .labelNames("opprettet", "antall_vedtak")
     .register()
 
