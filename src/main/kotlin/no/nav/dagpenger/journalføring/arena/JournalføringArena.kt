@@ -19,7 +19,6 @@ import java.util.Properties
 private val logger = KotlinLogging.logger {}
 
 internal object PacketKeys {
-    const val ARENA_SAK_OPPRETTET: String = "arenaSakOpprettet"
     const val NY_SØKNAD: String = "nySøknad"
     const val JOURNALPOST_ID: String = "journalpostId"
     const val AKTØR_ID: String = "aktørId"
@@ -40,7 +39,7 @@ class JournalføringArena(
 
     override fun filterPredicates(): List<Predicate<String, Packet>> {
         return listOf(
-            Predicate { _, packet -> !packet.hasField(PacketKeys.ARENA_SAK_OPPRETTET) }
+            Predicate { _, packet -> !packet.hasField(PacketKeys.ARENA_SAK_ID) }
         )
     }
 
@@ -51,6 +50,10 @@ class JournalføringArena(
             packet.getObjectValue(PacketKeys.BEHANDLENDE_ENHETER) { behandlendeenhetAdapter.fromJsonValue(it)!! }
                 .first().enhetId
 
+        packet.putValue(
+            PacketKeys.ARENA_SAK_ID,
+            "1234"
+        )
         try {
 
             val saker = arenaClient.hentArenaSaker(naturligIdent)
@@ -65,11 +68,9 @@ class JournalføringArena(
                 if (unleash.isEnabled("dp-arena.bestillOppgave${configuration.application.profile.name}", false)) {
                     val arenaSakId = arenaClient.bestillOppgave(naturligIdent, enhetId)
                     packet.putValue(PacketKeys.ARENA_SAK_ID, arenaSakId)
-                    packet.putValue(PacketKeys.ARENA_SAK_OPPRETTET, true)
                 }
             } else {
                 automatiskJournalførtNeiTeller.inc()
-                packet.putValue(PacketKeys.ARENA_SAK_OPPRETTET, false)
             }
             saker.forEach {
                 logger.info { "Tilhører sak: id: ${it.fagsystemSakId}, status: ${it.status}" }
