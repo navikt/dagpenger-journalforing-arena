@@ -1,6 +1,5 @@
 package no.nav.dagpenger.journalføring.arena
 
-import io.prometheus.client.Counter
 import mu.KotlinLogging
 import no.finn.unleash.DefaultUnleash
 import no.finn.unleash.Unleash
@@ -27,12 +26,6 @@ internal object PacketKeys {
     const val NATURLIG_IDENT: String = "naturligIdent"
     const val ARENA_SAK_ID: String = "arenaSakId"
 }
-
-private val arenaOppgaveTeller = Counter
-    .build()
-    .name("oppgave_opprettet_arena")
-    .help("Antall oppgaver opprettet i arena")
-    .register()
 
 class JournalføringArena(private val configuration: Configuration, val arenaClient: ArenaClient) :
     River(configuration.kafka.dagpengerJournalpostTopic) {
