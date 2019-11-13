@@ -27,13 +27,15 @@ internal object PacketKeys {
     const val ARENA_SAK_ID: String = "arenaSakId"
 }
 
-class JournalføringArena(private val configuration: Configuration, val arenaClient: ArenaClient) :
+class JournalføringArena(
+    private val configuration: Configuration,
+    private val arenaClient: ArenaClient,
+    private val unleash: Unleash
+) :
     River(configuration.kafka.dagpengerJournalpostTopic) {
 
     override val SERVICE_APP_ID = "dp-journalforing-arena"
     override val HTTP_PORT: Int = configuration.application.httpPort
-
-    private val unleash: Unleash = DefaultUnleash(configuration.unleashConfig)
 
     override fun filterPredicates(): List<Predicate<String, Packet>> {
         return listOf(
@@ -117,7 +119,9 @@ fun main(args: Array<String>) {
         soapStsClient.configureFor(ytelseskontraktV3)
     }
 
-    val service = JournalføringArena(configuration, arenaClient)
+    val unleash: Unleash = DefaultUnleash(configuration.unleashConfig)
+
+    val service = JournalføringArena(configuration, arenaClient, unleash)
 
     service.start()
 }

@@ -4,8 +4,11 @@ import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
+import no.finn.unleash.Unleash
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
+import no.nav.dagpenger.journalføring.arena.adapter.ArenaSak
 import no.nav.dagpenger.streams.PacketDeserializer
 import no.nav.dagpenger.streams.PacketSerializer
 import no.nav.dagpenger.streams.Topic
@@ -43,7 +46,16 @@ class JournalFøringArenaTopologyTest {
             arenaOppgaveClient.bestillOppgave("12345678", "1234")
         } returns "1234"
 
-        val testService = JournalføringArena(Configuration(), arenaOppgaveClient)
+        every {
+            arenaOppgaveClient.hentArenaSaker("12345678")
+        } returns emptyList<ArenaSak>()
+
+        val unleashMock: Unleash = mockk()
+        every {
+            unleashMock.isEnabled("dp-arena.bestillOppgaveLOCAL", false)
+        } returns true
+
+        val testService = JournalføringArena(Configuration(), arenaOppgaveClient, unleashMock)
 
         val packet = Packet().apply {
             putValue(
@@ -75,6 +87,17 @@ class JournalFøringArenaTopologyTest {
             ut.value().getStringValue("arenaSakId") shouldBe "1234"
         }
 
-        // verify { arenaOppgaveClient.bestillOppgave("12345678", "1234") }
+        /*  val registry = CollectorRegistry.defaultRegistry
+
+
+          registry.metricFamilySamples().asSequence().find { it.name == "automatisk_journalfort_arena" }?.let { metric ->
+              print(metric)
+              metric.samples[0].value shouldNotBe null
+              metric.samples[0].value shouldBeGreaterThan 0.0
+              metric.samples[0].labelValues[0] shouldBe "true"
+          }
+  */
+
+        verify { arenaOppgaveClient.bestillOppgave("12345678", "1234") }
     }
 }
