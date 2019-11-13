@@ -3,7 +3,6 @@ package no.nav.dagpenger.journalføring.arena.adapter.soap
 import no.nav.cxf.metrics.MetricFeature
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BehandleArbeidOgAktivitetOppgaveV1
 import no.nav.tjeneste.virksomhet.ytelseskontrakt.v3.YtelseskontraktV3
-import org.apache.cxf.ext.logging.LoggingFeature
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean
 import org.apache.cxf.ws.addressing.WSAddressingFeature
 import javax.xml.namespace.QName
