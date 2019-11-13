@@ -47,7 +47,7 @@ object SoapPort {
             serviceName = QName(namespace, svcName)
             endpointName = QName(namespace, portName)
             serviceClass = serviceClazz
-            features = listOf(WSAddressingFeature(), LoggingFeature(), MetricFeature())
+            features = listOf(WSAddressingFeature(), MetricFeature())
             outInterceptors.add(CallIdInterceptor())
         }
 
