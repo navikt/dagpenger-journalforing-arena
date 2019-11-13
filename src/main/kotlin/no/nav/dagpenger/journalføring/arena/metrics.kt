@@ -6,7 +6,7 @@ val automatiskJournalførtTeller = Counter
     .build()
     .name("automatisk_journalfort_arena")
     .help("Antall søknader som er automatisk journalført i Arena")
-    .labelNames("opprettet", "antall_vedtak")
+    .labelNames("opprettet")
     .register()
 
 val automatiskJournalførtJaTeller = automatiskJournalførtTeller.labels("true")
