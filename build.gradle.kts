@@ -120,6 +120,10 @@ tasks.withType<ShadowJar> {
     }
 }
 
+tasks.named("shadowJar") {
+    dependsOn("test")
+}
+
 tasks.named("compileKotlin") {
     dependsOn("spotlessCheck")
 }
