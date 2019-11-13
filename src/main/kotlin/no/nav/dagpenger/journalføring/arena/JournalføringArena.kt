@@ -53,27 +53,29 @@ class JournalføringArena(private val configuration: Configuration, val arenaCli
             "1234"
         )
         try {
-            if (unleash.isEnabled("dp-arena.HentSaker${configuration.application.profile.name}")) {
-                val saker = arenaClient.hentArenaSaker(naturligIdent)
 
-                val aktiveSaker = saker.filter { it.status == "AKTIV" }.also { aktiveDagpengeSakTeller.inc(it.size.toDouble()) }
-                saker.filter { it.status == "AVSLU" }.also { avsluttetDagpengeSakTeller.inc(it.size.toDouble()) }
-                saker.filter { it.status == "INAKT" }.also { inaktivDagpengeSakTeller.inc(it.size.toDouble()) }
+            val saker = arenaClient.hentArenaSaker(naturligIdent)
 
-                if (aktiveSaker.isEmpty()) {
-                    automatiskJournalførtJaTeller.inc()
-                    // val arenaSakId = arenaClient.bestillOppgave(naturligIdent, enhetId)
-                    // packet.putValue(PacketKeys.ARENA_SAK_ID, arenaSakId)
-                } else {
-                    automatiskJournalførtNeiTeller.inc()
-                }
-                saker.forEach {
-                    logger.info { "Tilhører sak: id: ${it.fagsystemSakId}, status: ${it.status}" }
-                }
+            val aktiveSaker =
+                saker.filter { it.status == "AKTIV" }.also { aktiveDagpengeSakTeller.inc(it.size.toDouble()) }
+            saker.filter { it.status == "AVSLU" }.also { avsluttetDagpengeSakTeller.inc(it.size.toDouble()) }
+            saker.filter { it.status == "INAKT" }.also { inaktivDagpengeSakTeller.inc(it.size.toDouble()) }
 
-                if (saker.isEmpty()) {
-                    logger.info { "Har ingen saker" }
+            if (aktiveSaker.isEmpty()) {
+                automatiskJournalførtJaTeller.inc()
+                if (unleash.isEnabled("dp-arena.bestillOppgave${configuration.application.profile.name}", false)) {
+                    val arenaSakId = arenaClient.bestillOppgave(naturligIdent, enhetId)
+                    packet.putValue(PacketKeys.ARENA_SAK_ID, arenaSakId)
                 }
+            } else {
+                automatiskJournalførtNeiTeller.inc()
+            }
+            saker.forEach {
+                logger.info { "Tilhører sak: id: ${it.fagsystemSakId}, status: ${it.status}" }
+            }
+
+            if (saker.isEmpty()) {
+                logger.info { "Har ingen saker" }
             }
         } catch (exception: Exception) {
             logger.error(exception) { "Failed to get arena-saker" }
@@ -94,7 +96,8 @@ class JournalføringArena(private val configuration: Configuration, val arenaCli
 fun main(args: Array<String>) {
     val configuration = Configuration()
 
-    val ytelseskontraktV3: YtelseskontraktV3 = SoapPort.ytelseskontraktV3(configuration.ytelseskontraktV3Config.endpoint)
+    val ytelseskontraktV3: YtelseskontraktV3 =
+        SoapPort.ytelseskontraktV3(configuration.ytelseskontraktV3Config.endpoint)
 
     val behandleArbeidsytelseSak =
         SoapPort.behandleArbeidOgAktivitetOppgaveV1(configuration.behandleArbeidsytelseSakConfig.endpoint)
