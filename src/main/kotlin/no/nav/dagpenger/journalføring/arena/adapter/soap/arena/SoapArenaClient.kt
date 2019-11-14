@@ -3,6 +3,7 @@ package no.nav.dagpenger.journalføring.arena.adapter.soap.arena
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClientException
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSak
+import no.nav.dagpenger.streams.HealthStatus
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BehandleArbeidOgAktivitetOppgaveV1
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.informasjon.WSOppgave
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.informasjon.WSOppgavetype
@@ -20,6 +21,7 @@ import java.util.GregorianCalendar
 import javax.xml.datatype.DatatypeFactory
 
 class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1, private val ytelseskontraktV3: YtelseskontraktV3) : ArenaClient {
+
     override fun bestillOppgave(naturligIdent: String, behandlendeEnhetId: String): String {
         val soapRequest = WSBestillOppgaveRequest()
 
@@ -60,6 +62,15 @@ class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1,
                 it.fagsystemSakId,
                 it.status
             )
+        }
+    }
+
+    override fun status(): HealthStatus {
+        return try {
+            ytelseskontraktV3.ping()
+            HealthStatus.UP
+        } catch (e: Exception) {
+            HealthStatus.DOWN
         }
     }
 }
