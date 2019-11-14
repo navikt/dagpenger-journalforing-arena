@@ -10,6 +10,7 @@ import no.nav.dagpenger.journalføring.arena.adapter.soap.SoapPort
 import no.nav.dagpenger.journalføring.arena.adapter.soap.arena.SoapArenaClient
 import no.nav.dagpenger.journalføring.arena.adapter.soap.configureFor
 import no.nav.dagpenger.journalføring.arena.adapter.soap.stsClient
+import no.nav.dagpenger.streams.HealthCheck
 import no.nav.dagpenger.streams.River
 import no.nav.dagpenger.streams.streamConfig
 import no.nav.tjeneste.virksomhet.ytelseskontrakt.v3.YtelseskontraktV3
@@ -37,6 +38,7 @@ class JournalføringArena(
 
     override val SERVICE_APP_ID = "dp-journalforing-arena"
     override val HTTP_PORT: Int = configuration.application.httpPort
+    override val healthChecks: List<HealthCheck> = listOf(arenaClient as HealthCheck)
 
     override fun filterPredicates(): List<Predicate<String, Packet>> {
         return listOf(

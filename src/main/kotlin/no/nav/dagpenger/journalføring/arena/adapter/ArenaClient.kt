@@ -1,6 +1,8 @@
 package no.nav.dagpenger.journalføring.arena.adapter
 
-interface ArenaClient {
+import no.nav.dagpenger.streams.HealthCheck
+
+interface ArenaClient : HealthCheck {
     fun bestillOppgave(naturligIdent: String, behandlendeEnhetId: String): String
     fun hentArenaSaker(naturligIdent: String): List<ArenaSak>
 }
