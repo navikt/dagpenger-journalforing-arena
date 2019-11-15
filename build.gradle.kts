@@ -40,7 +40,7 @@ fun tjenestespesifikasjon(name: String) = "no.nav.tjenestespesifikasjoner:$name:
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
-    implementation("com.github.navikt:dagpenger-streams:2019.10.18-12.06.fbbb66cd150b")
+    implementation(Dagpenger.Streams)
     implementation(Dagpenger.Events)
 
     implementation("no.finn.unleash:unleash-client-java:3.2.9")
