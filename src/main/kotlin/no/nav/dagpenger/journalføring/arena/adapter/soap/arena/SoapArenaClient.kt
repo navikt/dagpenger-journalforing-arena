@@ -1,8 +1,9 @@
 package no.nav.dagpenger.journalføring.arena.adapter.soap.arena
 
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
-import no.nav.dagpenger.journalføring.arena.adapter.ArenaClientException
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSak
+import no.nav.dagpenger.journalføring.arena.adapter.BestillOppgaveArenaException
+import no.nav.dagpenger.journalføring.arena.adapter.HentArenaSakerException
 import no.nav.dagpenger.streams.HealthStatus
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BehandleArbeidOgAktivitetOppgaveV1
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.informasjon.WSOppgave
@@ -42,7 +43,7 @@ class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1,
         val response: WSBestillOppgaveResponse = try {
             oppgaveV1.bestillOppgave(soapRequest)
         } catch (e: Exception) {
-            throw ArenaClientException(e)
+            throw BestillOppgaveArenaException(e)
             // @todo Håndtere BestillOppgaveSikkerhetsbegrensning, BestillOppgaveOrganisasjonIkkeFunnet, BestillOppgavePersonErInaktiv, BestillOppgaveSakIkkeOpprettet, BestillOppgavePersonIkkeFunnet, BestillOppgaveUgyldigInput;
         }
 
@@ -56,12 +57,16 @@ class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1,
                 .withPersonidentifikator(naturligIdent)
                 .withPeriode(WSPeriode().withFom(DatatypeFactory.newInstance().newXMLGregorianCalendar(GregorianCalendar.from(fomDato))))
 
-        val response = ytelseskontraktV3.hentYtelseskontraktListe(request)
-        return response.ytelseskontraktListe.filter { it.ytelsestype == "DAGP" }.map {
-            ArenaSak(
-                it.fagsystemSakId,
-                it.status
-            )
+        try {
+            val response = ytelseskontraktV3.hentYtelseskontraktListe(request)
+            return response.ytelseskontraktListe.filter { it.ytelsestype == "DAGP" }.map {
+                ArenaSak(
+                    it.fagsystemSakId,
+                    it.status
+                )
+            }
+        } catch (e: Exception) {
+            throw HentArenaSakerException(e)
         }
     }
 

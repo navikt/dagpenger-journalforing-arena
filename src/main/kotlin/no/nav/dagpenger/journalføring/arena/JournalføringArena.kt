@@ -5,6 +5,7 @@ import no.finn.unleash.DefaultUnleash
 import no.finn.unleash.Unleash
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
+import no.nav.dagpenger.journalføring.arena.adapter.HentArenaSakerException
 import no.nav.dagpenger.journalføring.arena.adapter.soap.STS_SAML_POLICY_NO_TRANSPORT_BINDING
 import no.nav.dagpenger.journalføring.arena.adapter.soap.SoapPort
 import no.nav.dagpenger.journalføring.arena.adapter.soap.arena.SoapArenaClient
@@ -81,7 +82,7 @@ class JournalføringArena(
             if (saker.isEmpty()) {
                 logger.info { "Har ingen saker" }
             }
-        } catch (exception: Exception) {
+        } catch (exception: HentArenaSakerException) {
             logger.error(exception) { "Failed to get arena-saker" }
         }
 
