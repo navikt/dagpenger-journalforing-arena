@@ -34,7 +34,7 @@ class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1,
             bruker = WSPerson().apply { ident = naturligIdent }
             this.behandlendeEnhetId = behandlendeEnhetId
             prioritet = WSPrioritet().apply {
-                this.kodeRef = "HOY"
+                this.value = "HOY"
             }
             frist = DatatypeFactory.newInstance().newXMLGregorianCalendar(GregorianCalendar.from(today))
         }
