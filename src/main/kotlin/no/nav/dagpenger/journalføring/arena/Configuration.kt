@@ -24,7 +24,7 @@ private val defaultProperties = ConfigurationMap(
     mapOf(
         "application.httpPort" to 8080.toString(),
         "allow.insecure.soap.requests" to false.toString(),
-        "unleash.url" to "http://unleash.nais.adeo.no/api/"
+        "unleash.url" to "https://unleash.nais.adeo.no/api/"
     )
 )
 
