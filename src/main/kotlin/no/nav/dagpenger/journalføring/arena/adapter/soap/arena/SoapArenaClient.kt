@@ -44,7 +44,6 @@ class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1,
             oppgaveV1.bestillOppgave(soapRequest)
         } catch (e: Exception) {
             throw BestillOppgaveArenaException(e)
-
             // @todo Håndtere BestillOppgaveSikkerhetsbegrensning, BestillOppgaveOrganisasjonIkkeFunnet, BestillOppgavePersonErInaktiv, BestillOppgaveSakIkkeOpprettet, BestillOppgavePersonIkkeFunnet, BestillOppgaveUgyldigInput
         }
 
