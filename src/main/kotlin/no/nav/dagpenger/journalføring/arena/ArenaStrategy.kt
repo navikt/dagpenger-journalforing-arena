@@ -1,10 +1,11 @@
 package no.nav.dagpenger.journalføring.arena
 
+import mu.KotlinLogging
 import no.finn.unleash.Unleash
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
 
+private val logger = KotlinLogging.logger {}
 interface ArenaStrategy {
-
     fun canHandle(fakta: Fakta): Boolean
     fun handle(fakta: Fakta): ArenaResultat
 }
@@ -14,7 +15,12 @@ class ArenaDefaultStrategy(val strategies: List<ArenaStrategy>) : ArenaStrategy 
 
     override fun handle(fakta: Fakta) =
         strategies.filter { it.canHandle(fakta) }
-            .map { it.handle(fakta) }.firstOrNull() ?: ArenaResultat(null, false)
+            .map { it.handle(fakta) }.firstOrNull() ?: default()
+
+    private fun default(): ArenaResultat {
+        logger.info { "Strategy ${this.javaClass.name} handling this" }
+        return ArenaResultat(null, false)
+    }
 }
 
 class ArenaCreateOppgaveStrategy(
@@ -32,6 +38,7 @@ class ArenaCreateOppgaveStrategy(
 
     override fun handle(fakta: Fakta): ArenaResultat {
         val arenaSakId = arenaClient.bestillOppgave(fakta.naturligIdent, fakta.enhetId)
+        logger.info { "Strategy ${this.javaClass.name} handling this" }
         return ArenaResultat(arenaSakId, true)
     }
 }
@@ -41,7 +48,10 @@ class ArenaKanIkkeOppretteOppgaveStrategy : ArenaStrategy {
         return fakta.arenaSaker.any { it.status == "AKTIV" }
     }
 
-    override fun handle(fakta: Fakta) = ArenaResultat(null, false)
+    override fun handle(fakta: Fakta): ArenaResultat {
+        logger.info { "Strategy ${this.javaClass.name} handling this" }
+        return ArenaResultat(null, false)
+    }
 }
 
 data class ArenaResultat(val arenaSakId: String?, val opprettet: Boolean)
