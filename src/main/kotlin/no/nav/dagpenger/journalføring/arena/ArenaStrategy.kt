@@ -5,6 +5,7 @@ import no.finn.unleash.Unleash
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
 
 private val logger = KotlinLogging.logger {}
+
 interface ArenaStrategy {
     fun canHandle(fakta: Fakta): Boolean
     fun handle(fakta: Fakta): ArenaResultat
