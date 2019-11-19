@@ -15,7 +15,7 @@ Gradle brukes som byggverktøy og er bundlet inn.
 
 Spørsmål knyttet til koden eller prosjektet kan rettes mot:
 
-* André Roaldseth, andre.roaldseth@nav.no
+* #team-dagpenger på nav-it Slack
 * Eller en annen måte for omverden å kontakte teamet på
 
 ## For NAV-ansatte
