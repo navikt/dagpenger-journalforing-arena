@@ -80,7 +80,9 @@ class JournalføringArena(
             }
 
             if (saker.isEmpty()) {
-                logger.info { "Har ingen saker" }
+                logger.info { "Innsender av journalpost ${PacketKeys.JOURNALPOST_ID} har ingen dagpengesaker siste 104 uker" }
+            } else {
+                logger.info { "Innsender av journalpost ${PacketKeys.JOURNALPOST_ID} har ${saker.size} dagpengesaker siste 104 uker" }
             }
         } catch (exception: HentArenaSakerException) {
             logger.error(exception) { "Failed to get arena-saker" }
