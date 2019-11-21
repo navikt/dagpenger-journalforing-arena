@@ -65,6 +65,8 @@ class JournalføringArena(
             packet.putValue(PacketKeys.ARENA_SAK_OPPRETTET, arenaResultat.opprettet)
             arenaResultat.arenaSakId?.let { packet.putValue(PacketKeys.ARENA_SAK_ID, it) }
 
+            logger.info { "Mulige saksstatuser: ${saker.map { it.status }.toSet()}" }
+
             val aktiveSaker =
                 saker.filter { it.status == "AKTIV" }.also { aktiveDagpengeSakTeller.inc(it.size.toDouble()) }
             saker.filter { it.status == "AVSLU" }.also { avsluttetDagpengeSakTeller.inc(it.size.toDouble()) }

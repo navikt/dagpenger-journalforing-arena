@@ -32,7 +32,7 @@ internal class SoapArenaClientTest {
 
         every {
             ytelseskontraktV3.hentYtelseskontraktListe(any())
-        } returns WSHentYtelseskontraktListeResponse().withYtelseskontraktListe(listOf(WSDagpengekontrakt().withFagsystemSakId(123).withStatus("INAKT").withYtelsestype("DAGP")))
+        } returns WSHentYtelseskontraktListeResponse().withYtelseskontraktListe(listOf(WSDagpengekontrakt().withFagsystemSakId(123).withStatus("INAKT").withYtelsestype("Dagpenger")))
 
         val client = SoapArenaClient(mockk(), ytelseskontraktV3)
         val saker = client.hentArenaSaker("1234")
