@@ -59,7 +59,6 @@ internal class SoapArenaClientTest {
         shouldThrow<HentArenaSakerException> {
             client.hentArenaSaker("1234")
         }
-
     }
 
     @Test
