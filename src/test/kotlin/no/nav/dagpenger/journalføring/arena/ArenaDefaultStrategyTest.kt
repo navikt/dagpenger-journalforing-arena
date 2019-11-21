@@ -2,6 +2,7 @@ package no.nav.dagpenger.journalføring.arena
 
 import io.kotlintest.shouldBe
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSak
+import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakStatus
 import org.junit.jupiter.api.Test
 
 internal class ArenaDefaultStrategyTest {
@@ -16,7 +17,7 @@ internal class ArenaDefaultStrategyTest {
     fun `skal bestille oppgave når Fakta inneholder liste uten aktiv sak`() {
 
         val arenaResultat = ArenaDefaultStrategy(listOf(SuksessBestillOppgaveStrategi(), ArenaKanIkkeOppretteOppgaveStrategy())).handle(
-            Fakta("1010101", "NAV", listOf(ArenaSak(123, "INAKTIV"))))
+            Fakta("1010101", "NAV", listOf(ArenaSak(123, ArenaSakStatus.Inaktiv))))
         arenaResultat.arenaSakId shouldBe "123"
         arenaResultat.opprettet shouldBe true
     }

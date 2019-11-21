@@ -2,6 +2,7 @@ package no.nav.dagpenger.journalføring.arena
 
 import io.kotlintest.shouldBe
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSak
+import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakStatus
 import org.junit.jupiter.api.Test
 
 class ArenaKanIkkeOppretteOppgaveStrategyTest {
@@ -10,7 +11,7 @@ class ArenaKanIkkeOppretteOppgaveStrategyTest {
         val fakta = Fakta(
             naturligIdent = "12345678",
             enhetId = "1234",
-            arenaSaker = listOf(ArenaSak(124, "AKTIV")))
+            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Aktiv)))
 
         val strategy = ArenaKanIkkeOppretteOppgaveStrategy()
         strategy.canHandle(fakta) shouldBe true
@@ -25,7 +26,7 @@ class ArenaKanIkkeOppretteOppgaveStrategyTest {
         val fakta = Fakta(
             naturligIdent = "12345678",
             enhetId = "1234",
-            arenaSaker = listOf(ArenaSak(124, "INAKTIV")))
+            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Inaktiv)))
 
         val strategy = ArenaKanIkkeOppretteOppgaveStrategy()
         strategy.canHandle(fakta) shouldBe false

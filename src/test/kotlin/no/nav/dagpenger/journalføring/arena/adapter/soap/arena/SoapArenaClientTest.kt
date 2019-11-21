@@ -1,8 +1,11 @@
 package no.nav.dagpenger.journalføring.arena.adapter.soap.arena
 
 import io.kotlintest.shouldBe
+import io.kotlintest.shouldThrow
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakStatus
+import no.nav.dagpenger.journalføring.arena.adapter.HentArenaSakerException
 import no.nav.dagpenger.streams.HealthStatus
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BehandleArbeidOgAktivitetOppgaveV1
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.meldinger.WSBestillOppgaveResponse
@@ -32,14 +35,31 @@ internal class SoapArenaClientTest {
 
         every {
             ytelseskontraktV3.hentYtelseskontraktListe(any())
-        } returns WSHentYtelseskontraktListeResponse().withYtelseskontraktListe(listOf(WSDagpengekontrakt().withFagsystemSakId(123).withStatus("INAKT").withYtelsestype("Dagpenger")))
+        } returns WSHentYtelseskontraktListeResponse().withYtelseskontraktListe(listOf(WSDagpengekontrakt().withFagsystemSakId(123).withStatus("Inaktiv").withYtelsestype("Dagpenger")))
 
         val client = SoapArenaClient(mockk(), ytelseskontraktV3)
         val saker = client.hentArenaSaker("1234")
 
         saker.isEmpty() shouldBe false
         saker.first().fagsystemSakId shouldBe 123
-        saker.first().status shouldBe "INAKT"
+        saker.first().status shouldBe ArenaSakStatus.Inaktiv
+    }
+
+    @Test
+    fun `Skal kaste unntak med ukjent saksstatus`() {
+
+        val ytelseskontraktV3: YtelseskontraktV3 = mockk()
+
+        every {
+            ytelseskontraktV3.hentYtelseskontraktListe(any())
+        } returns WSHentYtelseskontraktListeResponse().withYtelseskontraktListe(listOf(WSDagpengekontrakt().withFagsystemSakId(123).withStatus("INAKT").withYtelsestype("Dagpenger")))
+
+        val client = SoapArenaClient(mockk(), ytelseskontraktV3)
+
+        shouldThrow<HentArenaSakerException> {
+            client.hentArenaSaker("1234")
+        }
+
     }
 
     @Test

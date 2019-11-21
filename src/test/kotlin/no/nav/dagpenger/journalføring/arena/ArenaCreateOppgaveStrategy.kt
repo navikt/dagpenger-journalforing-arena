@@ -7,6 +7,7 @@ import io.mockk.mockk
 import no.finn.unleash.Unleash
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSak
+import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakStatus
 import org.junit.jupiter.api.Test
 
 class ArenaCreateOppgaveStrategyTest {
@@ -27,7 +28,7 @@ class ArenaCreateOppgaveStrategyTest {
         val fakta = Fakta(
             naturligIdent = "12345678",
             enhetId = "1234",
-            arenaSaker = listOf(ArenaSak(124, "INAKT")))
+            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Inaktiv)))
 
         val strategy = ArenaCreateOppgaveStrategy(arenaOppgaveClient, unleashMock, Profile.LOCAL)
         strategy.canHandle(fakta) shouldBe true
@@ -52,7 +53,7 @@ class ArenaCreateOppgaveStrategyTest {
         val fakta = Fakta(
             naturligIdent = "12345678",
             enhetId = "1234",
-            arenaSaker = listOf(ArenaSak(124, "AKTIV")))
+            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Aktiv)))
 
         val strategy = ArenaCreateOppgaveStrategy(arenaOppgaveClient, unleashMock, Profile.LOCAL)
         strategy.canHandle(fakta) shouldBe false
@@ -73,7 +74,7 @@ class ArenaCreateOppgaveStrategyTest {
         val fakta = Fakta(
             naturligIdent = "12345678",
             enhetId = "1234",
-            arenaSaker = listOf(ArenaSak(124, "INAKT")))
+            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Inaktiv)))
 
         val strategy = ArenaCreateOppgaveStrategy(arenaOppgaveClient, unleashMock, Profile.LOCAL)
         strategy.canHandle(fakta) shouldBe false

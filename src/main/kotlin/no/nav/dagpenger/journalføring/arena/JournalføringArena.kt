@@ -5,6 +5,7 @@ import no.finn.unleash.DefaultUnleash
 import no.finn.unleash.Unleash
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
+import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakStatus
 import no.nav.dagpenger.journalføring.arena.adapter.HentArenaSakerException
 import no.nav.dagpenger.journalføring.arena.adapter.soap.STS_SAML_POLICY_NO_TRANSPORT_BINDING
 import no.nav.dagpenger.journalføring.arena.adapter.soap.SoapPort
@@ -65,12 +66,10 @@ class JournalføringArena(
             packet.putValue(PacketKeys.ARENA_SAK_OPPRETTET, arenaResultat.opprettet)
             arenaResultat.arenaSakId?.let { packet.putValue(PacketKeys.ARENA_SAK_ID, it) }
 
-            logger.info { "Mulige saksstatuser: ${saker.map { it.status }.toSet()}" }
-
             val aktiveSaker =
-                saker.filter { it.status == "AKTIV" }.also { aktiveDagpengeSakTeller.inc(it.size.toDouble()) }
-            saker.filter { it.status == "AVSLU" }.also { avsluttetDagpengeSakTeller.inc(it.size.toDouble()) }
-            saker.filter { it.status == "INAKT" }.also { inaktivDagpengeSakTeller.inc(it.size.toDouble()) }
+                saker.filter { it.status == ArenaSakStatus.Aktiv }.also { aktiveDagpengeSakTeller.inc(it.size.toDouble()) }
+            saker.filter { it.status == ArenaSakStatus.Lukket }.also { avsluttetDagpengeSakTeller.inc(it.size.toDouble()) }
+            saker.filter { it.status == ArenaSakStatus.Inaktiv }.also { inaktivDagpengeSakTeller.inc(it.size.toDouble()) }
 
             if (aktiveSaker.isEmpty()) {
                 automatiskJournalførtJaTeller.inc()

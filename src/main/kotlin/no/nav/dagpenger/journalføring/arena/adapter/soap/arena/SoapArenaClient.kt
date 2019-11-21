@@ -2,6 +2,7 @@ package no.nav.dagpenger.journalføring.arena.adapter.soap.arena
 
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSak
+import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakStatus
 import no.nav.dagpenger.journalføring.arena.adapter.BestillOppgaveArenaException
 import no.nav.dagpenger.journalføring.arena.adapter.HentArenaSakerException
 import no.nav.dagpenger.streams.HealthStatus
@@ -62,7 +63,7 @@ class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1,
             return response.ytelseskontraktListe.filter { it.ytelsestype == "Dagpenger" }.map {
                 ArenaSak(
                     it.fagsystemSakId,
-                    it.status
+                    ArenaSakStatus.valueOf(it.status)
                 )
             }
         } catch (e: Exception) {

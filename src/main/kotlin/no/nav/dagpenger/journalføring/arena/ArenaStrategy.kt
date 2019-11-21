@@ -3,6 +3,7 @@ package no.nav.dagpenger.journalføring.arena
 import mu.KotlinLogging
 import no.finn.unleash.Unleash
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
+import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakStatus
 
 private val logger = KotlinLogging.logger {}
 
@@ -31,7 +32,7 @@ class ArenaCreateOppgaveStrategy(
 ) : ArenaStrategy {
 
     override fun canHandle(fakta: Fakta): Boolean {
-        return fakta.arenaSaker.none { it.status == "AKTIV" } && unleash.isEnabled(
+        return fakta.arenaSaker.none { it.status == ArenaSakStatus.Aktiv } && unleash.isEnabled(
             "dp-arena.bestillOppgave${profile.name}",
             false
         )
@@ -46,7 +47,7 @@ class ArenaCreateOppgaveStrategy(
 
 class ArenaKanIkkeOppretteOppgaveStrategy : ArenaStrategy {
     override fun canHandle(fakta: Fakta): Boolean {
-        return fakta.arenaSaker.any { it.status == "AKTIV" }
+        return fakta.arenaSaker.any { it.status == ArenaSakStatus.Aktiv }
     }
 
     override fun handle(fakta: Fakta): ArenaResultat {
