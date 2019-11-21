@@ -1,5 +1,6 @@
 package no.nav.dagpenger.journalføring.arena.adapter.soap.arena
 
+import mu.KotlinLogging
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSak
 import no.nav.dagpenger.journalføring.arena.adapter.BestillOppgaveArenaException
@@ -22,6 +23,7 @@ import java.util.GregorianCalendar
 import javax.xml.datatype.DatatypeFactory
 
 class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1, private val ytelseskontraktV3: YtelseskontraktV3) : ArenaClient {
+    private val logger = KotlinLogging.logger {}
 
     override fun bestillOppgave(naturligIdent: String, behandlendeEnhetId: String): String {
         val soapRequest = WSBestillOppgaveRequest()
@@ -59,6 +61,8 @@ class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1,
 
         try {
             val response = ytelseskontraktV3.hentYtelseskontraktListe(request)
+            logger.info { "Hentet ytelseseskontraktliste med størrelse: ${response.ytelseskontraktListe}" }
+            logger.info { "Ytelseskontraktlisten inneholder ytelsestypenee ${response.ytelseskontraktListe.map { it.ytelsestype }.toSet()}" }
             return response.ytelseskontraktListe.filter { it.ytelsestype == "DAGP" }.map {
                 ArenaSak(
                     it.fagsystemSakId,
