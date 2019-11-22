@@ -39,7 +39,7 @@ class ArenaCreateOppgaveStrategy(
     }
 
     override fun handle(fakta: Fakta): ArenaResultat {
-        val arenaSakId = arenaClient.bestillOppgave(fakta.naturligIdent, fakta.enhetId)
+        val arenaSakId = arenaClient.bestillOppgave(fakta.naturligIdent, fakta.enhetId, fakta.dokumentTitler, fakta.registrertDato)
         logger.info { "Strategy ${this.javaClass.name} handling this" }
         return ArenaResultat(arenaSakId, true)
     }
