@@ -1,27 +1,26 @@
 package no.nav.dagpenger.journalføring.arena
 
-import mu.KotlinLogging
 import no.finn.unleash.Unleash
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
+import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakId
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakStatus
-
-private val logger = KotlinLogging.logger {}
+import no.nav.dagpenger.journalføring.arena.adapter.BestillOppgaveArenaException
+import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BestillOppgavePersonErInaktiv
 
 interface ArenaStrategy {
     fun canHandle(fakta: Fakta): Boolean
-    fun handle(fakta: Fakta): ArenaResultat
+    fun handle(fakta: Fakta): ArenaSakId?
 }
 
-class ArenaDefaultStrategy(val strategies: List<ArenaStrategy>) : ArenaStrategy {
+class ArenaDefaultStrategy(private val strategies: List<ArenaStrategy>) : ArenaStrategy {
     override fun canHandle(fakta: Fakta) = true
 
-    override fun handle(fakta: Fakta) =
+    override fun handle(fakta: Fakta): ArenaSakId? =
         strategies.filter { it.canHandle(fakta) }
             .map { it.handle(fakta) }.firstOrNull() ?: default()
 
-    private fun default(): ArenaResultat {
-        logger.info { "Strategy ${this.javaClass.name} handling this" }
-        return ArenaResultat(null, false)
+    private fun default(): ArenaSakId? {
+        return null
     }
 }
 
@@ -38,10 +37,16 @@ class ArenaCreateOppgaveStrategy(
         )
     }
 
-    override fun handle(fakta: Fakta): ArenaResultat {
-        val arenaSakId = arenaClient.bestillOppgave(fakta.naturligIdent, fakta.enhetId)
-        logger.info { "Strategy ${this.javaClass.name} handling this" }
-        return ArenaResultat(arenaSakId, true)
+    override fun handle(fakta: Fakta): ArenaSakId? {
+        val arenaSakId = try {
+            arenaClient.bestillOppgave(fakta.naturligIdent, fakta.enhetId)
+        } catch (e: BestillOppgaveArenaException) {
+            return when (e.cause) {
+                is BestillOppgavePersonErInaktiv -> null
+                else -> throw e
+            }
+        }
+        return ArenaSakId(id = arenaSakId)
     }
 }
 
@@ -50,9 +55,8 @@ class ArenaKanIkkeOppretteOppgaveStrategy : ArenaStrategy {
         return fakta.arenaSaker.any { it.status == ArenaSakStatus.Aktiv }
     }
 
-    override fun handle(fakta: Fakta): ArenaResultat {
-        logger.info { "Strategy ${this.javaClass.name} handling this" }
-        return ArenaResultat(null, false)
+    override fun handle(fakta: Fakta): ArenaSakId? {
+        return null
     }
 }
 

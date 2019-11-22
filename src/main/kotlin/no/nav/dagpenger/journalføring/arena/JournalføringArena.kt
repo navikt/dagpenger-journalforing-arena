@@ -61,10 +61,14 @@ class JournalføringArena(
 
             val fakta = Fakta(naturligIdent = naturligIdent, enhetId = enhetId, arenaSaker = saker)
 
-            val arenaResultat = defaultStrategy.handle(fakta)
+            val arenaSakId = defaultStrategy.handle(fakta)
 
-            packet.putValue(PacketKeys.ARENA_SAK_OPPRETTET, arenaResultat.opprettet)
-            arenaResultat.arenaSakId?.let { packet.putValue(PacketKeys.ARENA_SAK_ID, it) }
+            if (arenaSakId != null) {
+                packet.putValue(PacketKeys.ARENA_SAK_OPPRETTET, true)
+                packet.putValue(PacketKeys.ARENA_SAK_ID, arenaSakId.id)
+            } else {
+                packet.putValue(PacketKeys.ARENA_SAK_OPPRETTET, false)
+            }
 
             val aktiveSaker =
                 saker.filter { it.status == ArenaSakStatus.Aktiv }.also { aktiveDagpengeSakTeller.inc(it.size.toDouble()) }
