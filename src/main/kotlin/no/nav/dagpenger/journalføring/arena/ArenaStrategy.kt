@@ -63,4 +63,3 @@ class ArenaKanIkkeOppretteOppgaveStrategy : ArenaStrategy {
         return null
     }
 }
-

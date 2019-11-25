@@ -10,7 +10,7 @@ fun createArenaOppgaveBeskrivelse(dokumentTitler: List<String>, registrertDato: 
     val formatertVedlegg =
         if (vedlegg.isNotEmpty()) {
             vedlegg.joinToString(prefix = "- ", separator = "\n- ", postfix = "\n")
-        } else {""}
+        } else { "" }
 
     val formatertDato =
         LocalDateTime
