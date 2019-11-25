@@ -20,7 +20,6 @@ class ArenaDefaultStrategy(private val strategies: List<ArenaStrategy>) : ArenaS
             .map { it.handle(fakta) }.firstOrNull() ?: default()
 
     private fun default(): ArenaSakId? {
-        automatiskJournalførtNeiTeller.inc()
         return null
     }
 }
@@ -44,13 +43,11 @@ class ArenaCreateOppgaveStrategy(
         } catch (e: BestillOppgaveArenaException) {
             return when (e.cause) {
                 is BestillOppgavePersonErInaktiv -> {
-
                     null
                 }
                 else -> throw e
             }
         }
-        automatiskJournalførtJaTeller.inc()
         return ArenaSakId(id = arenaSakId)
     }
 }
@@ -61,7 +58,6 @@ class ArenaKanIkkeOppretteOppgaveStrategy : ArenaStrategy {
     }
 
     override fun handle(fakta: Fakta): ArenaSakId? {
-        automatiskJournalførtNeiTeller.inc()
         return null
     }
 }

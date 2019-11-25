@@ -67,8 +67,10 @@ class JournalføringArena(
             if (arenaSakId != null) {
                 packet.putValue(PacketKeys.ARENA_SAK_OPPRETTET, true)
                 packet.putValue(PacketKeys.ARENA_SAK_ID, arenaSakId.id)
+                automatiskJournalførtJaTeller.inc()
             } else {
                 packet.putValue(PacketKeys.ARENA_SAK_OPPRETTET, false)
+                automatiskJournalførtNeiTeller.inc()
             }
             registrerMetrikker(saker)
             saker.forEach {
@@ -85,8 +87,7 @@ class JournalføringArena(
     }
 
     private fun registrerMetrikker(saker: List<ArenaSak>) {
-        val aktiveSaker =
-            saker.filter { it.status == ArenaSakStatus.Aktiv }.also { aktiveDagpengeSakTeller.inc(it.size.toDouble()) }
+        saker.filter { it.status == ArenaSakStatus.Aktiv }.also { aktiveDagpengeSakTeller.inc(it.size.toDouble()) }
         saker.filter { it.status == ArenaSakStatus.Lukket }.also { avsluttetDagpengeSakTeller.inc(it.size.toDouble()) }
         saker.filter { it.status == ArenaSakStatus.Inaktiv }.also { inaktivDagpengeSakTeller.inc(it.size.toDouble()) }
     }
