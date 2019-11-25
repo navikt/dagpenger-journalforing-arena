@@ -132,8 +132,7 @@ fun main(args: Array<String>) {
             listOf(
                 ArenaCreateOppgaveStrategy(
                     arenaClient = arenaClient,
-                    unleash = unleash,
-                    profile = configuration.application.profile
+                    unleash = unleash
                 ),
                 ArenaKanIkkeOppretteOppgaveStrategy()
             )

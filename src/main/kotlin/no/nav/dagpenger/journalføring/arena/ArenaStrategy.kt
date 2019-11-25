@@ -26,13 +26,12 @@ class ArenaDefaultStrategy(private val strategies: List<ArenaStrategy>) : ArenaS
 
 class ArenaCreateOppgaveStrategy(
     private val arenaClient: ArenaClient,
-    private val unleash: Unleash,
-    private val profile: Profile
+    private val unleash: Unleash
 ) : ArenaStrategy {
 
     override fun canHandle(fakta: Fakta): Boolean {
         return fakta.arenaSaker.none { it.status == ArenaSakStatus.Aktiv } && unleash.isEnabled(
-            "dp-arena.bestillOppgave${profile.name}",
+            "dp-arena.bestillOppgave",
             false
         )
     }
