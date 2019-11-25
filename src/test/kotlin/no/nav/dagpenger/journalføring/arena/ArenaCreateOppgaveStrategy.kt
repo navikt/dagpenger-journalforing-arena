@@ -24,7 +24,7 @@ class ArenaCreateOppgaveStrategyTest {
 
         val unleashMock: Unleash = mockk()
         every {
-            unleashMock.isEnabled("dp-arena.bestillOppgaveLOCAL", false)
+            unleashMock.isEnabled("dp-arena.bestillOppgave", false)
         } returns true
 
         val fakta = Fakta(
@@ -32,7 +32,7 @@ class ArenaCreateOppgaveStrategyTest {
             enhetId = "1234",
             arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Inaktiv)))
 
-        val strategy = ArenaCreateOppgaveStrategy(arenaOppgaveClient, unleashMock, Profile.LOCAL)
+        val strategy = ArenaCreateOppgaveStrategy(arenaOppgaveClient, unleashMock)
         strategy.canHandle(fakta) shouldBe true
 
         val resultat = strategy.handle(fakta)
@@ -48,7 +48,7 @@ class ArenaCreateOppgaveStrategyTest {
 
         val unleashMock: Unleash = mockk()
         every {
-            unleashMock.isEnabled("dp-arena.bestillOppgaveLOCAL", false)
+            unleashMock.isEnabled("dp-arena.bestillOppgave", false)
         } returns true
 
         val fakta = Fakta(
@@ -56,7 +56,7 @@ class ArenaCreateOppgaveStrategyTest {
             enhetId = "1234",
             arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Aktiv)))
 
-        val strategy = ArenaCreateOppgaveStrategy(arenaOppgaveClient, unleashMock, Profile.LOCAL)
+        val strategy = ArenaCreateOppgaveStrategy(arenaOppgaveClient, unleashMock)
         strategy.canHandle(fakta) shouldBe false
     }
 
@@ -69,7 +69,7 @@ class ArenaCreateOppgaveStrategyTest {
 
         val unleashMock: Unleash = mockk()
         every {
-            unleashMock.isEnabled("dp-arena.bestillOppgaveLOCAL", false)
+            unleashMock.isEnabled("dp-arena.bestillOppgave", false)
         } returns false
 
         val fakta = Fakta(
@@ -77,7 +77,7 @@ class ArenaCreateOppgaveStrategyTest {
             enhetId = "1234",
             arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Inaktiv)))
 
-        val strategy = ArenaCreateOppgaveStrategy(arenaOppgaveClient, unleashMock, Profile.LOCAL)
+        val strategy = ArenaCreateOppgaveStrategy(arenaOppgaveClient, unleashMock)
         strategy.canHandle(fakta) shouldBe false
     }
 
@@ -90,7 +90,7 @@ class ArenaCreateOppgaveStrategyTest {
 
         val unleashMock: Unleash = mockk()
         every {
-            unleashMock.isEnabled("dp-arena.bestillOppgaveLOCAL", false)
+            unleashMock.isEnabled("dp-arena.bestillOppgave", false)
         } returns true
 
         val fakta = Fakta(
@@ -98,7 +98,7 @@ class ArenaCreateOppgaveStrategyTest {
             enhetId = "1234",
             arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Inaktiv)))
 
-        val strategy = ArenaCreateOppgaveStrategy(arenaOppgaveClient, unleashMock, Profile.LOCAL)
+        val strategy = ArenaCreateOppgaveStrategy(arenaOppgaveClient, unleashMock)
         strategy.handle(fakta) shouldBe null
     }
 }
