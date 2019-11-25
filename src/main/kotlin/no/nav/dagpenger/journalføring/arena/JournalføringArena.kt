@@ -5,6 +5,7 @@ import no.finn.unleash.DefaultUnleash
 import no.finn.unleash.Unleash
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
+import no.nav.dagpenger.journalføring.arena.adapter.ArenaSak
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakStatus
 import no.nav.dagpenger.journalføring.arena.adapter.HentArenaSakerException
 import no.nav.dagpenger.journalføring.arena.adapter.soap.STS_SAML_POLICY_NO_TRANSPORT_BINDING
@@ -69,29 +70,25 @@ class JournalføringArena(
             } else {
                 packet.putValue(PacketKeys.ARENA_SAK_OPPRETTET, false)
             }
-
-            val aktiveSaker =
-                saker.filter { it.status == ArenaSakStatus.Aktiv }.also { aktiveDagpengeSakTeller.inc(it.size.toDouble()) }
-            saker.filter { it.status == ArenaSakStatus.Lukket }.also { avsluttetDagpengeSakTeller.inc(it.size.toDouble()) }
-            saker.filter { it.status == ArenaSakStatus.Inaktiv }.also { inaktivDagpengeSakTeller.inc(it.size.toDouble()) }
-
-            if (aktiveSaker.isEmpty()) {
-                automatiskJournalførtJaTeller.inc()
-            } else {
-                automatiskJournalførtNeiTeller.inc()
-            }
+            registrerMetrikker(saker)
             saker.forEach {
                 logger.info { "Tilhører sak: id: ${it.fagsystemSakId}, status: ${it.status}" }
             }
-
             logger.info {
                 "Innsender av journalpost ${packet.getStringValue(PacketKeys.JOURNALPOST_ID)} har ${saker.size} dagpengesaker siste 104 uker"
             }
-        } catch (exception: HentArenaSakerException) {
+        } catch (exception: HentArenaSakerException) { // @todo: Feilhåndtering
             logger.error(exception) { "Failed to get arena-saker" }
         }
 
         return packet
+    }
+
+    private fun registrerMetrikker(saker: List<ArenaSak>) {
+        val aktiveSaker =
+            saker.filter { it.status == ArenaSakStatus.Aktiv }.also { aktiveDagpengeSakTeller.inc(it.size.toDouble()) }
+        saker.filter { it.status == ArenaSakStatus.Lukket }.also { avsluttetDagpengeSakTeller.inc(it.size.toDouble()) }
+        saker.filter { it.status == ArenaSakStatus.Inaktiv }.also { inaktivDagpengeSakTeller.inc(it.size.toDouble()) }
     }
 
     override fun getConfig(): Properties {
