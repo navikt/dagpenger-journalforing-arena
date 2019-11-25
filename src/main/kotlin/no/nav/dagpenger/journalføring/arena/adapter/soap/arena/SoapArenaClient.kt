@@ -24,7 +24,7 @@ import javax.xml.datatype.DatatypeFactory
 
 class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1, private val ytelseskontraktV3: YtelseskontraktV3) : ArenaClient {
 
-    override fun bestillOppgave(naturligIdent: String, behandlendeEnhetId: String, dokumentTitler: String, ): String {
+    override fun bestillOppgave(naturligIdent: String, behandlendeEnhetId: String, oppgaveBeskrivelse: String): String {
         val soapRequest = WSBestillOppgaveRequest()
 
         soapRequest.oppgavetype = WSOppgavetype().apply { value = "STARTVEDTAK" }

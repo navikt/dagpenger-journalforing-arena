@@ -17,8 +17,7 @@ class ArenaKanIkkeOppretteOppgaveStrategyTest {
         strategy.canHandle(fakta) shouldBe true
 
         val resultat = strategy.handle(fakta)
-        resultat.arenaSakId shouldBe null
-        resultat.opprettet shouldBe false
+        resultat shouldBe null
     }
 
     @Test

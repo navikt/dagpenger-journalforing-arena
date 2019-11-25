@@ -7,6 +7,7 @@ import io.mockk.mockk
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSak
+import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakId
 import no.nav.dagpenger.streams.PacketDeserializer
 import no.nav.dagpenger.streams.PacketSerializer
 import no.nav.dagpenger.streams.Topic
@@ -48,7 +49,7 @@ class JournalFøringArenaTopologyTest {
         val mockedStrategy: ArenaDefaultStrategy = mockk()
         every {
             mockedStrategy.handle(any())
-        } returns ArenaResultat("1234", true)
+        } returns ArenaSakId("1234")
 
         val testService = JournalføringArena(Configuration(), mockedStrategy, arenaOppgaveClient)
 
