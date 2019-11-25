@@ -1,9 +1,11 @@
 package no.nav.dagpenger.journalføring.arena
 
+import com.squareup.moshi.Types
 import mu.KotlinLogging
 import no.finn.unleash.DefaultUnleash
 import no.finn.unleash.Unleash
 import no.nav.dagpenger.events.Packet
+import no.nav.dagpenger.events.moshiInstance
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSak
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakStatus
@@ -23,6 +25,8 @@ import java.util.Properties
 private val logger = KotlinLogging.logger {}
 
 internal object PacketKeys {
+    const val DATO_REGISTRERT: String = "datoRegistrert"
+    const val DOKUMENT_TITLER: String = "dokumentTitler"
     const val ARENA_SAK_OPPRETTET: String = "arenaSakOpprettet"
     const val NY_SØKNAD: String = "nySøknad"
     const val JOURNALPOST_ID: String = "journalpostId"
@@ -43,6 +47,13 @@ class JournalføringArena(
     override val HTTP_PORT: Int = configuration.application.httpPort
     override val healthChecks: List<HealthCheck> = listOf(arenaClient as HealthCheck)
 
+    val dokumentAdapter = moshiInstance.adapter<List<String>>(
+        Types.newParameterizedType(
+            List::class.java,
+            String::class.java
+        )
+    )
+
     override fun filterPredicates(): List<Predicate<String, Packet>> {
         return listOf(
             Predicate { _, packet -> !packet.hasField(PacketKeys.ARENA_SAK_OPPRETTET) }
@@ -55,12 +66,21 @@ class JournalføringArena(
         val enhetId =
             packet.getObjectValue(PacketKeys.BEHANDLENDE_ENHETER) { behandlendeenhetAdapter.fromJsonValue(it)!! }
                 .first().enhetId
+        val dokumentTitler =
+            packet.getObjectValue(PacketKeys.DOKUMENT_TITLER) { dokumentAdapter.fromJsonValue(it)!! }
+        val registrertDato = packet.getStringValue(PacketKeys.DATO_REGISTRERT)
 
         try {
 
             val saker = arenaClient.hentArenaSaker(naturligIdent)
 
-            val fakta = Fakta(naturligIdent = naturligIdent, enhetId = enhetId, arenaSaker = saker)
+            val fakta = Fakta(
+                naturligIdent = naturligIdent,
+                enhetId = enhetId,
+                arenaSaker = saker,
+                dokumentTitler = dokumentTitler,
+                registrertDato = registrertDato
+            )
 
             val arenaSakId = defaultStrategy.handle(fakta)
 

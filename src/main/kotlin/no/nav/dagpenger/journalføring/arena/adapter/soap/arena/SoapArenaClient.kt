@@ -22,7 +22,10 @@ import java.time.ZonedDateTime
 import java.util.GregorianCalendar
 import javax.xml.datatype.DatatypeFactory
 
-class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1, private val ytelseskontraktV3: YtelseskontraktV3) : ArenaClient {
+class SoapArenaClient(
+    private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1,
+    private val ytelseskontraktV3: YtelseskontraktV3
+) : ArenaClient {
 
     override fun bestillOppgave(naturligIdent: String, behandlendeEnhetId: String, oppgaveBeskrivelse: String): String {
         val soapRequest = WSBestillOppgaveRequest()
@@ -39,6 +42,7 @@ class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1,
                 this.value = "HOY"
             }
             frist = DatatypeFactory.newInstance().newXMLGregorianCalendar(GregorianCalendar.from(today))
+            beskrivelse = oppgaveBeskrivelse
         }
 
         val response: WSBestillOppgaveResponse = try {
@@ -56,7 +60,15 @@ class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1,
         val request =
             WSHentYtelseskontraktListeRequest()
                 .withPersonidentifikator(naturligIdent)
-                .withPeriode(WSPeriode().withFom(DatatypeFactory.newInstance().newXMLGregorianCalendar(GregorianCalendar.from(fomDato))))
+                .withPeriode(
+                    WSPeriode().withFom(
+                        DatatypeFactory.newInstance().newXMLGregorianCalendar(
+                            GregorianCalendar.from(
+                                fomDato
+                            )
+                        )
+                    )
+                )
 
         try {
             val response = ytelseskontraktV3.hentYtelseskontraktListe(request)

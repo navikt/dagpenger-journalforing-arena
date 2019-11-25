@@ -19,7 +19,7 @@ class ArenaCreateOppgaveStrategyTest {
 
         val arenaOppgaveClient: ArenaClient = mockk()
         every {
-            arenaOppgaveClient.bestillOppgave("12345678", "1234")
+            arenaOppgaveClient.bestillOppgave("12345678", "1234", any())
         } returns "1234"
 
         val unleashMock: Unleash = mockk()
@@ -30,7 +30,9 @@ class ArenaCreateOppgaveStrategyTest {
         val fakta = Fakta(
             naturligIdent = "12345678",
             enhetId = "1234",
-            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Inaktiv)))
+            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Inaktiv)),
+            registrertDato = "2019-11-22T12:01:57",
+            dokumentTitler = listOf("Hoved", "vedlegg"))
 
         val strategy = ArenaCreateOppgaveStrategy(arenaOppgaveClient, unleashMock, Profile.LOCAL)
         strategy.canHandle(fakta) shouldBe true
@@ -43,7 +45,7 @@ class ArenaCreateOppgaveStrategyTest {
     fun `Skal ikke opprette oppgave når det er aktive saker og toggle er på`() {
         val arenaOppgaveClient: ArenaClient = mockk()
         every {
-            arenaOppgaveClient.bestillOppgave("12345678", "1234")
+            arenaOppgaveClient.bestillOppgave("12345678", "1234", any())
         } returns "1234"
 
         val unleashMock: Unleash = mockk()
@@ -54,7 +56,9 @@ class ArenaCreateOppgaveStrategyTest {
         val fakta = Fakta(
             naturligIdent = "12345678",
             enhetId = "1234",
-            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Aktiv)))
+            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Aktiv)),
+            registrertDato = "2019-11-22T12:01:57",
+            dokumentTitler = listOf("Hoved", "vedlegg"))
 
         val strategy = ArenaCreateOppgaveStrategy(arenaOppgaveClient, unleashMock, Profile.LOCAL)
         strategy.canHandle(fakta) shouldBe false
@@ -64,7 +68,7 @@ class ArenaCreateOppgaveStrategyTest {
     fun `Skal ikke opprette oppgave når det er ikke aktive saker og men toggle er av`() {
         val arenaOppgaveClient: ArenaClient = mockk()
         every {
-            arenaOppgaveClient.bestillOppgave("12345678", "1234")
+            arenaOppgaveClient.bestillOppgave("12345678", "1234", any())
         } returns "1234"
 
         val unleashMock: Unleash = mockk()
@@ -75,7 +79,9 @@ class ArenaCreateOppgaveStrategyTest {
         val fakta = Fakta(
             naturligIdent = "12345678",
             enhetId = "1234",
-            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Inaktiv)))
+            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Inaktiv)),
+            registrertDato = "2019-11-22T12:01:57",
+            dokumentTitler = listOf("Hoved", "vedlegg"))
 
         val strategy = ArenaCreateOppgaveStrategy(arenaOppgaveClient, unleashMock, Profile.LOCAL)
         strategy.canHandle(fakta) shouldBe false
@@ -85,7 +91,7 @@ class ArenaCreateOppgaveStrategyTest {
     fun `Skal opprette manuell oppgave når søker ikke er registrert som arbeidssøker i Arena (kaster BestillOppgavePersonErInaktiv) `() {
         val arenaOppgaveClient: ArenaClient = mockk()
         every {
-            arenaOppgaveClient.bestillOppgave("12345678", "1234")
+            arenaOppgaveClient.bestillOppgave("12345678", "1234", any())
         } throws BestillOppgaveArenaException(BestillOppgavePersonErInaktiv())
 
         val unleashMock: Unleash = mockk()
@@ -96,7 +102,9 @@ class ArenaCreateOppgaveStrategyTest {
         val fakta = Fakta(
             naturligIdent = "12345678",
             enhetId = "1234",
-            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Inaktiv)))
+            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Inaktiv)),
+            registrertDato = "2019-11-22T12:01:57",
+            dokumentTitler = listOf("Hoved", "vedlegg"))
 
         val strategy = ArenaCreateOppgaveStrategy(arenaOppgaveClient, unleashMock, Profile.LOCAL)
         strategy.handle(fakta) shouldBe null

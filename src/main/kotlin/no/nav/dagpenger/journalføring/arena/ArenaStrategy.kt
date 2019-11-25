@@ -40,11 +40,8 @@ class ArenaCreateOppgaveStrategy(
 
     override fun handle(fakta: Fakta): ArenaSakId? {
         val arenaSakId = try {
-            arenaClient.bestillOppgave(
-                fakta.naturligIdent,
-                fakta.enhetId,
-                createArenaOppgaveBeskrivelse(fakta.dokumentTitler, fakta.registrertDato)
-            )
+            val beskrivelse = createArenaOppgaveBeskrivelse(fakta.dokumentTitler, fakta.registrertDato)
+            arenaClient.bestillOppgave(fakta.naturligIdent, fakta.enhetId, beskrivelse)
         } catch (e: BestillOppgaveArenaException) {
             return when (e.cause) {
                 is BestillOppgavePersonErInaktiv -> {
