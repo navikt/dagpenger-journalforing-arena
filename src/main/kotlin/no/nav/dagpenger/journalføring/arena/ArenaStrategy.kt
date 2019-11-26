@@ -6,6 +6,7 @@ import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakId
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakStatus
 import no.nav.dagpenger.journalføring.arena.adapter.BestillOppgaveArenaException
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BestillOppgavePersonErInaktiv
+import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BestillOppgavePersonIkkeFunnet
 
 interface ArenaStrategy {
     fun canHandle(fakta: Fakta): Boolean
@@ -42,6 +43,9 @@ class ArenaCreateOppgaveStrategy(
         } catch (e: BestillOppgaveArenaException) {
             return when (e.cause) {
                 is BestillOppgavePersonErInaktiv -> {
+                    null
+                }
+                is BestillOppgavePersonIkkeFunnet -> {
                     null
                 }
                 else -> throw e
