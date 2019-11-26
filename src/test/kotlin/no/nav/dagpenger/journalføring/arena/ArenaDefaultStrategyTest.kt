@@ -30,6 +30,4 @@ internal class ArenaDefaultStrategyTest {
             return ArenaSakId(id = "123")
         }
     }
-
-
 }
