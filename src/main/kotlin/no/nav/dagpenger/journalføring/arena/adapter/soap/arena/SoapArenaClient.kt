@@ -11,6 +11,7 @@ import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.informasjo
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.informasjon.WSOppgavetype
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.informasjon.WSPerson
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.informasjon.WSPrioritet
+import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.informasjon.WSSakInfo
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.informasjon.WSTema
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.meldinger.WSBestillOppgaveRequest
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.meldinger.WSBestillOppgaveResponse
@@ -39,6 +40,7 @@ class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1,
                 this.value = "HOY"
             }
             frist = DatatypeFactory.newInstance().newXMLGregorianCalendar(GregorianCalendar.from(today))
+            sakInfo = WSSakInfo().withTvingNySak(true)
         }
 
         val response: WSBestillOppgaveResponse = try {
