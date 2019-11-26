@@ -7,7 +7,6 @@ import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSak
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakStatus
-import no.nav.dagpenger.journalføring.arena.adapter.HentArenaSakerException
 import no.nav.dagpenger.journalføring.arena.adapter.soap.STS_SAML_POLICY_NO_TRANSPORT_BINDING
 import no.nav.dagpenger.journalføring.arena.adapter.soap.SoapPort
 import no.nav.dagpenger.journalføring.arena.adapter.soap.arena.SoapArenaClient
@@ -56,34 +55,33 @@ class JournalføringArena(
             packet.getObjectValue(PacketKeys.BEHANDLENDE_ENHETER) { behandlendeenhetAdapter.fromJsonValue(it)!! }
                 .first().enhetId
 
-        try {
+        val saker = arenaClient.hentArenaSaker(naturligIdent)
 
-            val saker = arenaClient.hentArenaSaker(naturligIdent)
+        val fakta = Fakta(naturligIdent = naturligIdent, enhetId = enhetId, arenaSaker = saker)
 
-            val fakta = Fakta(naturligIdent = naturligIdent, enhetId = enhetId, arenaSaker = saker)
+        val arenaSakId = defaultStrategy.handle(fakta)
 
-            val arenaSakId = defaultStrategy.handle(fakta)
-
-            if (arenaSakId != null) {
-                packet.putValue(PacketKeys.ARENA_SAK_OPPRETTET, true)
-                packet.putValue(PacketKeys.ARENA_SAK_ID, arenaSakId.id)
-                automatiskJournalførtJaTeller.inc()
-            } else {
-                packet.putValue(PacketKeys.ARENA_SAK_OPPRETTET, false)
-                automatiskJournalførtNeiTeller.inc()
-            }
-            registrerMetrikker(saker)
-            saker.forEach {
-                logger.info { "Tilhører sak: id: ${it.fagsystemSakId}, status: ${it.status}" }
-            }
-            logger.info {
-                "Innsender av journalpost ${packet.getStringValue(PacketKeys.JOURNALPOST_ID)} har ${saker.size} dagpengesaker siste 104 uker"
-            }
-        } catch (exception: HentArenaSakerException) { // @todo: Feilhåndtering
-            logger.error(exception) { "Failed to get arena-saker" }
+        if (arenaSakId != null) {
+            packet.putValue(PacketKeys.ARENA_SAK_OPPRETTET, true)
+            packet.putValue(PacketKeys.ARENA_SAK_ID, arenaSakId.id)
+            automatiskJournalførtJaTeller.inc()
+        } else {
+            packet.putValue(PacketKeys.ARENA_SAK_OPPRETTET, false)
+        }
+        registrerMetrikker(saker)
+        saker.forEach {
+            logger.info { "Tilhører sak: id: ${it.fagsystemSakId}, status: ${it.status}" }
+        }
+        logger.info {
+            "Innsender av journalpost ${packet.getStringValue(PacketKeys.JOURNALPOST_ID)} har ${saker.size} dagpengesaker siste 104 uker"
         }
 
         return packet
+    }
+
+    override fun onFailure(packet: Packet, error: Throwable?): Packet {
+        logger.error(error) { "Feilet ved håntering av pakke $packet" }
+        throw error ?: RuntimeException("Feilet ved håndtering av pakke, ukjent grunn")
     }
 
     private fun registrerMetrikker(saker: List<ArenaSak>) {

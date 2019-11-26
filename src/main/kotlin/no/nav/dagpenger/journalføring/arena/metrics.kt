@@ -6,11 +6,11 @@ val automatiskJournalførtTeller = Counter
     .build()
     .name("automatisk_journalfort_arena")
     .help("Antall søknader som er automatisk journalført i Arena")
-    .labelNames("opprettet")
+    .labelNames("opprettet", "grunn")
     .register()
 
-val automatiskJournalførtJaTeller = automatiskJournalførtTeller.labels("true")
-val automatiskJournalførtNeiTeller = automatiskJournalførtTeller.labels("false")
+val automatiskJournalførtJaTeller = automatiskJournalførtTeller.labels("true", "arena_ok")
+fun automatiskJournalførtNeiTeller(reason: String) = automatiskJournalførtTeller.labels("false", reason).inc()
 
 val antallDagpengerSaker = Counter
     .build()

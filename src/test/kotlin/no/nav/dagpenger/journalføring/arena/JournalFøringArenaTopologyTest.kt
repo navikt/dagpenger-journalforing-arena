@@ -2,6 +2,7 @@ package no.nav.dagpenger.journalføring.arena
 
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe
+import io.kotlintest.shouldThrow
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.dagpenger.events.Packet
@@ -126,6 +127,45 @@ class JournalFøringArenaTopologyTest {
             )
 
             ut shouldBe null
+        }
+    }
+
+    @Test
+    fun `skal kaste feil hvis det skjer en ukjent feil`() {
+
+        val feilendeArenaKlient = mockk<ArenaClient>()
+
+        every { feilendeArenaKlient.hentArenaSaker(any()) } throws RuntimeException()
+
+        val testService = JournalføringArena(Configuration(), mockk(), feilendeArenaKlient)
+
+        val packet = Packet().apply {
+            putValue(
+                "behandlendeEnheter", behandlendeenhetAdapter.toJsonValue(
+                    listOf(
+                        Behandlendeenhet(
+                            enhetId = "1234",
+                            enhetNavn = "NAV"
+                        )
+                    )
+                )!!
+            )
+            putValue("naturligIdent", "12345678")
+        }
+
+        shouldThrow<java.lang.RuntimeException> {
+            TopologyTestDriver(testService.buildTopology(), properties).use { topologyTestDriver ->
+                val inputRecord = factory.create(packet)
+                topologyTestDriver.pipeInput(inputRecord)
+
+                val ut = topologyTestDriver.readOutput(
+                    dagpengerJournalpostTopic.name,
+                    dagpengerJournalpostTopic.keySerde.deserializer(),
+                    dagpengerJournalpostTopic.valueSerde.deserializer()
+                )
+
+                ut shouldBe null
+            }
         }
     }
 }

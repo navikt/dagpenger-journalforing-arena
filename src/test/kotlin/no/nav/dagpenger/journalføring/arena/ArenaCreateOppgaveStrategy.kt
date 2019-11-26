@@ -10,6 +10,7 @@ import no.nav.dagpenger.journalføring.arena.adapter.ArenaSak
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakStatus
 import no.nav.dagpenger.journalføring.arena.adapter.BestillOppgaveArenaException
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BestillOppgavePersonErInaktiv
+import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BestillOppgavePersonIkkeFunnet
 import org.junit.jupiter.api.Test
 
 class ArenaCreateOppgaveStrategyTest {
@@ -87,6 +88,27 @@ class ArenaCreateOppgaveStrategyTest {
         every {
             arenaOppgaveClient.bestillOppgave("12345678", "1234")
         } throws BestillOppgaveArenaException(BestillOppgavePersonErInaktiv())
+
+        val unleashMock: Unleash = mockk()
+        every {
+            unleashMock.isEnabled("dp-arena.bestillOppgave", false)
+        } returns true
+
+        val fakta = Fakta(
+            naturligIdent = "12345678",
+            enhetId = "1234",
+            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Inaktiv)))
+
+        val strategy = ArenaCreateOppgaveStrategy(arenaOppgaveClient, unleashMock)
+        strategy.handle(fakta) shouldBe null
+    }
+
+    @Test
+    fun `Skal opprette manuell oppgave når person ikke finnes i Arena (kaster PersonIkkeFunnet ) `() {
+        val arenaOppgaveClient: ArenaClient = mockk()
+        every {
+            arenaOppgaveClient.bestillOppgave("12345678", "1234")
+        } throws BestillOppgaveArenaException(BestillOppgavePersonIkkeFunnet())
 
         val unleashMock: Unleash = mockk()
         every {

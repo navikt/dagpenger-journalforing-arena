@@ -6,6 +6,7 @@ import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakId
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakStatus
 import no.nav.dagpenger.journalføring.arena.adapter.BestillOppgaveArenaException
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BestillOppgavePersonErInaktiv
+import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BestillOppgavePersonIkkeFunnet
 
 interface ArenaStrategy {
     fun canHandle(fakta: Fakta): Boolean
@@ -20,6 +21,7 @@ class ArenaDefaultStrategy(private val strategies: List<ArenaStrategy>) : ArenaS
             .map { it.handle(fakta) }.firstOrNull() ?: default()
 
     private fun default(): ArenaSakId? {
+        automatiskJournalførtNeiTeller("ukjent_default")
         return null
     }
 }
@@ -40,11 +42,17 @@ class ArenaCreateOppgaveStrategy(
         val arenaSakId = try {
             arenaClient.bestillOppgave(fakta.naturligIdent, fakta.enhetId)
         } catch (e: BestillOppgaveArenaException) {
+            automatiskJournalførtNeiTeller(e.cause?.javaClass?.simpleName ?: "ukjent")
             return when (e.cause) {
                 is BestillOppgavePersonErInaktiv -> {
                     null
                 }
-                else -> throw e
+                is BestillOppgavePersonIkkeFunnet -> {
+                    null
+                }
+                else -> {
+                    throw e
+                }
             }
         }
         return ArenaSakId(id = arenaSakId)
@@ -57,8 +65,7 @@ class ArenaKanIkkeOppretteOppgaveStrategy : ArenaStrategy {
     }
 
     override fun handle(fakta: Fakta): ArenaSakId? {
+        automatiskJournalførtNeiTeller("aktiv_sak")
         return null
     }
 }
-
-data class ArenaResultat(val arenaSakId: String?, val opprettet: Boolean)
