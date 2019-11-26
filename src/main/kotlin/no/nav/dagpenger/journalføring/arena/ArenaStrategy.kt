@@ -21,6 +21,7 @@ class ArenaDefaultStrategy(private val strategies: List<ArenaStrategy>) : ArenaS
             .map { it.handle(fakta) }.firstOrNull() ?: default()
 
     private fun default(): ArenaSakId? {
+        automatiskJournalførtNeiTeller("ukjent_default")
         return null
     }
 }
@@ -41,6 +42,7 @@ class ArenaCreateOppgaveStrategy(
         val arenaSakId = try {
             arenaClient.bestillOppgave(fakta.naturligIdent, fakta.enhetId)
         } catch (e: BestillOppgaveArenaException) {
+            automatiskJournalførtNeiTeller(e.cause?.javaClass?.simpleName ?: "ukjent")
             return when (e.cause) {
                 is BestillOppgavePersonErInaktiv -> {
                     null
@@ -48,7 +50,9 @@ class ArenaCreateOppgaveStrategy(
                 is BestillOppgavePersonIkkeFunnet -> {
                     null
                 }
-                else -> throw e
+                else -> {
+                    throw e
+                }
             }
         }
         return ArenaSakId(id = arenaSakId)
@@ -61,8 +65,7 @@ class ArenaKanIkkeOppretteOppgaveStrategy : ArenaStrategy {
     }
 
     override fun handle(fakta: Fakta): ArenaSakId? {
+        automatiskJournalførtNeiTeller("aktiv_sak")
         return null
     }
 }
-
-data class ArenaResultat(val arenaSakId: String?, val opprettet: Boolean)

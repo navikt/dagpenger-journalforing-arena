@@ -67,7 +67,6 @@ class JournalføringArena(
             automatiskJournalførtJaTeller.inc()
         } else {
             packet.putValue(PacketKeys.ARENA_SAK_OPPRETTET, false)
-            automatiskJournalførtNeiTeller.inc()
         }
         registrerMetrikker(saker)
         saker.forEach {
