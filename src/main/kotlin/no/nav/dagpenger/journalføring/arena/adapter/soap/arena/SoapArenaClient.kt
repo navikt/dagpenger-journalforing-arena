@@ -54,7 +54,7 @@ class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1,
     }
 
     override fun hentArenaSaker(naturligIdent: String): List<ArenaSak> {
-        val fomDato = ZonedDateTime.now().toInstant().atZone(ZoneId.of("Europe/Oslo")).minusWeeks(104)
+        val fomDato = ZonedDateTime.now().toInstant().atZone(ZoneId.of("Europe/Oslo")).minusDays(1)
         val request =
             WSHentYtelseskontraktListeRequest()
                 .withPersonidentifikator(naturligIdent)
