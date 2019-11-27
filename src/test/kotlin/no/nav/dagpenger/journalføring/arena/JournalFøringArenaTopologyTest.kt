@@ -165,7 +165,7 @@ class JournalFøringArenaTopologyTest {
 
         val packet = Packet().apply { putValue("behandlendeEnheter", "tomListe") }
 
-        service.filterPredicates().all { it.test("", packet)  } shouldBe false
+        service.filterPredicates().all { it.test("", packet) } shouldBe false
     }
 
     @Test
