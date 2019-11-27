@@ -23,9 +23,7 @@ private val logger = KotlinLogging.logger {}
 
 internal object PacketKeys {
     const val ARENA_SAK_OPPRETTET: String = "arenaSakOpprettet"
-    const val NY_SØKNAD: String = "nySøknad"
     const val JOURNALPOST_ID: String = "journalpostId"
-    const val AKTØR_ID: String = "aktørId"
     const val BEHANDLENDE_ENHETER: String = "behandlendeEnheter"
     const val NATURLIG_IDENT: String = "naturligIdent"
     const val ARENA_SAK_ID: String = "arenaSakId"
