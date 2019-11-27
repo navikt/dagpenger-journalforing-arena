@@ -83,17 +83,6 @@ class JournalFøringArenaTopologyTest {
             ut.value().hasField("arenaSakId") shouldNotBe false
             ut.value().getStringValue("arenaSakId") shouldBe "1234"
         }
-
-        /*  val registry = CollectorRegistry.defaultRegistry
-
-
-          registry.metricFamilySamples().asSequence().find { it.name == "automatisk_journalfort_arena" }?.let { metric ->
-              print(metric)
-              metric.samples[0].value shouldNotBe null
-              metric.samples[0].value shouldBeGreaterThan 0.0
-              metric.samples[0].labelValues[0] shouldBe "true"
-          }
-  */
     }
 
     @Test
@@ -167,5 +156,37 @@ class JournalFøringArenaTopologyTest {
                 ut shouldBe null
             }
         }
+    }
+
+    @Test
+    fun `skal ikke behandle pakker uten naturlig ident`() {
+
+        val service = JournalføringArena(Configuration(), mockk(), mockk())
+
+        val packet = Packet().apply { putValue("behandlendeEnheter", "tomListe") }
+
+        service.filterPredicates().all { it.test("", packet)  } shouldBe false
+    }
+
+    @Test
+    fun `skal ikke behandle pakker uten behandlendeEnheter`() {
+
+        val service = JournalføringArena(Configuration(), mockk(), mockk())
+
+        val packet = Packet().apply { putValue("naturligIdent", "1234") }
+
+        service.filterPredicates().all { it.test("", packet) } shouldBe false
+    }
+
+    @Test
+    fun `skal behandle pakken hvis behandlendeEnheter og naturligIdent finnes, men ikke arenaResultat`() {
+        val service = JournalføringArena(Configuration(), mockk(), mockk())
+
+        val packet = Packet().apply {
+            putValue("naturligIdent", "1234")
+            putValue("behandlendeEnheter", "")
+        }
+
+        service.filterPredicates().all { it.test("", packet) } shouldBe true
     }
 }

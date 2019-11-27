@@ -44,7 +44,9 @@ class JournalføringArena(
 
     override fun filterPredicates(): List<Predicate<String, Packet>> {
         return listOf(
-            Predicate { _, packet -> !packet.hasField(PacketKeys.ARENA_SAK_OPPRETTET) }
+            Predicate { _, packet -> !packet.hasField(PacketKeys.ARENA_SAK_OPPRETTET) },
+            Predicate { _, packet -> packet.hasField(PacketKeys.NATURLIG_IDENT) },
+            Predicate { _, packet -> packet.hasField(PacketKeys.BEHANDLENDE_ENHETER)}
         )
     }
 
