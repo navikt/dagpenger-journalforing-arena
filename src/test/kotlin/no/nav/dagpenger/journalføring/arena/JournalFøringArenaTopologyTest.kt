@@ -65,6 +65,7 @@ class JournalFøringArenaTopologyTest {
                     )
                 )!!
             )
+            putValue("journalpostId", "987")
             putValue("naturligIdent", "12345678")
         }
 
