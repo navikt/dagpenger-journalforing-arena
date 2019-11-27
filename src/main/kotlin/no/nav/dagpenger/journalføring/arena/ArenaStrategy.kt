@@ -1,5 +1,6 @@
 package no.nav.dagpenger.journalføring.arena
 
+import mu.KotlinLogging
 import no.finn.unleash.Unleash
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakId
@@ -7,6 +8,8 @@ import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakStatus
 import no.nav.dagpenger.journalføring.arena.adapter.BestillOppgaveArenaException
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BestillOppgavePersonErInaktiv
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BestillOppgavePersonIkkeFunnet
+
+private val logger = KotlinLogging.logger {}
 
 interface ArenaStrategy {
     fun canHandle(fakta: Fakta): Boolean
@@ -43,12 +46,15 @@ class ArenaCreateOppgaveStrategy(
                 automatiskJournalførtNeiTeller(e.cause?.javaClass?.simpleName ?: "ukjent")
                 return when (e.cause) {
                     is BestillOppgavePersonErInaktiv -> {
+                        logger.warn { "Kan ikke bestille oppgave for journalpost ${fakta.journalpostId}. Person ikke arbeidssøker " }
                         null
                     }
                     is BestillOppgavePersonIkkeFunnet -> {
+                        logger.warn { "Kan ikke bestille oppgave for journalpost ${fakta.journalpostId}. Person ikke funnet i arena " }
                         null
                     }
                     else -> {
+                        logger.warn { "Kan ikke bestille oppgave for journalpost ${fakta.journalpostId}. Ukjent feil. " }
                         throw e
                     }
                 }

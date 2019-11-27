@@ -51,13 +51,16 @@ class JournalføringArena(
     override fun onPacket(packet: Packet): Packet {
 
         val naturligIdent: String = packet.getStringValue(PacketKeys.NATURLIG_IDENT)
+        val journalpostId = packet.getStringValue(PacketKeys.JOURNALPOST_ID)
+
         val enhetId =
             packet.getObjectValue(PacketKeys.BEHANDLENDE_ENHETER) { behandlendeenhetAdapter.fromJsonValue(it)!! }
                 .first().enhetId
 
         val saker = arenaClient.hentArenaSaker(naturligIdent)
 
-        val fakta = Fakta(naturligIdent = naturligIdent, enhetId = enhetId, arenaSaker = saker)
+        val fakta =
+            Fakta(naturligIdent = naturligIdent, enhetId = enhetId, arenaSaker = saker, journalpostId = journalpostId)
 
         val arenaSakId = defaultStrategy.handle(fakta)
 
