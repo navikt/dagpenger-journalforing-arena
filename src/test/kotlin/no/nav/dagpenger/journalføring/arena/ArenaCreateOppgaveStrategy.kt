@@ -62,7 +62,7 @@ class ArenaCreateOppgaveStrategyTest {
     }
 
     @Test
-    fun `Skal ikke opprette oppgave når det er ikke aktive saker og men toggle er av`() {
+    fun `Skal ikke opprette oppgave når det er ikke aktive saker men toggle er av`() {
         val arenaOppgaveClient: ArenaClient = mockk()
         every {
             arenaOppgaveClient.bestillOppgave("12345678", "1234")
@@ -79,7 +79,8 @@ class ArenaCreateOppgaveStrategyTest {
             arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Inaktiv)))
 
         val strategy = ArenaCreateOppgaveStrategy(arenaOppgaveClient, unleashMock)
-        strategy.canHandle(fakta) shouldBe false
+        strategy.canHandle(fakta) shouldBe true
+        strategy.handle(fakta) shouldBe null
     }
 
     @Test
