@@ -11,7 +11,8 @@ class ArenaKanIkkeOppretteOppgaveStrategyTest {
         val fakta = Fakta(
             naturligIdent = "12345678",
             enhetId = "1234",
-            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Aktiv)))
+            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Aktiv)),
+            journalpostId = "987")
 
         val strategy = ArenaKanIkkeOppretteOppgaveStrategy()
         strategy.canHandle(fakta) shouldBe true
@@ -25,7 +26,8 @@ class ArenaKanIkkeOppretteOppgaveStrategyTest {
         val fakta = Fakta(
             naturligIdent = "12345678",
             enhetId = "1234",
-            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Inaktiv)))
+            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Inaktiv)),
+            journalpostId = "987")
 
         val strategy = ArenaKanIkkeOppretteOppgaveStrategy()
         strategy.canHandle(fakta) shouldBe false

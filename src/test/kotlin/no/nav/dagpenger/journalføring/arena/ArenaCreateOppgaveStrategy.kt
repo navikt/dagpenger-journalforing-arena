@@ -15,6 +15,20 @@ import org.junit.jupiter.api.Test
 
 class ArenaCreateOppgaveStrategyTest {
 
+    val faktaMedAktivSak = Fakta(
+        naturligIdent = "12345678",
+        enhetId = "1234",
+        arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Aktiv)),
+        journalpostId = "987987"
+    )
+
+    val faktaUtenAktivSak = Fakta(
+        naturligIdent = "12345678",
+        enhetId = "1234",
+        arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Inaktiv)),
+        journalpostId = "987987"
+    )
+
     @Test
     fun `Skal opprette oppgave når det ikke er aktive saker`() {
 
@@ -28,15 +42,10 @@ class ArenaCreateOppgaveStrategyTest {
             unleashMock.isEnabled("dp-arena.bestillOppgave", false)
         } returns true
 
-        val fakta = Fakta(
-            naturligIdent = "12345678",
-            enhetId = "1234",
-            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Inaktiv)))
-
         val strategy = ArenaCreateOppgaveStrategy(arenaOppgaveClient, unleashMock)
-        strategy.canHandle(fakta) shouldBe true
+        strategy.canHandle(faktaUtenAktivSak) shouldBe true
 
-        val resultat = strategy.handle(fakta)
+        val resultat = strategy.handle(faktaUtenAktivSak)
         resultat shouldNotBe null
     }
 
@@ -52,13 +61,8 @@ class ArenaCreateOppgaveStrategyTest {
             unleashMock.isEnabled("dp-arena.bestillOppgave", false)
         } returns true
 
-        val fakta = Fakta(
-            naturligIdent = "12345678",
-            enhetId = "1234",
-            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Aktiv)))
-
         val strategy = ArenaCreateOppgaveStrategy(arenaOppgaveClient, unleashMock)
-        strategy.canHandle(fakta) shouldBe false
+        strategy.canHandle(faktaMedAktivSak) shouldBe false
     }
 
     @Test
@@ -73,14 +77,9 @@ class ArenaCreateOppgaveStrategyTest {
             unleashMock.isEnabled("dp-arena.bestillOppgave", false)
         } returns false
 
-        val fakta = Fakta(
-            naturligIdent = "12345678",
-            enhetId = "1234",
-            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Inaktiv)))
-
         val strategy = ArenaCreateOppgaveStrategy(arenaOppgaveClient, unleashMock)
-        strategy.canHandle(fakta) shouldBe true
-        strategy.handle(fakta) shouldBe null
+        strategy.canHandle(faktaUtenAktivSak) shouldBe true
+        strategy.handle(faktaUtenAktivSak) shouldBe null
     }
 
     @Test
@@ -95,13 +94,8 @@ class ArenaCreateOppgaveStrategyTest {
             unleashMock.isEnabled("dp-arena.bestillOppgave", false)
         } returns true
 
-        val fakta = Fakta(
-            naturligIdent = "12345678",
-            enhetId = "1234",
-            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Inaktiv)))
-
         val strategy = ArenaCreateOppgaveStrategy(arenaOppgaveClient, unleashMock)
-        strategy.handle(fakta) shouldBe null
+        strategy.handle(faktaUtenAktivSak) shouldBe null
     }
 
     @Test
@@ -116,12 +110,7 @@ class ArenaCreateOppgaveStrategyTest {
             unleashMock.isEnabled("dp-arena.bestillOppgave", false)
         } returns true
 
-        val fakta = Fakta(
-            naturligIdent = "12345678",
-            enhetId = "1234",
-            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Inaktiv)))
-
         val strategy = ArenaCreateOppgaveStrategy(arenaOppgaveClient, unleashMock)
-        strategy.handle(fakta) shouldBe null
+        strategy.handle(faktaUtenAktivSak) shouldBe null
     }
 }
