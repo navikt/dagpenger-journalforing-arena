@@ -32,30 +32,32 @@ class ArenaCreateOppgaveStrategy(
 ) : ArenaStrategy {
 
     override fun canHandle(fakta: Fakta): Boolean {
-        return fakta.arenaSaker.none { it.status == ArenaSakStatus.Aktiv } && unleash.isEnabled(
-            "dp-arena.bestillOppgave",
-            false
-        )
+        return fakta.arenaSaker.none { it.status == ArenaSakStatus.Aktiv }
     }
 
     override fun handle(fakta: Fakta): ArenaSakId? {
-        val arenaSakId = try {
-            arenaClient.bestillOppgave(fakta.naturligIdent, fakta.enhetId)
-        } catch (e: BestillOppgaveArenaException) {
-            automatiskJournalførtNeiTeller(e.cause?.javaClass?.simpleName ?: "ukjent")
-            return when (e.cause) {
-                is BestillOppgavePersonErInaktiv -> {
-                    null
-                }
-                is BestillOppgavePersonIkkeFunnet -> {
-                    null
-                }
-                else -> {
-                    throw e
+        if (unleash.isEnabled("dp-arena.bestillOppgave", false)) {
+            val arenaSakId = try {
+                arenaClient.bestillOppgave(fakta.naturligIdent, fakta.enhetId)
+            } catch (e: BestillOppgaveArenaException) {
+                automatiskJournalførtNeiTeller(e.cause?.javaClass?.simpleName ?: "ukjent")
+                return when (e.cause) {
+                    is BestillOppgavePersonErInaktiv -> {
+                        null
+                    }
+                    is BestillOppgavePersonIkkeFunnet -> {
+                        null
+                    }
+                    else -> {
+                        throw e
+                    }
                 }
             }
+            return ArenaSakId(id = arenaSakId)
+        } else {
+            automatiskJournalførtNeiTeller("feature_toggle_off")
+            return null
         }
-        return ArenaSakId(id = arenaSakId)
     }
 }
 
