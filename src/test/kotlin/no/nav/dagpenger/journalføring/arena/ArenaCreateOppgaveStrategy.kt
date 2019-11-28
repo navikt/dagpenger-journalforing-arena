@@ -16,17 +16,21 @@ import org.junit.jupiter.api.Test
 class ArenaCreateOppgaveStrategyTest {
 
     val faktaMedAktivSak = Fakta(
-        naturligIdent = "12345678",
-        enhetId = "1234",
-        arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Aktiv)),
-        journalpostId = "987987"
+            naturligIdent = "12345678",
+            enhetId = "1234",
+            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Aktiv)),
+            journalpostId = "987987",
+            dokumentTitler = listOf(""),
+            registrertDato = "2019-12-24T23:59:01"
     )
 
     val faktaUtenAktivSak = Fakta(
-        naturligIdent = "12345678",
-        enhetId = "1234",
-        arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Inaktiv)),
-        journalpostId = "987987"
+            naturligIdent = "12345678",
+            enhetId = "1234",
+            arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Inaktiv)),
+            journalpostId = "987987",
+            dokumentTitler = listOf(""),
+            registrertDato = "2019-12-24T23:59:01"
     )
 
     @Test
@@ -34,7 +38,7 @@ class ArenaCreateOppgaveStrategyTest {
 
         val arenaOppgaveClient: ArenaClient = mockk()
         every {
-            arenaOppgaveClient.bestillOppgave("12345678", "1234")
+            arenaOppgaveClient.bestillOppgave("12345678", "1234", "beskrivelse")
         } returns "1234"
 
         val unleashMock: Unleash = mockk()
@@ -53,7 +57,7 @@ class ArenaCreateOppgaveStrategyTest {
     fun `Skal ikke opprette oppgave når det er aktive saker og toggle er på`() {
         val arenaOppgaveClient: ArenaClient = mockk()
         every {
-            arenaOppgaveClient.bestillOppgave("12345678", "1234")
+            arenaOppgaveClient.bestillOppgave("12345678", "1234", "beskrivelse")
         } returns "1234"
 
         val unleashMock: Unleash = mockk()
@@ -69,7 +73,7 @@ class ArenaCreateOppgaveStrategyTest {
     fun `Skal ikke opprette oppgave når det er ikke aktive saker men toggle er av`() {
         val arenaOppgaveClient: ArenaClient = mockk()
         every {
-            arenaOppgaveClient.bestillOppgave("12345678", "1234")
+            arenaOppgaveClient.bestillOppgave("12345678", "1234", "beskrivelse")
         } returns "1234"
 
         val unleashMock: Unleash = mockk()
@@ -86,7 +90,7 @@ class ArenaCreateOppgaveStrategyTest {
     fun `Skal opprette manuell oppgave når søker ikke er registrert som arbeidssøker i Arena (kaster BestillOppgavePersonErInaktiv) `() {
         val arenaOppgaveClient: ArenaClient = mockk()
         every {
-            arenaOppgaveClient.bestillOppgave("12345678", "1234")
+            arenaOppgaveClient.bestillOppgave("12345678", "1234", "beskrivelse")
         } throws BestillOppgaveArenaException(BestillOppgavePersonErInaktiv())
 
         val unleashMock: Unleash = mockk()
@@ -102,7 +106,7 @@ class ArenaCreateOppgaveStrategyTest {
     fun `Skal opprette manuell oppgave når person ikke finnes i Arena (kaster PersonIkkeFunnet ) `() {
         val arenaOppgaveClient: ArenaClient = mockk()
         every {
-            arenaOppgaveClient.bestillOppgave("12345678", "1234")
+            arenaOppgaveClient.bestillOppgave("12345678", "1234", "beskrivelse")
         } throws BestillOppgaveArenaException(BestillOppgavePersonIkkeFunnet())
 
         val unleashMock: Unleash = mockk()

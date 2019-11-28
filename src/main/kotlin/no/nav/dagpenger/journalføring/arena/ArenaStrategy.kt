@@ -6,6 +6,7 @@ import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakId
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakStatus
 import no.nav.dagpenger.journalføring.arena.adapter.BestillOppgaveArenaException
+import no.nav.dagpenger.journalføring.arena.adapter.createArenaOppgaveBeskrivelse
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BestillOppgavePersonErInaktiv
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.BestillOppgavePersonIkkeFunnet
 
@@ -40,8 +41,9 @@ class ArenaCreateOppgaveStrategy(
 
     override fun handle(fakta: Fakta): ArenaSakId? {
         if (unleash.isEnabled("dp-arena.bestillOppgave", false)) {
+            val beskrivelse = createArenaOppgaveBeskrivelse(fakta.dokumentTitler, fakta.registrertDato)
             val arenaSakId = try {
-                arenaClient.bestillOppgave(fakta.naturligIdent, fakta.enhetId)
+                arenaClient.bestillOppgave(fakta.naturligIdent, fakta.enhetId, beskrivelse)
             } catch (e: BestillOppgaveArenaException) {
                 automatiskJournalførtNeiTeller(e.cause?.javaClass?.simpleName ?: "ukjent")
                 return when (e.cause) {
