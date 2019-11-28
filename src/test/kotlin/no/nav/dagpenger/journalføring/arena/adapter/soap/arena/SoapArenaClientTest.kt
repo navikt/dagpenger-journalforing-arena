@@ -23,7 +23,7 @@ internal class SoapArenaClientTest {
 
         val client = SoapArenaClient(stubbedClient, mockk())
 
-        val actual = client.bestillOppgave("123456789", "abcbscb")
+        val actual = client.bestillOppgave("123456789", "abcbscb", "beskrivelse")
 
         actual shouldBe "123"
     }

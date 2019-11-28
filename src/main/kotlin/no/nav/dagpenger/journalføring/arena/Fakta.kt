@@ -6,5 +6,7 @@ data class Fakta(
     val naturligIdent: String,
     val enhetId: String,
     val arenaSaker: List<ArenaSak>,
-    val journalpostId: String
+    val journalpostId: String,
+    val dokumentTitler: List<String>,
+    val registrertDato: String
 )
