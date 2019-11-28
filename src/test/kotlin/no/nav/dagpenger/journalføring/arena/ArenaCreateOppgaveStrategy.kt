@@ -38,7 +38,7 @@ class ArenaCreateOppgaveStrategyTest {
 
         val arenaOppgaveClient: ArenaClient = mockk()
         every {
-            arenaOppgaveClient.bestillOppgave("12345678", "1234", "beskrivelse")
+            arenaOppgaveClient.bestillOppgave("12345678", "1234", any())
         } returns "1234"
 
         val unleashMock: Unleash = mockk()
@@ -57,7 +57,7 @@ class ArenaCreateOppgaveStrategyTest {
     fun `Skal ikke opprette oppgave når det er aktive saker og toggle er på`() {
         val arenaOppgaveClient: ArenaClient = mockk()
         every {
-            arenaOppgaveClient.bestillOppgave("12345678", "1234", "beskrivelse")
+            arenaOppgaveClient.bestillOppgave("12345678", "1234", any())
         } returns "1234"
 
         val unleashMock: Unleash = mockk()
@@ -73,7 +73,7 @@ class ArenaCreateOppgaveStrategyTest {
     fun `Skal ikke opprette oppgave når det er ikke aktive saker men toggle er av`() {
         val arenaOppgaveClient: ArenaClient = mockk()
         every {
-            arenaOppgaveClient.bestillOppgave("12345678", "1234", "beskrivelse")
+            arenaOppgaveClient.bestillOppgave("12345678", "1234", any())
         } returns "1234"
 
         val unleashMock: Unleash = mockk()
@@ -90,7 +90,7 @@ class ArenaCreateOppgaveStrategyTest {
     fun `Skal opprette manuell oppgave når søker ikke er registrert som arbeidssøker i Arena (kaster BestillOppgavePersonErInaktiv) `() {
         val arenaOppgaveClient: ArenaClient = mockk()
         every {
-            arenaOppgaveClient.bestillOppgave("12345678", "1234", "beskrivelse")
+            arenaOppgaveClient.bestillOppgave("12345678", "1234", any())
         } throws BestillOppgaveArenaException(BestillOppgavePersonErInaktiv())
 
         val unleashMock: Unleash = mockk()
@@ -106,7 +106,7 @@ class ArenaCreateOppgaveStrategyTest {
     fun `Skal opprette manuell oppgave når person ikke finnes i Arena (kaster PersonIkkeFunnet ) `() {
         val arenaOppgaveClient: ArenaClient = mockk()
         every {
-            arenaOppgaveClient.bestillOppgave("12345678", "1234", "beskrivelse")
+            arenaOppgaveClient.bestillOppgave("12345678", "1234", any())
         } throws BestillOppgaveArenaException(BestillOppgavePersonIkkeFunnet())
 
         val unleashMock: Unleash = mockk()

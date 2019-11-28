@@ -65,8 +65,10 @@ class JournalFøringArenaTopologyTest {
                     )
                 )!!
             )
-            putValue("journalpostId", "987")
             putValue("naturligIdent", "12345678")
+            putValue("journalpostId", "666")
+            putValue("dokumentTitler", listOf("Tittel 1"))
+            putValue("datoRegistrert", "2019")
         }
 
         TopologyTestDriver(testService.buildTopology(), properties).use { topologyTestDriver ->
