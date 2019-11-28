@@ -21,7 +21,7 @@ class ArenaCreateOppgaveStrategyTest {
             arenaSaker = listOf(ArenaSak(124, ArenaSakStatus.Aktiv)),
             journalpostId = "987987",
             dokumentTitler = listOf(""),
-            registrertDato = "2019-12-24T23:59:01"
+            registrertDato = "2019-11-22T12:01:57"
     )
 
     val faktaUtenAktivSak = Fakta(
