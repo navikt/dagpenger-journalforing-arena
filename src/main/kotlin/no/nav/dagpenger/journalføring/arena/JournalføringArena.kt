@@ -70,7 +70,6 @@ class JournalføringArena(
             packet.getObjectValue(PacketKeys.BEHANDLENDE_ENHETER) { behandlendeenhetAdapter.fromJsonValue(it)!! }
                 .first().enhetId
 
-
         val saker = arenaClient.hentArenaSaker(naturligIdent)
 
         val fakta =
