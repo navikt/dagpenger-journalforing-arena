@@ -70,7 +70,6 @@ class JournalføringArena(
             packet.getObjectValue(PacketKeys.BEHANDLENDE_ENHETER) { behandlendeenhetAdapter.fromJsonValue(it)!! }
                 .first().enhetId
 
-        logger.info { "Journalpost $journalpostId har dokumenttitlene: ${dokumentTitler.joinToString()}" }
 
         val saker = arenaClient.hentArenaSaker(naturligIdent)
 
