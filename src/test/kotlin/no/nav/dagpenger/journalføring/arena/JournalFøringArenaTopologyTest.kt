@@ -67,7 +67,7 @@ class JournalFøringArenaTopologyTest {
             )
             putValue("naturligIdent", "12345678")
             putValue("journalpostId", "666")
-            putValue("dokumentTitler", listOf("Tittel 1"))
+            putValue("dokumentTitler", listOf(JournalføringArena.Dokument("tittel 1")))
             putValue("datoRegistrert", "2019")
         }
 

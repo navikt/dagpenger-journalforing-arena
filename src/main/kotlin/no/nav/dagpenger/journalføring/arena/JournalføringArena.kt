@@ -44,11 +44,15 @@ class JournalføringArena(
     override val HTTP_PORT: Int = configuration.application.httpPort
     override val healthChecks: List<HealthCheck> = listOf(arenaClient as HealthCheck)
 
-    val dokumentAdapter = moshiInstance.adapter<List<String>>(
+    val dokumentAdapter = moshiInstance.adapter<List<Dokument>>(
             Types.newParameterizedType(
                     List::class.java,
-                    String::class.java
+                    Dokument::class.java
             )
+    )
+
+    data class Dokument (
+        val tittel: String
     )
 
     override fun filterPredicates(): List<Predicate<String, Packet>> {
@@ -65,7 +69,7 @@ class JournalføringArena(
         val journalpostId = packet.getStringValue(PacketKeys.JOURNALPOST_ID)
         val registrertDato: String = packet.getStringValue(PacketKeys.DATO_REGISTRERT)
         val dokumentTitler =
-                packet.getObjectValue(PacketKeys.DOKUMENT_TITLER) { dokumentAdapter.fromJsonValue(it)!! }
+                packet.getObjectValue(PacketKeys.DOKUMENT_TITLER) { dokumentAdapter.fromJsonValue(it)!! }.map { it.tittel }
         val enhetId =
             packet.getObjectValue(PacketKeys.BEHANDLENDE_ENHETER) { behandlendeenhetAdapter.fromJsonValue(it)!! }
                 .first().enhetId
