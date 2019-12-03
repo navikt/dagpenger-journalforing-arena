@@ -1,11 +1,9 @@
 package no.nav.dagpenger.journalføring.arena
 
-import com.squareup.moshi.Types
 import mu.KotlinLogging
 import no.finn.unleash.DefaultUnleash
 import no.finn.unleash.Unleash
 import no.nav.dagpenger.events.Packet
-import no.nav.dagpenger.events.moshiInstance
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSak
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakStatus
@@ -24,8 +22,8 @@ import java.util.Properties
 private val logger = KotlinLogging.logger {}
 
 internal object PacketKeys {
+    const val DOKUMENTER: String = "dokumenter"
     const val DATO_REGISTRERT: String = "datoRegistrert"
-    const val DOKUMENT_TITLER: String = "dokumentTitler"
     const val ARENA_SAK_OPPRETTET: String = "arenaSakOpprettet"
     const val JOURNALPOST_ID: String = "journalpostId"
     const val BEHANDLENDE_ENHETER: String = "behandlendeEnheter"
@@ -44,17 +42,6 @@ class JournalføringArena(
     override val HTTP_PORT: Int = configuration.application.httpPort
     override val healthChecks: List<HealthCheck> = listOf(arenaClient as HealthCheck)
 
-    val dokumentAdapter = moshiInstance.adapter<List<Dokument>>(
-            Types.newParameterizedType(
-                    List::class.java,
-                    Dokument::class.java
-            )
-    )
-
-    data class Dokument (
-        val tittel: String
-    )
-
     override fun filterPredicates(): List<Predicate<String, Packet>> {
         return listOf(
             Predicate { _, packet -> !packet.hasField(PacketKeys.ARENA_SAK_OPPRETTET) },
@@ -69,7 +56,7 @@ class JournalføringArena(
         val journalpostId = packet.getStringValue(PacketKeys.JOURNALPOST_ID)
         val registrertDato: String = packet.getStringValue(PacketKeys.DATO_REGISTRERT)
         val dokumentTitler =
-                packet.getObjectValue(PacketKeys.DOKUMENT_TITLER) { dokumentAdapter.fromJsonValue(it)!! }.map { it.tittel }
+            packet.getObjectValue(PacketKeys.DOKUMENTER) { dokumentAdapter.fromJsonValue(it)!! }.map { it.tittel }
         val enhetId =
             packet.getObjectValue(PacketKeys.BEHANDLENDE_ENHETER) { behandlendeenhetAdapter.fromJsonValue(it)!! }
                 .first().enhetId
@@ -78,12 +65,12 @@ class JournalføringArena(
 
         val fakta =
             Fakta(
-                    naturligIdent = naturligIdent,
-                    enhetId = enhetId,
-                    arenaSaker = saker,
-                    journalpostId = journalpostId,
-                    dokumentTitler = dokumentTitler,
-                    registrertDato = registrertDato
+                naturligIdent = naturligIdent,
+                enhetId = enhetId,
+                arenaSaker = saker,
+                journalpostId = journalpostId,
+                dokumentTitler = dokumentTitler,
+                registrertDato = registrertDato
             )
 
         val arenaSakId = defaultStrategy.handle(fakta)
