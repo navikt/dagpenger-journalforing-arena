@@ -10,6 +10,6 @@ val dokumentAdapter = moshiInstance.adapter<List<Dokument>>(
     )
 )
 
-data class Dokument (
+data class Dokument(
     val tittel: String
 )
