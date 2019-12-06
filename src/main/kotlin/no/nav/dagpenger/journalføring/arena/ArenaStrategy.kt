@@ -22,7 +22,9 @@ class ArenaDefaultStrategy(private val strategies: List<ArenaStrategy>) : ArenaS
 
     override fun handle(fakta: Fakta): ArenaSakId? =
         strategies.filter { it.canHandle(fakta) }
-            .map { it.handle(fakta) }.firstOrNull() ?: default()
+            .map { it.handle(fakta) }
+            .takeIf { it.isNotEmpty() }?.first()
+            ?: default()
 
     private fun default(): ArenaSakId? {
         automatiskJournalførtNeiTeller("ukjent_default")
