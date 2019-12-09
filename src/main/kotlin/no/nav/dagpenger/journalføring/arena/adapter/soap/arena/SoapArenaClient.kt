@@ -41,7 +41,7 @@ class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1,
             }
             frist = DatatypeFactory.newInstance().newXMLGregorianCalendar(GregorianCalendar.from(today))
             sakInfo = WSSakInfo().withTvingNySak(true)
-            beskrivelse = "Start vedtaksbehandling - automatisk journalført.\n"
+            beskrivelse = "Start Vedtaksbehandling - automatisk journalført.\n"
             this.tilleggsinformasjon = tilleggsinformasjon
         }
 
