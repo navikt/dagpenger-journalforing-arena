@@ -1,6 +1,5 @@
 package no.nav.dagpenger.journalføring.arena.adapter.soap.arena
 
-import mu.KotlinLogging
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSak
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakStatus
@@ -17,14 +16,11 @@ import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.informasjo
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.meldinger.WSBestillOppgaveRequest
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.meldinger.WSBestillOppgaveResponse
 import no.nav.tjeneste.virksomhet.ytelseskontrakt.v3.YtelseskontraktV3
-import no.nav.tjeneste.virksomhet.ytelseskontrakt.v3.informasjon.ytelseskontrakt.WSDagpengekontrakt
 import no.nav.tjeneste.virksomhet.ytelseskontrakt.v3.meldinger.WSHentYtelseskontraktListeRequest
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.GregorianCalendar
 import javax.xml.datatype.DatatypeFactory
-
-private val logger = KotlinLogging.logger {}
 
 class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1, private val ytelseskontraktV3: YtelseskontraktV3) : ArenaClient {
 
@@ -65,7 +61,6 @@ class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1,
 
         try {
             val response = ytelseskontraktV3.hentYtelseskontraktListe(request)
-            logger.info { response.ytelseskontraktListe.map { if (it is WSDagpengekontrakt) "Dagpengesak" }.joinToString() }
             return response.ytelseskontraktListe.filter { it.ytelsestype == "Dagpenger" }.map {
                 ArenaSak(
                     it.fagsystemSakId,
