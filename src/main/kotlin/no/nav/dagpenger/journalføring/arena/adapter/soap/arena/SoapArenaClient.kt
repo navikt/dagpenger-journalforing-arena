@@ -1,5 +1,6 @@
 package no.nav.dagpenger.journalføring.arena.adapter.soap.arena
 
+import mu.KotlinLogging
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSak
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakStatus
@@ -21,6 +22,8 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.GregorianCalendar
 import javax.xml.datatype.DatatypeFactory
+
+private val logger = KotlinLogging.logger {}
 
 class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1, private val ytelseskontraktV3: YtelseskontraktV3) : ArenaClient {
 
@@ -61,6 +64,7 @@ class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1,
 
         try {
             val response = ytelseskontraktV3.hentYtelseskontraktListe(request)
+            logger.info { response.ytelseskontraktListe.map { it.ytelsestype }.joinToString() }
             return response.ytelseskontraktListe.filter { it.ytelsestype == "Dagpenger" }.map {
                 ArenaSak(
                     it.fagsystemSakId,
