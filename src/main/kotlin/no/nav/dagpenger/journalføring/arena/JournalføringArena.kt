@@ -88,7 +88,7 @@ class JournalføringArena(
             logger.info { "Tilhører sak: id: ${it.fagsystemSakId}, status: ${it.status}" }
         }
         logger.info {
-            "Innsender av journalpost ${packet.getStringValue(PacketKeys.JOURNALPOST_ID)} har ${saker.size} dagpengesaker siste 104 uker"
+            "Innsender av journalpost ${packet.getStringValue(PacketKeys.JOURNALPOST_ID)} har ${saker.filter { it.status == ArenaSakStatus.Aktiv }.size} aktive saker av ${saker.size} dagpengesaker totalt"
         }
 
         return packet
