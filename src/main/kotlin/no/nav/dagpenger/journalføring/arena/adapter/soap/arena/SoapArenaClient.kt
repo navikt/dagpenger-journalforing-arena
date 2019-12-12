@@ -17,6 +17,7 @@ import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.informasjo
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.meldinger.WSBestillOppgaveRequest
 import no.nav.tjeneste.virksomhet.behandlearbeidogaktivitetoppgave.v1.meldinger.WSBestillOppgaveResponse
 import no.nav.tjeneste.virksomhet.ytelseskontrakt.v3.YtelseskontraktV3
+import no.nav.tjeneste.virksomhet.ytelseskontrakt.v3.informasjon.ytelseskontrakt.WSDagpengekontrakt
 import no.nav.tjeneste.virksomhet.ytelseskontrakt.v3.meldinger.WSHentYtelseskontraktListeRequest
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -64,7 +65,7 @@ class SoapArenaClient(private val oppgaveV1: BehandleArbeidOgAktivitetOppgaveV1,
 
         try {
             val response = ytelseskontraktV3.hentYtelseskontraktListe(request)
-            logger.info { response.ytelseskontraktListe.map { it.ytelsestype }.joinToString() }
+            logger.info { response.ytelseskontraktListe.map { if (it is WSDagpengekontrakt) "Dagpengesak" }.joinToString() }
             return response.ytelseskontraktListe.filter { it.ytelsestype == "Dagpenger" }.map {
                 ArenaSak(
                     it.fagsystemSakId,
