@@ -16,6 +16,7 @@ import no.nav.dagpenger.streams.HealthCheck
 import no.nav.dagpenger.streams.River
 import no.nav.dagpenger.streams.streamConfig
 import no.nav.tjeneste.virksomhet.ytelseskontrakt.v3.YtelseskontraktV3
+import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.kstream.Predicate
 import java.util.Properties
 
@@ -105,11 +106,13 @@ class JournalføringArena(
     }
 
     override fun getConfig(): Properties {
-        return streamConfig(
+        val properties = streamConfig(
             appId = SERVICE_APP_ID,
             bootStapServerUrl = configuration.kafka.brokers,
             credential = configuration.kafka.credential()
         )
+        properties[StreamsConfig.PROCESSING_GUARANTEE_CONFIG] = StreamsConfig.EXACTLY_ONCE
+        return properties
     }
 }
 
