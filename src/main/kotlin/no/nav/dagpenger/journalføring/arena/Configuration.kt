@@ -16,6 +16,7 @@ import no.nav.dagpenger.streams.PacketDeserializer
 import no.nav.dagpenger.streams.PacketSerializer
 import no.nav.dagpenger.streams.Topic
 import org.apache.kafka.common.serialization.Serdes
+import org.apache.kafka.streams.StreamsConfig
 import java.io.File
 import java.net.InetAddress
 import java.net.UnknownHostException
@@ -24,7 +25,8 @@ private val defaultProperties = ConfigurationMap(
     mapOf(
         "application.httpPort" to 8080.toString(),
         "allow.insecure.soap.requests" to false.toString(),
-        "unleash.url" to "http://unleash.default.svc.nais.local/api"
+        "unleash.url" to "http://unleash.default.svc.nais.local/api",
+        "kafka.processing.guarantee" to StreamsConfig.AT_LEAST_ONCE
     )
 )
 
@@ -54,7 +56,8 @@ private val prodProperties = ConfigurationMap(
         "application.profile" to Profile.PROD.toString(),
         "securitytokenservice.url" to "https://sts.adeo.no/SecurityTokenServiceProvider/",
         "behandlearbeidsytelsesak.v1.url" to "https://arena.adeo.no/ail_ws/BehandleArbeidOgAktivitetOppgave_v1",
-        "ytelseskontrakt.v3.url" to "https://arena.adeo.no/ail_ws/Ytelseskontrakt_v3"
+        "ytelseskontrakt.v3.url" to "https://arena.adeo.no/ail_ws/Ytelseskontrakt_v3",
+        "kafka.processing.guarantee" to StreamsConfig.EXACTLY_ONCE
     )
 )
 
@@ -92,7 +95,8 @@ data class Configuration(
         ),
         val user: String = config()[Key("srvdagpenger.journalforing.arena.username", stringType)],
         val password: String = config()[Key("srvdagpenger.journalforing.arena.password", stringType)],
-        val brokers: String = config()[Key("kafka.bootstrap.servers", stringType)]
+        val brokers: String = config()[Key("kafka.bootstrap.servers", stringType)],
+        val processingGuarantee: String = config()[Key("kafka.processing.guarantee", stringType)]
     ) {
         fun credential(): KafkaCredential? {
             return KafkaCredential(user, password)
