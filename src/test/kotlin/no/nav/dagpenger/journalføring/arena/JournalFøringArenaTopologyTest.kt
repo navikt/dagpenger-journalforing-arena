@@ -168,9 +168,8 @@ class JournalFøringArenaTopologyTest {
 
         val service = JournalføringArena(Configuration(), mockk(), mockk())
 
-        val packet = Packet().apply {
+        val packet = packetWithTrueToggle.apply {
             putValue("behandlendeEnheter", "tomListe")
-            putValue(PacketKeys.TOGGLE_BEHANDLE_NY_SØKNAD, true)
         }
 
         service.filterPredicates().all { it.test("", packet) } shouldBe false
@@ -181,9 +180,8 @@ class JournalFøringArenaTopologyTest {
 
         val service = JournalføringArena(Configuration(), mockk(), mockk())
 
-        val packet = Packet().apply {
+        val packet = packetWithTrueToggle.apply {
             putValue("naturligIdent", "1234")
-            putValue(PacketKeys.TOGGLE_BEHANDLE_NY_SØKNAD, true)
         }
 
         service.filterPredicates().all { it.test("", packet) } shouldBe false
