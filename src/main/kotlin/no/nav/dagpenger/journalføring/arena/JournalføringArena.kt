@@ -30,6 +30,7 @@ internal object PacketKeys {
     const val BEHANDLENDE_ENHETER: String = "behandlendeEnheter"
     const val NATURLIG_IDENT: String = "naturligIdent"
     const val ARENA_SAK_ID: String = "arenaSakId"
+    const val TOGGLE_BEHANDLE_NY_SØKNAD: String = "toggleBehandleNySøknad"
 }
 
 class JournalføringArena(
@@ -45,6 +46,7 @@ class JournalføringArena(
 
     override fun filterPredicates(): List<Predicate<String, Packet>> {
         return listOf(
+            Predicate { _, packet -> packet.hasField(PacketKeys.TOGGLE_BEHANDLE_NY_SØKNAD) && packet.getBoolean(PacketKeys.TOGGLE_BEHANDLE_NY_SØKNAD) },
             Predicate { _, packet -> !packet.hasField(PacketKeys.ARENA_SAK_OPPRETTET) },
             Predicate { _, packet -> packet.hasField(PacketKeys.NATURLIG_IDENT) },
             Predicate { _, packet -> packet.hasField(PacketKeys.BEHANDLENDE_ENHETER) }

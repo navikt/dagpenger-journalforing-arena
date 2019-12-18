@@ -22,21 +22,23 @@ import java.util.Properties
 class JournalFøringArenaTopologyTest {
 
     val dagpengerJournalpostTopic: Topic<String, Packet> = Topic(
-        "privat-dagpenger-journalpost-mottatt-v1",
-        keySerde = Serdes.String(),
-        valueSerde = Serdes.serdeFrom(PacketSerializer(), PacketDeserializer())
+            "privat-dagpenger-journalpost-mottatt-v1",
+            keySerde = Serdes.String(),
+            valueSerde = Serdes.serdeFrom(PacketSerializer(), PacketDeserializer())
     )
 
     val factory = ConsumerRecordFactory<String, Packet>(
-        dagpengerJournalpostTopic.name,
-        dagpengerJournalpostTopic.keySerde.serializer(),
-        dagpengerJournalpostTopic.valueSerde.serializer()
+            dagpengerJournalpostTopic.name,
+            dagpengerJournalpostTopic.keySerde.serializer(),
+            dagpengerJournalpostTopic.valueSerde.serializer()
     )
 
     val properties = Properties().apply {
         this[StreamsConfig.APPLICATION_ID_CONFIG] = "test"
         this[StreamsConfig.BOOTSTRAP_SERVERS_CONFIG] = "dummy:1234"
     }
+
+    val packetWithTrueToggle = Packet().apply { putValue(PacketKeys.TOGGLE_BEHANDLE_NY_SØKNAD, true) }
 
     @Test
     fun `Skal prosessere melding hvis arena resultat mangler `() {
@@ -54,16 +56,16 @@ class JournalFøringArenaTopologyTest {
 
         val testService = JournalføringArena(Configuration(), mockedStrategy, arenaOppgaveClient)
 
-        val packet = Packet().apply {
+        val packet = packetWithTrueToggle.apply {
             putValue(
-                "behandlendeEnheter", behandlendeenhetAdapter.toJsonValue(
+                    "behandlendeEnheter", behandlendeenhetAdapter.toJsonValue(
                     listOf(
-                        Behandlendeenhet(
-                            enhetId = "1234",
-                            enhetNavn = "NAV"
-                        )
+                            Behandlendeenhet(
+                                    enhetId = "1234",
+                                    enhetNavn = "NAV"
+                            )
                     )
-                )!!
+            )!!
             )
             putValue("naturligIdent", "12345678")
             putValue("journalpostId", "666")
@@ -76,9 +78,9 @@ class JournalFøringArenaTopologyTest {
             topologyTestDriver.pipeInput(inputRecord)
 
             val ut = topologyTestDriver.readOutput(
-                dagpengerJournalpostTopic.name,
-                dagpengerJournalpostTopic.keySerde.deserializer(),
-                dagpengerJournalpostTopic.valueSerde.deserializer()
+                    dagpengerJournalpostTopic.name,
+                    dagpengerJournalpostTopic.keySerde.deserializer(),
+                    dagpengerJournalpostTopic.valueSerde.deserializer()
             )
 
             ut shouldNotBe null
@@ -93,16 +95,16 @@ class JournalFøringArenaTopologyTest {
 
         val testService = JournalføringArena(Configuration(), mockk(), mockk())
 
-        val packet = Packet().apply {
+        val packet = packetWithTrueToggle.apply {
             putValue(
-                "behandlendeEnheter", behandlendeenhetAdapter.toJsonValue(
+                    "behandlendeEnheter", behandlendeenhetAdapter.toJsonValue(
                     listOf(
-                        Behandlendeenhet(
-                            enhetId = "1234",
-                            enhetNavn = "NAV"
-                        )
+                            Behandlendeenhet(
+                                    enhetId = "1234",
+                                    enhetNavn = "NAV"
+                            )
                     )
-                )!!
+            )!!
             )
             putValue("naturligIdent", "12345678")
             putValue("arenaSakOpprettet", true)
@@ -113,9 +115,9 @@ class JournalFøringArenaTopologyTest {
             topologyTestDriver.pipeInput(inputRecord)
 
             val ut = topologyTestDriver.readOutput(
-                dagpengerJournalpostTopic.name,
-                dagpengerJournalpostTopic.keySerde.deserializer(),
-                dagpengerJournalpostTopic.valueSerde.deserializer()
+                    dagpengerJournalpostTopic.name,
+                    dagpengerJournalpostTopic.keySerde.deserializer(),
+                    dagpengerJournalpostTopic.valueSerde.deserializer()
             )
 
             ut shouldBe null
@@ -131,16 +133,16 @@ class JournalFøringArenaTopologyTest {
 
         val testService = JournalføringArena(Configuration(), mockk(), feilendeArenaKlient)
 
-        val packet = Packet().apply {
+        val packet = packetWithTrueToggle.apply {
             putValue(
-                "behandlendeEnheter", behandlendeenhetAdapter.toJsonValue(
+                    "behandlendeEnheter", behandlendeenhetAdapter.toJsonValue(
                     listOf(
-                        Behandlendeenhet(
-                            enhetId = "1234",
-                            enhetNavn = "NAV"
-                        )
+                            Behandlendeenhet(
+                                    enhetId = "1234",
+                                    enhetNavn = "NAV"
+                            )
                     )
-                )!!
+            )!!
             )
             putValue("naturligIdent", "12345678")
         }
@@ -151,9 +153,9 @@ class JournalFøringArenaTopologyTest {
                 topologyTestDriver.pipeInput(inputRecord)
 
                 val ut = topologyTestDriver.readOutput(
-                    dagpengerJournalpostTopic.name,
-                    dagpengerJournalpostTopic.keySerde.deserializer(),
-                    dagpengerJournalpostTopic.valueSerde.deserializer()
+                        dagpengerJournalpostTopic.name,
+                        dagpengerJournalpostTopic.keySerde.deserializer(),
+                        dagpengerJournalpostTopic.valueSerde.deserializer()
                 )
 
                 ut shouldBe null
@@ -166,7 +168,10 @@ class JournalFøringArenaTopologyTest {
 
         val service = JournalføringArena(Configuration(), mockk(), mockk())
 
-        val packet = Packet().apply { putValue("behandlendeEnheter", "tomListe") }
+        val packet = Packet().apply {
+            putValue("behandlendeEnheter", "tomListe")
+            putValue(PacketKeys.TOGGLE_BEHANDLE_NY_SØKNAD, true)
+        }
 
         service.filterPredicates().all { it.test("", packet) } shouldBe false
     }
@@ -176,7 +181,10 @@ class JournalFøringArenaTopologyTest {
 
         val service = JournalføringArena(Configuration(), mockk(), mockk())
 
-        val packet = Packet().apply { putValue("naturligIdent", "1234") }
+        val packet = Packet().apply {
+            putValue("naturligIdent", "1234")
+            putValue(PacketKeys.TOGGLE_BEHANDLE_NY_SØKNAD, true)
+        }
 
         service.filterPredicates().all { it.test("", packet) } shouldBe false
     }
@@ -185,11 +193,33 @@ class JournalFøringArenaTopologyTest {
     fun `skal behandle pakken hvis behandlendeEnheter og naturligIdent finnes, men ikke arenaResultat`() {
         val service = JournalføringArena(Configuration(), mockk(), mockk())
 
-        val packet = Packet().apply {
+        val packet = packetWithTrueToggle.apply {
             putValue("naturligIdent", "1234")
             putValue("behandlendeEnheter", "")
         }
 
         service.filterPredicates().all { it.test("", packet) } shouldBe true
+    }
+
+    @Test
+    fun `Skal ikke behandle pakken dersom feature toggle flag ikke finnes`() {
+        val service = JournalføringArena(Configuration(), mockk(), mockk())
+        val packet = Packet().apply {
+            putValue("naturligIdent", "1234")
+            putValue("behandlendeEnheter", "")
+        }
+
+        service.filterPredicates().all { it.test("", packet) } shouldBe false
+    }
+
+    @Test
+    fun `Skal ikke behandle pakken dersom feature toggle flag er false `() {
+        val service = JournalføringArena(Configuration(), mockk(), mockk())
+        val packet = Packet().apply {
+            putValue("naturligIdent", "1234")
+            putValue("behandlendeEnheter", "")
+            putValue(PacketKeys.TOGGLE_BEHANDLE_NY_SØKNAD, false)
+        }
+        service.filterPredicates().all { it.test("", packet) } shouldBe false
     }
 }
