@@ -48,7 +48,7 @@ class JournalforingArenaComponentTest {
             )
         )
 
-        val arena = JournalføringArena(configuration, mockk(), mockk())
+        val arena = Application(configuration, mockk(), mockk())
         @BeforeAll
         @JvmStatic
         fun setup() {

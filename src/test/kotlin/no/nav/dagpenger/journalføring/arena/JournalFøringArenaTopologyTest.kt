@@ -54,7 +54,7 @@ class JournalFøringArenaTopologyTest {
             mockedStrategy.handle(any())
         } returns ArenaSakId("1234")
 
-        val testService = JournalføringArena(Configuration(), mockedStrategy, arenaOppgaveClient)
+        val testService = Application(Configuration(), mockedStrategy, arenaOppgaveClient)
 
         val packet = packetWithTrueToggle.apply {
             putValue("behandlendeEnhet", "1234")
@@ -84,7 +84,7 @@ class JournalFøringArenaTopologyTest {
     @Test
     fun `Skal ikke prosessere meldinger hvor arenasak er forsøkt opprettet`() {
 
-        val testService = JournalføringArena(Configuration(), mockk(), mockk())
+        val testService = Application(Configuration(), mockk(), mockk())
 
         val packet = packetWithTrueToggle.apply {
             putValue("behandlendeEnhet", "1234")
@@ -113,7 +113,7 @@ class JournalFøringArenaTopologyTest {
 
         every { feilendeArenaKlient.hentArenaSaker(any()) } throws RuntimeException()
 
-        val testService = JournalføringArena(Configuration(), mockk(), feilendeArenaKlient)
+        val testService = Application(Configuration(), mockk(), feilendeArenaKlient)
 
         val packet = packetWithTrueToggle.apply {
             putValue("behandlendeEnhet", "1234")
@@ -139,7 +139,7 @@ class JournalFøringArenaTopologyTest {
     @Test
     fun `skal ikke behandle pakker uten naturlig ident`() {
 
-        val service = JournalføringArena(Configuration(), mockk(), mockk())
+        val service = Application(Configuration(), mockk(), mockk())
 
         val packet = packetWithTrueToggle.apply {
             putValue("behandlendeEnhet", "tomListe")
@@ -151,7 +151,7 @@ class JournalFøringArenaTopologyTest {
     @Test
     fun `skal ikke behandle pakker uten behandlendeEnhet`() {
 
-        val service = JournalføringArena(Configuration(), mockk(), mockk())
+        val service = Application(Configuration(), mockk(), mockk())
 
         val packet = packetWithTrueToggle.apply {
             putValue("naturligIdent", "1234")
@@ -162,7 +162,7 @@ class JournalFøringArenaTopologyTest {
 
     @Test
     fun `skal behandle pakken hvis behandlendeEnhet og naturligIdent finnes, men ikke arenaResultat`() {
-        val service = JournalføringArena(Configuration(), mockk(), mockk())
+        val service = Application(Configuration(), mockk(), mockk())
 
         val packet = packetWithTrueToggle.apply {
             putValue("naturligIdent", "1234")
@@ -174,7 +174,7 @@ class JournalFøringArenaTopologyTest {
 
     @Test
     fun `Skal ikke behandle pakken dersom feature toggle flag ikke finnes`() {
-        val service = JournalføringArena(Configuration(), mockk(), mockk())
+        val service = Application(Configuration(), mockk(), mockk())
         val packet = Packet().apply {
             putValue("naturligIdent", "1234")
             putValue("behandlendeEnhet", "")
@@ -185,7 +185,7 @@ class JournalFøringArenaTopologyTest {
 
     @Test
     fun `Skal ikke behandle pakken dersom feature toggle flag er false `() {
-        val service = JournalføringArena(Configuration(), mockk(), mockk())
+        val service = Application(Configuration(), mockk(), mockk())
         val packet = Packet().apply {
             putValue("naturligIdent", "1234")
             putValue("behandlendeEnhet", "")
