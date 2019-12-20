@@ -5,8 +5,30 @@ import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSak
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakStatus
+import org.apache.kafka.streams.kstream.Predicate
 
 private val logger = KotlinLogging.logger {}
+
+internal object PacketKeys {
+    const val DOKUMENTER: String = "dokumenter"
+    const val DATO_REGISTRERT: String = "datoRegistrert"
+    const val ARENA_SAK_OPPRETTET: String = "arenaSakOpprettet"
+    const val JOURNALPOST_ID: String = "journalpostId"
+    const val BEHANDLENDE_ENHET: String = "behandlendeEnhet"
+    const val NATURLIG_IDENT: String = "naturligIdent"
+    const val ARENA_SAK_ID: String = "arenaSakId"
+    const val TOGGLE_BEHANDLE_NY_SØKNAD: String = "toggleBehandleNySøknad"
+}
+
+val filterPredicates = listOf<Predicate<String, Packet>>(
+    Predicate { _, packet -> packet.hasEnabledToggle() },
+    Predicate { _, packet -> !packet.hasField(PacketKeys.ARENA_SAK_OPPRETTET) },
+    Predicate { _, packet -> packet.hasField(PacketKeys.NATURLIG_IDENT) },
+    Predicate { _, packet -> packet.hasField(PacketKeys.BEHANDLENDE_ENHET) }
+)
+
+private fun Packet.hasEnabledToggle() =
+    this.hasField(PacketKeys.TOGGLE_BEHANDLE_NY_SØKNAD) && this.getBoolean(PacketKeys.TOGGLE_BEHANDLE_NY_SØKNAD)
 
 internal class JournalføringArena(private val defaultStrategy: ArenaStrategy, val arenaClient: ArenaClient) {
 

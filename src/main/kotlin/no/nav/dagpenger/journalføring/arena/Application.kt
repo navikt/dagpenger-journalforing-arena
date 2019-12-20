@@ -20,17 +20,6 @@ import java.util.Properties
 
 private val logger = KotlinLogging.logger {}
 
-internal object PacketKeys {
-    const val DOKUMENTER: String = "dokumenter"
-    const val DATO_REGISTRERT: String = "datoRegistrert"
-    const val ARENA_SAK_OPPRETTET: String = "arenaSakOpprettet"
-    const val JOURNALPOST_ID: String = "journalpostId"
-    const val BEHANDLENDE_ENHET: String = "behandlendeEnhet"
-    const val NATURLIG_IDENT: String = "naturligIdent"
-    const val ARENA_SAK_ID: String = "arenaSakId"
-    const val TOGGLE_BEHANDLE_NY_SØKNAD: String = "toggleBehandleNySøknad"
-}
-
 internal class Application(
     private val configuration: Configuration,
     private val journalføringArena: JournalføringArena
@@ -41,18 +30,7 @@ internal class Application(
     override val HTTP_PORT: Int = configuration.application.httpPort
     override val healthChecks: List<HealthCheck> = listOf(journalføringArena.arenaClient as HealthCheck)
 
-    override fun filterPredicates(): List<Predicate<String, Packet>> {
-        return listOf(
-            Predicate { _, packet ->
-                packet.hasField(PacketKeys.TOGGLE_BEHANDLE_NY_SØKNAD) && packet.getBoolean(
-                    PacketKeys.TOGGLE_BEHANDLE_NY_SØKNAD
-                )
-            },
-            Predicate { _, packet -> !packet.hasField(PacketKeys.ARENA_SAK_OPPRETTET) },
-            Predicate { _, packet -> packet.hasField(PacketKeys.NATURLIG_IDENT) },
-            Predicate { _, packet -> packet.hasField(PacketKeys.BEHANDLENDE_ENHET) }
-        )
-    }
+    override fun filterPredicates(): List<Predicate<String, Packet>> = filterPredicates
 
     override fun onPacket(packet: Packet) = journalføringArena.handlePacket(packet)
 
