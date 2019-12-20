@@ -1,24 +1,11 @@
 package no.nav.dagpenger.journalføring.arena
 
 import mu.KotlinLogging
-import no.finn.unleash.DefaultUnleash
-import no.finn.unleash.Unleash
 import no.nav.dagpenger.events.Packet
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSak
 import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakStatus
-import no.nav.dagpenger.journalføring.arena.adapter.soap.STS_SAML_POLICY_NO_TRANSPORT_BINDING
-import no.nav.dagpenger.journalføring.arena.adapter.soap.SoapPort
-import no.nav.dagpenger.journalføring.arena.adapter.soap.arena.SoapArenaClient
-import no.nav.dagpenger.journalføring.arena.adapter.soap.configureFor
-import no.nav.dagpenger.journalføring.arena.adapter.soap.stsClient
-import no.nav.dagpenger.streams.HealthCheck
-import no.nav.dagpenger.streams.River
-import no.nav.dagpenger.streams.streamConfig
-import no.nav.tjeneste.virksomhet.ytelseskontrakt.v3.YtelseskontraktV3
-import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.kstream.Predicate
-import java.util.Properties
 
 private val logger = KotlinLogging.logger {}
 
@@ -33,128 +20,62 @@ internal object PacketKeys {
     const val TOGGLE_BEHANDLE_NY_SØKNAD: String = "toggleBehandleNySøknad"
 }
 
-class JournalføringArena(
-    private val configuration: Configuration,
-    private val defaultStrategy: ArenaDefaultStrategy,
-    private val arenaClient: ArenaClient
-) :
-    River(configuration.kafka.dagpengerJournalpostTopic) {
+val filterPredicates = listOf<Predicate<String, Packet>>(
+    Predicate { _, packet -> packet.hasEnabledToggle() },
+    Predicate { _, packet -> !packet.hasField(PacketKeys.ARENA_SAK_OPPRETTET) },
+    Predicate { _, packet -> packet.hasField(PacketKeys.NATURLIG_IDENT) },
+    Predicate { _, packet -> packet.hasField(PacketKeys.BEHANDLENDE_ENHET) }
+)
 
-    override val SERVICE_APP_ID = "dp-journalforing-arena"
-    override val HTTP_PORT: Int = configuration.application.httpPort
-    override val healthChecks: List<HealthCheck> = listOf(arenaClient as HealthCheck)
+private fun Packet.hasEnabledToggle() =
+    this.hasField(PacketKeys.TOGGLE_BEHANDLE_NY_SØKNAD) && this.getBoolean(PacketKeys.TOGGLE_BEHANDLE_NY_SØKNAD)
 
-    override fun filterPredicates(): List<Predicate<String, Packet>> {
-        return listOf(
-            Predicate { _, packet -> packet.hasField(PacketKeys.TOGGLE_BEHANDLE_NY_SØKNAD) && packet.getBoolean(PacketKeys.TOGGLE_BEHANDLE_NY_SØKNAD) },
-            Predicate { _, packet -> !packet.hasField(PacketKeys.ARENA_SAK_OPPRETTET) },
-            Predicate { _, packet -> packet.hasField(PacketKeys.NATURLIG_IDENT) },
-            Predicate { _, packet -> packet.hasField(PacketKeys.BEHANDLENDE_ENHET) }
+internal class JournalføringArena(private val defaultStrategy: ArenaStrategy, val arenaClient: ArenaClient) {
+
+    private fun naturligIdentFrom(packet: Packet) = packet.getStringValue(PacketKeys.NATURLIG_IDENT)
+    private fun behandlendeEnhetFrom(packet: Packet) = packet.getStringValue(PacketKeys.BEHANDLENDE_ENHET)
+    private fun journalpostIdFrom(packet: Packet) = packet.getStringValue(PacketKeys.JOURNALPOST_ID)
+    private fun registrertDatoFrom(packet: Packet) = packet.getStringValue(PacketKeys.DATO_REGISTRERT)
+    private fun dokumentTitlerFrom(packet: Packet) =
+        packet.getObjectValue(PacketKeys.DOKUMENTER) { dokumentAdapter.fromJsonValue(it)!! }.map { it.tittel }
+
+    private fun Packet.setArenaSakOpprettet(sakOpprettet: Boolean) =
+        this.putValue(PacketKeys.ARENA_SAK_OPPRETTET, sakOpprettet)
+
+    private fun Packet.setArenaSakId(arenaSakId: String) = this.putValue(PacketKeys.ARENA_SAK_ID, arenaSakId)
+
+    fun handlePacket(packet: Packet): Packet {
+        val naturligIdent = naturligIdentFrom(packet)
+
+        val saker = arenaClient.hentArenaSaker(naturligIdent).also {
+            registrerMetrikker(it)
+            logger.info {
+                "Innsender av journalpost ${journalpostIdFrom(packet)} har ${it.filter { it.status == ArenaSakStatus.Aktiv }.size} aktive saker av ${it.size} dagpengesaker totalt"
+            }
+        }
+
+        val fakta = Fakta(
+            naturligIdent = naturligIdent,
+            enhetId = behandlendeEnhetFrom(packet),
+            arenaSaker = saker,
+            journalpostId = journalpostIdFrom(packet),
+            dokumentTitler = dokumentTitlerFrom(packet),
+            registrertDato = registrertDatoFrom(packet)
         )
-    }
 
-    override fun onPacket(packet: Packet): Packet {
+        defaultStrategy.handle(fakta).apply {
+            val sakBleOpprettet = this != null
+            packet.setArenaSakOpprettet(sakBleOpprettet)
 
-        val naturligIdent: String = packet.getStringValue(PacketKeys.NATURLIG_IDENT)
-        val journalpostId = packet.getStringValue(PacketKeys.JOURNALPOST_ID)
-        val registrertDato: String = packet.getStringValue(PacketKeys.DATO_REGISTRERT)
-        val dokumentTitler =
-            packet.getObjectValue(PacketKeys.DOKUMENTER) { dokumentAdapter.fromJsonValue(it)!! }.map { it.tittel }
-        val enhetId =
-            packet.getStringValue(PacketKeys.BEHANDLENDE_ENHET)
-
-        val saker = arenaClient.hentArenaSaker(naturligIdent)
-
-        val fakta =
-            Fakta(
-                naturligIdent = naturligIdent,
-                enhetId = enhetId,
-                arenaSaker = saker,
-                journalpostId = journalpostId,
-                dokumentTitler = dokumentTitler,
-                registrertDato = registrertDato
-            )
-
-        val arenaSakId = defaultStrategy.handle(fakta)
-
-        if (arenaSakId != null) {
-            packet.putValue(PacketKeys.ARENA_SAK_OPPRETTET, true)
-            packet.putValue(PacketKeys.ARENA_SAK_ID, arenaSakId.id)
-            automatiskJournalførtJaTeller.inc()
-        } else {
-            packet.putValue(PacketKeys.ARENA_SAK_OPPRETTET, false)
-        }
-        registrerMetrikker(saker)
-        saker.forEach {
-            logger.info { "Tilhører sak: id: ${it.fagsystemSakId}, status: ${it.status}" }
-        }
-        logger.info {
-            "Innsender av journalpost ${packet.getStringValue(PacketKeys.JOURNALPOST_ID)} har ${saker.filter { it.status == ArenaSakStatus.Aktiv }.size} aktive saker av ${saker.size} dagpengesaker totalt"
+            if (sakBleOpprettet) packet.setArenaSakId(this!!.id)
         }
 
         return packet
     }
-
-    override fun onFailure(packet: Packet, error: Throwable?): Packet {
-        logger.error(error) { "Feilet ved håntering av pakke $packet" }
-        throw error ?: RuntimeException("Feilet ved håndtering av pakke, ukjent grunn")
-    }
-
-    private fun registrerMetrikker(saker: List<ArenaSak>) {
-        saker.filter { it.status == ArenaSakStatus.Aktiv }.also { aktiveDagpengeSakTeller.inc(it.size.toDouble()) }
-        saker.filter { it.status == ArenaSakStatus.Lukket }.also { avsluttetDagpengeSakTeller.inc(it.size.toDouble()) }
-        saker.filter { it.status == ArenaSakStatus.Inaktiv }.also { inaktivDagpengeSakTeller.inc(it.size.toDouble()) }
-    }
-
-    override fun getConfig(): Properties {
-        val properties = streamConfig(
-            appId = SERVICE_APP_ID,
-            bootStapServerUrl = configuration.kafka.brokers,
-            credential = configuration.kafka.credential()
-        )
-        properties[StreamsConfig.PROCESSING_GUARANTEE_CONFIG] = configuration.kafka.processingGuarantee
-        return properties
-    }
 }
 
-fun main(args: Array<String>) {
-    val configuration = Configuration()
-
-    val ytelseskontraktV3: YtelseskontraktV3 =
-        SoapPort.ytelseskontraktV3(configuration.ytelseskontraktV3Config.endpoint)
-
-    val behandleArbeidsytelseSak =
-        SoapPort.behandleArbeidOgAktivitetOppgaveV1(configuration.behandleArbeidsytelseSakConfig.endpoint)
-
-    val arenaClient: ArenaClient =
-        SoapArenaClient(behandleArbeidsytelseSak, ytelseskontraktV3)
-
-    val soapStsClient = stsClient(
-        stsUrl = configuration.soapSTSClient.endpoint,
-        credentials = configuration.soapSTSClient.username to configuration.soapSTSClient.password
-    )
-    if (configuration.soapSTSClient.allowInsecureSoapRequests) {
-        soapStsClient.configureFor(behandleArbeidsytelseSak, STS_SAML_POLICY_NO_TRANSPORT_BINDING)
-        soapStsClient.configureFor(ytelseskontraktV3, STS_SAML_POLICY_NO_TRANSPORT_BINDING)
-    } else {
-        soapStsClient.configureFor(behandleArbeidsytelseSak)
-        soapStsClient.configureFor(ytelseskontraktV3)
-    }
-
-    val unleash: Unleash = DefaultUnleash(configuration.unleashConfig)
-
-    val defaultStrategy =
-        ArenaDefaultStrategy(
-            listOf(
-                ArenaCreateOppgaveStrategy(
-                    arenaClient = arenaClient,
-                    unleash = unleash
-                ),
-                ArenaKanIkkeOppretteOppgaveStrategy()
-            )
-        )
-
-    val service = JournalføringArena(configuration, defaultStrategy, arenaClient)
-
-    service.start()
+private fun registrerMetrikker(saker: List<ArenaSak>) {
+    saker.filter { it.status == ArenaSakStatus.Aktiv }.also { aktiveDagpengeSakTeller.inc(it.size.toDouble()) }
+    saker.filter { it.status == ArenaSakStatus.Lukket }.also { avsluttetDagpengeSakTeller.inc(it.size.toDouble()) }
+    saker.filter { it.status == ArenaSakStatus.Inaktiv }.also { inaktivDagpengeSakTeller.inc(it.size.toDouble()) }
 }

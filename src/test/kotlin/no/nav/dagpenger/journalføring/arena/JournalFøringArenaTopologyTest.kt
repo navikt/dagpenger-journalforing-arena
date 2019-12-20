@@ -1,14 +1,10 @@
 package no.nav.dagpenger.journalføring.arena
 
 import io.kotlintest.shouldBe
-import io.kotlintest.shouldNotBe
 import io.kotlintest.shouldThrow
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.dagpenger.events.Packet
-import no.nav.dagpenger.journalføring.arena.adapter.ArenaClient
-import no.nav.dagpenger.journalføring.arena.adapter.ArenaSak
-import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakId
 import no.nav.dagpenger.streams.PacketDeserializer
 import no.nav.dagpenger.streams.PacketSerializer
 import no.nav.dagpenger.streams.Topic
@@ -42,19 +38,9 @@ class JournalFøringArenaTopologyTest {
 
     @Test
     fun `Skal prosessere melding hvis arena resultat mangler `() {
+        val journalføringArena = mockk<JournalføringArena>(relaxed = true)
 
-        val arenaOppgaveClient: ArenaClient = mockk()
-
-        every {
-            arenaOppgaveClient.hentArenaSaker("12345678")
-        } returns emptyList<ArenaSak>()
-
-        val mockedStrategy: ArenaDefaultStrategy = mockk()
-        every {
-            mockedStrategy.handle(any())
-        } returns ArenaSakId("1234")
-
-        val testService = JournalføringArena(Configuration(), mockedStrategy, arenaOppgaveClient)
+        val service = Application(Configuration(), journalføringArena)
 
         val packet = packetWithTrueToggle.apply {
             putValue("behandlendeEnhet", "1234")
@@ -64,27 +50,13 @@ class JournalFøringArenaTopologyTest {
             putValue("datoRegistrert", "2019")
         }
 
-        TopologyTestDriver(testService.buildTopology(), properties).use { topologyTestDriver ->
-            val inputRecord = factory.create(packet)
-            topologyTestDriver.pipeInput(inputRecord)
-
-            val ut = topologyTestDriver.readOutput(
-                dagpengerJournalpostTopic.name,
-                dagpengerJournalpostTopic.keySerde.deserializer(),
-                dagpengerJournalpostTopic.valueSerde.deserializer()
-            )
-
-            ut shouldNotBe null
-            ut.value().hasProblem() shouldBe false
-            ut.value().hasField("arenaSakId") shouldNotBe false
-            ut.value().getStringValue("arenaSakId") shouldBe "1234"
-        }
+        service.filterPredicates().all { it.test("", packet) } shouldBe true
     }
 
     @Test
     fun `Skal ikke prosessere meldinger hvor arenasak er forsøkt opprettet`() {
 
-        val testService = JournalføringArena(Configuration(), mockk(), mockk())
+        val service = Application(Configuration(), mockk(relaxed = true))
 
         val packet = packetWithTrueToggle.apply {
             putValue("behandlendeEnhet", "1234")
@@ -92,28 +64,17 @@ class JournalFøringArenaTopologyTest {
             putValue("arenaSakOpprettet", true)
         }
 
-        TopologyTestDriver(testService.buildTopology(), properties).use { topologyTestDriver ->
-            val inputRecord = factory.create(packet)
-            topologyTestDriver.pipeInput(inputRecord)
-
-            val ut = topologyTestDriver.readOutput(
-                dagpengerJournalpostTopic.name,
-                dagpengerJournalpostTopic.keySerde.deserializer(),
-                dagpengerJournalpostTopic.valueSerde.deserializer()
-            )
-
-            ut shouldBe null
-        }
+        service.filterPredicates().all { it.test("", packet) } shouldBe false
     }
 
     @Test
     fun `skal kaste feil hvis det skjer en ukjent feil`() {
 
-        val feilendeArenaKlient = mockk<ArenaClient>()
+        val feilendeJournalføring = mockk<JournalføringArena>(relaxed = true)
 
-        every { feilendeArenaKlient.hentArenaSaker(any()) } throws RuntimeException()
+        every { feilendeJournalføring.handlePacket(any()) } throws RuntimeException()
 
-        val testService = JournalføringArena(Configuration(), mockk(), feilendeArenaKlient)
+        val testService = Application(Configuration(), feilendeJournalføring)
 
         val packet = packetWithTrueToggle.apply {
             putValue("behandlendeEnhet", "1234")
@@ -139,7 +100,7 @@ class JournalFøringArenaTopologyTest {
     @Test
     fun `skal ikke behandle pakker uten naturlig ident`() {
 
-        val service = JournalføringArena(Configuration(), mockk(), mockk())
+        val service = Application(Configuration(), mockk(relaxed = true))
 
         val packet = packetWithTrueToggle.apply {
             putValue("behandlendeEnhet", "tomListe")
@@ -151,7 +112,7 @@ class JournalFøringArenaTopologyTest {
     @Test
     fun `skal ikke behandle pakker uten behandlendeEnhet`() {
 
-        val service = JournalføringArena(Configuration(), mockk(), mockk())
+        val service = Application(Configuration(), mockk(relaxed = true))
 
         val packet = packetWithTrueToggle.apply {
             putValue("naturligIdent", "1234")
@@ -162,7 +123,7 @@ class JournalFøringArenaTopologyTest {
 
     @Test
     fun `skal behandle pakken hvis behandlendeEnhet og naturligIdent finnes, men ikke arenaResultat`() {
-        val service = JournalføringArena(Configuration(), mockk(), mockk())
+        val service = Application(Configuration(), mockk(relaxed = true))
 
         val packet = packetWithTrueToggle.apply {
             putValue("naturligIdent", "1234")
@@ -174,7 +135,7 @@ class JournalFøringArenaTopologyTest {
 
     @Test
     fun `Skal ikke behandle pakken dersom feature toggle flag ikke finnes`() {
-        val service = JournalføringArena(Configuration(), mockk(), mockk())
+        val service = Application(Configuration(), mockk(relaxed = true))
         val packet = Packet().apply {
             putValue("naturligIdent", "1234")
             putValue("behandlendeEnhet", "")
@@ -185,7 +146,7 @@ class JournalFøringArenaTopologyTest {
 
     @Test
     fun `Skal ikke behandle pakken dersom feature toggle flag er false `() {
-        val service = JournalføringArena(Configuration(), mockk(), mockk())
+        val service = Application(Configuration(), mockk(relaxed = true))
         val packet = Packet().apply {
             putValue("naturligIdent", "1234")
             putValue("behandlendeEnhet", "")
