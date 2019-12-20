@@ -48,18 +48,18 @@ class JournalforingArenaComponentTest {
             )
         )
 
-        val arena = Application(configuration, mockk(), mockk())
+        private val application = Application(configuration, mockk(relaxed = true))
         @BeforeAll
         @JvmStatic
         fun setup() {
             embeddedEnvironment.start()
-            arena.start()
+            application.start()
         }
 
         @AfterAll
         @JvmStatic
         fun teardown() {
-            arena.stop()
+            application.stop()
             embeddedEnvironment.tearDown()
         }
     }

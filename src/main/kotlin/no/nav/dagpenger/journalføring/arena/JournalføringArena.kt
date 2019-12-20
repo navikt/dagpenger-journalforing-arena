@@ -9,42 +9,43 @@ import no.nav.dagpenger.journalføring.arena.adapter.ArenaSakStatus
 private val logger = KotlinLogging.logger {}
 
 internal class JournalføringArena(private val defaultStrategy: ArenaStrategy, val arenaClient: ArenaClient) {
+
+    private fun naturligIdentFrom(packet: Packet) = packet.getStringValue(PacketKeys.NATURLIG_IDENT)
+    private fun behandlendeEnhetFrom(packet: Packet) = packet.getStringValue(PacketKeys.BEHANDLENDE_ENHET)
+    private fun journalpostIdFrom(packet: Packet) = packet.getStringValue(PacketKeys.JOURNALPOST_ID)
+    private fun registrertDatoFrom(packet: Packet) = packet.getStringValue(PacketKeys.DATO_REGISTRERT)
+    private fun dokumentTitlerFrom(packet: Packet) =
+        packet.getObjectValue(PacketKeys.DOKUMENTER) { dokumentAdapter.fromJsonValue(it)!! }.map { it.tittel }
+
+    private fun Packet.setArenaSakOpprettet(sakOpprettet: Boolean) =
+        this.putValue(PacketKeys.ARENA_SAK_OPPRETTET, sakOpprettet)
+
+    private fun Packet.setArenaSakId(arenaSakId: String) = this.putValue(PacketKeys.ARENA_SAK_ID, arenaSakId)
+
     fun handlePacket(packet: Packet): Packet {
-        val naturligIdent: String = packet.getStringValue(PacketKeys.NATURLIG_IDENT)
-        val journalpostId = packet.getStringValue(PacketKeys.JOURNALPOST_ID)
-        val registrertDato: String = packet.getStringValue(PacketKeys.DATO_REGISTRERT)
-        val dokumentTitler =
-            packet.getObjectValue(PacketKeys.DOKUMENTER) { dokumentAdapter.fromJsonValue(it)!! }.map { it.tittel }
-        val enhetId =
-            packet.getStringValue(PacketKeys.BEHANDLENDE_ENHET)
+        val naturligIdent = naturligIdentFrom(packet)
 
-        val saker = arenaClient.hentArenaSaker(naturligIdent)
-
-        val fakta =
-            Fakta(
-                naturligIdent = naturligIdent,
-                enhetId = enhetId,
-                arenaSaker = saker,
-                journalpostId = journalpostId,
-                dokumentTitler = dokumentTitler,
-                registrertDato = registrertDato
-            )
-
-        val arenaSakId = defaultStrategy.handle(fakta)
-
-        if (arenaSakId != null) {
-            packet.putValue(PacketKeys.ARENA_SAK_OPPRETTET, true)
-            packet.putValue(PacketKeys.ARENA_SAK_ID, arenaSakId.id)
-            automatiskJournalførtJaTeller.inc()
-        } else {
-            packet.putValue(PacketKeys.ARENA_SAK_OPPRETTET, false)
+        val saker = arenaClient.hentArenaSaker(naturligIdent).also {
+            registrerMetrikker(it)
+            logger.info {
+                "Innsender av journalpost ${journalpostIdFrom(packet)} har ${it.filter { it.status == ArenaSakStatus.Aktiv }.size} aktive saker av ${it.size} dagpengesaker totalt"
+            }
         }
-        registrerMetrikker(saker)
-        saker.forEach {
-            logger.info { "Tilhører sak: id: ${it.fagsystemSakId}, status: ${it.status}" }
-        }
-        logger.info {
-            "Innsender av journalpost ${packet.getStringValue(PacketKeys.JOURNALPOST_ID)} har ${saker.filter { it.status == ArenaSakStatus.Aktiv }.size} aktive saker av ${saker.size} dagpengesaker totalt"
+
+        val fakta = Fakta(
+            naturligIdent = naturligIdent,
+            enhetId = behandlendeEnhetFrom(packet),
+            arenaSaker = saker,
+            journalpostId = journalpostIdFrom(packet),
+            dokumentTitler = dokumentTitlerFrom(packet),
+            registrertDato = registrertDatoFrom(packet)
+        )
+
+        defaultStrategy.handle(fakta).apply {
+            val sakBleOpprettet = this != null
+            packet.setArenaSakOpprettet(sakBleOpprettet)
+
+            if (sakBleOpprettet) packet.setArenaSakId(this!!.id)
         }
 
         return packet

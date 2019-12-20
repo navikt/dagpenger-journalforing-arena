@@ -54,9 +54,7 @@ internal class Application(
         )
     }
 
-    override fun onPacket(packet: Packet): Packet {
-        return journalføringArena.handlePacket(packet)
-    }
+    override fun onPacket(packet: Packet) = journalføringArena.handlePacket(packet)
 
     override fun onFailure(packet: Packet, error: Throwable?): Packet {
         logger.error(error) { "Feilet ved håntering av pakke $packet" }
