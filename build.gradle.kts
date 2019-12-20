@@ -30,7 +30,7 @@ repositories {
 
 application {
     applicationName = "dagpenger-journalforing-arena"
-    mainClassName = "no.nav.dagpenger.journalføring.arena.JournalføringArenaKt"
+    mainClassName = "no.nav.dagpenger.journalføring.arena.ApplicationKt"
 }
 
 val cxfVersion = "3.3.4"
