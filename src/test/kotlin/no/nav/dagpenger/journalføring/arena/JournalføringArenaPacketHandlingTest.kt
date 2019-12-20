@@ -21,7 +21,7 @@ internal class JournalføringArenaPacketHandlingTest {
     fun `skal legge arenaSakId på pakken når arenaSakId blir gitt fra strategien`() {
         val strategy = mockk<ArenaStrategy>()
 
-        every {strategy.handle(any())} returns ArenaSakId(id = "123")
+        every { strategy.handle(any()) } returns ArenaSakId(id = "123")
 
         val journalføringArena = JournalføringArena(strategy, mockk(relaxed = true))
 
@@ -35,7 +35,7 @@ internal class JournalføringArenaPacketHandlingTest {
     fun `skal ikke legge arenaSakId på pakken når denne ikke finnes`() {
         val strategy = mockk<ArenaStrategy>()
 
-        every {strategy.handle(any())} returns null
+        every { strategy.handle(any()) } returns null
 
         val journalføringArena = JournalføringArena(strategy, mockk(relaxed = true))
 
