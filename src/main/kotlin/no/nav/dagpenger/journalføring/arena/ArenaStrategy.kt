@@ -45,32 +45,27 @@ class ArenaCreateOppgaveStrategy(
     }
 
     override fun handle(fakta: Fakta): ArenaSakId? {
-        if (unleash.isEnabled("dp-arena.bestillOppgave", false)) {
-            val tilleggsinformasjon = createArenaTilleggsinformasjon(fakta.dokumentTitler, fakta.registrertDato)
-            val arenaSakId = try {
-                arenaClient.bestillOppgave(fakta.naturligIdent, fakta.enhetId, tilleggsinformasjon)
-            } catch (e: BestillOppgaveArenaException) {
-                automatiskJournalførtNeiTeller(e.cause?.javaClass?.simpleName ?: "ukjent")
-                return when (e.cause) {
-                    is BestillOppgavePersonErInaktiv -> {
-                        logger.warn { "Kan ikke bestille oppgave for journalpost ${fakta.journalpostId}. Person ikke arbeidssøker " }
-                        null
-                    }
-                    is BestillOppgavePersonIkkeFunnet -> {
-                        logger.warn { "Kan ikke bestille oppgave for journalpost ${fakta.journalpostId}. Person ikke funnet i arena " }
-                        null
-                    }
-                    else -> {
-                        logger.warn { "Kan ikke bestille oppgave for journalpost ${fakta.journalpostId}. Ukjent feil. " }
-                        throw e
-                    }
+        val tilleggsinformasjon = createArenaTilleggsinformasjon(fakta.dokumentTitler, fakta.registrertDato)
+        val arenaSakId = try {
+            arenaClient.bestillOppgave(fakta.naturligIdent, fakta.enhetId, tilleggsinformasjon)
+        } catch (e: BestillOppgaveArenaException) {
+            automatiskJournalførtNeiTeller(e.cause?.javaClass?.simpleName ?: "ukjent")
+            return when (e.cause) {
+                is BestillOppgavePersonErInaktiv -> {
+                    logger.warn { "Kan ikke bestille oppgave for journalpost ${fakta.journalpostId}. Person ikke arbeidssøker " }
+                    null
+                }
+                is BestillOppgavePersonIkkeFunnet -> {
+                    logger.warn { "Kan ikke bestille oppgave for journalpost ${fakta.journalpostId}. Person ikke funnet i arena " }
+                    null
+                }
+                else -> {
+                    logger.warn { "Kan ikke bestille oppgave for journalpost ${fakta.journalpostId}. Ukjent feil. " }
+                    throw e
                 }
             }
-            return ArenaSakId(id = arenaSakId)
-        } else {
-            automatiskJournalførtNeiTeller("feature_toggle_off")
-            return null
         }
+        return ArenaSakId(id = arenaSakId)
     }
 }
 
