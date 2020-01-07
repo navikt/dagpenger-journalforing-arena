@@ -70,23 +70,6 @@ class ArenaCreateOppgaveStrategyTest {
     }
 
     @Test
-    fun `Skal ikke opprette oppgave når det er ikke aktive saker men toggle er av`() {
-        val arenaOppgaveClient: ArenaClient = mockk()
-        every {
-            arenaOppgaveClient.bestillOppgave("12345678", "1234", any())
-        } returns "1234"
-
-        val unleashMock: Unleash = mockk()
-        every {
-            unleashMock.isEnabled("dp-arena.bestillOppgave", false)
-        } returns false
-
-        val strategy = ArenaCreateOppgaveStrategy(arenaOppgaveClient, unleashMock)
-        strategy.canHandle(faktaUtenAktivSak) shouldBe true
-        strategy.handle(faktaUtenAktivSak) shouldBe null
-    }
-
-    @Test
     fun `Skal opprette manuell oppgave når søker ikke er registrert som arbeidssøker i Arena (kaster BestillOppgavePersonErInaktiv) `() {
         val arenaOppgaveClient: ArenaClient = mockk()
         every {
