@@ -12,6 +12,7 @@ import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.TopologyTestDriver
 import org.apache.kafka.streams.test.ConsumerRecordFactory
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.util.Properties
 
@@ -37,6 +38,7 @@ class JournalFøringArenaTopologyTest {
     val packetWithTrueToggle = Packet().apply { putValue(PacketKeys.TOGGLE_BEHANDLE_NY_SØKNAD, true) }
 
     @Test
+    @Disabled
     fun `Skal prosessere melding hvis arena resultat mangler `() {
         val journalføringArena = mockk<JournalføringArena>(relaxed = true)
 
@@ -54,6 +56,7 @@ class JournalFøringArenaTopologyTest {
     }
 
     @Test
+    @Disabled
     fun `Skal ikke prosessere meldinger hvor arenasak er forsøkt opprettet`() {
 
         val service = Application(Configuration(), mockk(relaxed = true))
@@ -98,6 +101,7 @@ class JournalFøringArenaTopologyTest {
     }
 
     @Test
+    @Disabled
     fun `skal ikke behandle pakker uten naturlig ident`() {
 
         val service = Application(Configuration(), mockk(relaxed = true))
@@ -110,6 +114,7 @@ class JournalFøringArenaTopologyTest {
     }
 
     @Test
+    @Disabled
     fun `skal ikke behandle pakker uten behandlendeEnhet`() {
 
         val service = Application(Configuration(), mockk(relaxed = true))
@@ -134,6 +139,7 @@ class JournalFøringArenaTopologyTest {
     }
 
     @Test
+    @Disabled
     fun `Skal ikke behandle pakken dersom feature toggle flag ikke finnes`() {
         val service = Application(Configuration(), mockk(relaxed = true))
         val packet = Packet().apply {
@@ -145,6 +151,7 @@ class JournalFøringArenaTopologyTest {
     }
 
     @Test
+    @Disabled
     fun `Skal ikke behandle pakken dersom feature toggle flag er false `() {
         val service = Application(Configuration(), mockk(relaxed = true))
         val packet = Packet().apply {

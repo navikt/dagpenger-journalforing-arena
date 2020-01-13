@@ -30,7 +30,8 @@ internal class Application(
     override val HTTP_PORT: Int = configuration.application.httpPort
     override val healthChecks: List<HealthCheck> = listOf(journalføringArena.arenaClient as HealthCheck)
 
-    override fun filterPredicates(): List<Predicate<String, Packet>> = filterPredicates
+    override fun filterPredicates(): List<Predicate<String, Packet>> =
+        listOf(Predicate { _, packet -> !packet.hasField(PacketKeys.JOURNALPOST_ID) })
 
     override fun onPacket(packet: Packet) = journalføringArena.handlePacket(packet)
 
