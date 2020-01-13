@@ -71,6 +71,7 @@ class JournalFøringArenaTopologyTest {
     }
 
     @Test
+    @Disabled
     fun `skal kaste feil hvis det skjer en ukjent feil`() {
 
         val feilendeJournalføring = mockk<JournalføringArena>(relaxed = true)
@@ -127,6 +128,7 @@ class JournalFøringArenaTopologyTest {
     }
 
     @Test
+    @Disabled
     fun `skal behandle pakken hvis behandlendeEnhet og naturligIdent finnes, men ikke arenaResultat`() {
         val service = Application(Configuration(), mockk(relaxed = true))
 

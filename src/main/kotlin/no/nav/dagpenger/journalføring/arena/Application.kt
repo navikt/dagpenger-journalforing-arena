@@ -31,7 +31,7 @@ internal class Application(
     override val healthChecks: List<HealthCheck> = listOf(journalføringArena.arenaClient as HealthCheck)
 
     override fun filterPredicates(): List<Predicate<String, Packet>> =
-        listOf(Predicate { _, packet -> !packet.hasField(PacketKeys.JOURNALPOST_ID) })
+        listOf(Predicate { _, packet -> false })
 
     override fun onPacket(packet: Packet) = journalføringArena.handlePacket(packet)
 
